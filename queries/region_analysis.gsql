@@ -1,0 +1,27 @@
+// Query 5: region_analysis
+// Compares transaction billing region to customer's historical modal regions
+USE GRAPH FraudInvestigation
+
+CREATE OR REPLACE QUERY region_analysis(STRING cust_id, FLOAT txn_addr1) FOR GRAPH FraudInvestigation {
+    MapAccum<FLOAT, INT> @@historical_regions;
+    SumAccum<INT> @@total_txns = 0;
+    OrAccum @@is_new_region = true;
+
+    Start = {Customer.*};
+    C = SELECT c FROM Start:c WHERE c.id == cust_id;
+
+    Cards = SELECT cd FROM C:c -(Customer_OWNS_Card:e)- Card:cd;
+
+    Txns = SELECT t FROM Cards:cd -(Card_MADE_Transaction:e)- Transaction:t
+           ACCUM 
+               @@total_txns += 1,
+               @@historical_regions += (t.addr1 -> 1);
+
+    IF @@historical_regions.containsKey(txn_addr1) THEN
+        @@is_new_region = false;
+    END;
+
+    PRINT @@is_new_region AS is_out_of_region,
+          @@historical_regions AS known_regions,
+          @@total_txns AS total_history_txns;
+}
