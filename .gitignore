@@ -1,0 +1,42 @@
+# Environment & Keys
+.env
+.env.*
+!.env.example
+
+# Large Data Files (Keep out of git repo)
+*.csv
+*.zip
+*.tar.gz
+data/
+transactions.csv
+identity.csv
+closed_cases_history.csv
+case_pack.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Testing & Quality
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+*.log
+
+# Node / Web UI
+web/node_modules/
+web/dist/
+.DS_Store
+Thumbs.db
+
+# Documentation & Guidelines (Excluded from remote repo)
+docs/
+*.pdf
