@@ -1,0 +1,76 @@
+{
+  "prior": {
+    "p_fraud": 0.8383,
+    "log_odds": 1.6454,
+    "sample_counts": {
+      "total": 5565,
+      "confirmed_fraud": 4665,
+      "cleared": 900
+    }
+  },
+  "evidence_likelihood_ratios": {
+    "CARD_TESTING_SEQUENCE": {
+      "lr": 34.3,
+      "log_lr": 3.535,
+      "description": "3+ small authorizations (<$5) followed by larger authorization within 1h"
+    },
+    "OUT_OF_REGION": {
+      "lr": 0.26,
+      "log_lr": -1.357,
+      "description": "Transaction in billing region customer has no history with"
+    },
+    "CNP_NEW_DEVICE": {
+      "lr": 1.31,
+      "log_lr": 0.273,
+      "description": "Card-not-present online transaction from a newly seen device"
+    },
+    "ACCOUNT_TAKEOVER": {
+      "lr": 2583.07,
+      "log_lr": 7.857,
+      "description": "Mixed-channel activity with anomalous credentials and match flags"
+    },
+    "SHARED_DEVICE_RING": {
+      "lr": 14.2,
+      "log_lr": 2.653,
+      "description": "Same device profile linked to multiple distinct cardholders"
+    },
+    "PROXY_DETECTED": {
+      "lr": 3.8,
+      "log_lr": 1.335,
+      "description": "Transaction routed via anonymous or hidden proxy"
+    },
+    "CUSTOMER_DENIAL": {
+      "lr": 18.5,
+      "log_lr": 2.918,
+      "description": "Customer explicitly reports/denies the transaction"
+    },
+    "CUSTOMER_CONFIRMATION": {
+      "lr": 0.05,
+      "log_lr": -2.996,
+      "description": "Customer confirms transaction was legitimate (Exculpatory)"
+    },
+    "RECURRING_CHARGE_MATCH": {
+      "lr": 0.08,
+      "log_lr": -2.526,
+      "description": "Transaction matches cardholder monthly recurring billing (Exculpatory)"
+    }
+  },
+  "score_calibration_bins": {
+    "[0.0, 0.3)": {
+      "lr": 0.15,
+      "log_lr": -1.897
+    },
+    "[0.3, 0.6)": {
+      "lr": 0.85,
+      "log_lr": -0.163
+    },
+    "[0.6, 0.8)": {
+      "lr": 2.4,
+      "log_lr": 0.875
+    },
+    "[0.8, 1.0]": {
+      "lr": 6.8,
+      "log_lr": 1.917
+    }
+  }
+}
