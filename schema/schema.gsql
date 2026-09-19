@@ -1,0 +1,77 @@
+USE GRAPH FraudInvestigation
+
+DROP JOB change_schema_FraudInvestigation
+CREATE SCHEMA_CHANGE JOB change_schema_FraudInvestigation FOR GRAPH FraudInvestigation {
+    ADD VERTEX Customer(PRIMARY_ID id STRING) WITH PRIMARY_ID_AS_ATTRIBUTE="true";
+    ADD VERTEX Card(PRIMARY_ID card_id STRING, customer_id STRING) WITH PRIMARY_ID_AS_ATTRIBUTE="true";
+    ADD VERTEX Transaction(
+        PRIMARY_ID txn_id STRING, 
+        ts DATETIME, 
+        amount FLOAT, 
+        product_cd STRING, 
+        channel STRING, 
+        risk_score FLOAT, 
+        card1 INT, 
+        card4 STRING, 
+        card6 STRING, 
+        addr1 FLOAT, 
+        addr2 FLOAT, 
+        p_email STRING, 
+        r_email STRING, 
+        is_flagged BOOL
+    ) WITH PRIMARY_ID_AS_ATTRIBUTE="true";
+    ADD VERTEX DeviceProfile(
+        PRIMARY_ID profile_id STRING, 
+        device_type STRING, 
+        device_info STRING, 
+        os STRING, 
+        browser STRING, 
+        screen STRING, 
+        is_proxy BOOL, 
+        id_15 STRING, 
+        id_23 STRING
+    ) WITH PRIMARY_ID_AS_ATTRIBUTE="true";
+    ADD VERTEX EmailDomain(PRIMARY_ID domain STRING) WITH PRIMARY_ID_AS_ATTRIBUTE="true";
+    ADD VERTEX BillingRegion(PRIMARY_ID region_code STRING, country_code STRING) WITH PRIMARY_ID_AS_ATTRIBUTE="true";
+    ADD VERTEX ClosedCase(
+        PRIMARY_ID case_id STRING, 
+        outcome STRING, 
+        pattern STRING, 
+        exposure_usd FLOAT, 
+        n_txns INT, 
+        actions_taken STRING, 
+        report_filed BOOL, 
+        analyst_notes STRING, 
+        opened_at DATETIME, 
+        closed_at DATETIME
+    ) WITH PRIMARY_ID_AS_ATTRIBUTE="true";
+    ADD VERTEX InvestigationCase(
+        PRIMARY_ID case_id STRING, 
+        opened_at DATETIME, 
+        trigger_type STRING, 
+        trigger_text STRING, 
+        verdict STRING, 
+        pattern STRING, 
+        exposure_usd FLOAT, 
+        confidence FLOAT, 
+        status STRING, 
+        sar_narrative STRING, 
+        actions_recommended STRING, 
+        approval_route STRING
+    ) WITH PRIMARY_ID_AS_ATTRIBUTE="true";
+
+    ADD DIRECTED EDGE Customer_OWNS_Card(FROM Customer, TO Card) WITH REVERSE_EDGE="Card_OWNED_BY_Customer";
+    ADD DIRECTED EDGE Card_MADE_Transaction(FROM Card, TO Transaction) WITH REVERSE_EDGE="Transaction_MADE_BY_Card";
+    ADD DIRECTED EDGE Transaction_FROM_DEVICE(FROM Transaction, TO DeviceProfile) WITH REVERSE_EDGE="DeviceProfile_USED_IN_Transaction";
+    ADD DIRECTED EDGE Transaction_PURCHASER_EMAIL(FROM Transaction, TO EmailDomain) WITH REVERSE_EDGE="EmailDomain_USED_IN_Transaction";
+    ADD DIRECTED EDGE Transaction_BILLED_IN(FROM Transaction, TO BillingRegion) WITH REVERSE_EDGE="BillingRegion_HAS_Transaction";
+    ADD DIRECTED EDGE Transaction_NEXT_Transaction(FROM Transaction, TO Transaction);
+
+    ADD UNDIRECTED EDGE ClosedCase_INVOLVES_Transaction(FROM ClosedCase, TO Transaction);
+    ADD UNDIRECTED EDGE ClosedCase_ON_CARD(FROM ClosedCase, TO Card);
+    ADD UNDIRECTED EDGE ClosedCase_CONNECTED_TO_Card(FROM ClosedCase, TO Card);
+
+    ADD UNDIRECTED EDGE InvestigationCase_INVOLVES_Transaction(FROM InvestigationCase, TO Transaction);
+    ADD UNDIRECTED EDGE InvestigationCase_ON_CARD(FROM InvestigationCase, TO Card);
+}
+RUN SCHEMA_CHANGE JOB change_schema_FraudInvestigation
