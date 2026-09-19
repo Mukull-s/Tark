@@ -1,0 +1,30 @@
+// Query 1: customer_profile
+// Establishes normal historical baseline for a customer
+USE GRAPH FraudInvestigation
+
+CREATE OR REPLACE QUERY customer_profile(STRING cust_id) FOR GRAPH FraudInvestigation {
+    SumAccum<INT> @@total_txns = 0;
+    SumAccum<FLOAT> @@total_amount = 0.0;
+    AvgAccum @@avg_amount;
+    MapAccum<STRING, INT> @@region_dist;
+    MapAccum<STRING, INT> @@channel_dist;
+
+    Start = {Customer.*};
+    C = SELECT c FROM Start:c WHERE c.id == cust_id;
+    
+    Cards = SELECT cd FROM C:c -(Customer_OWNS_Card:e)- Card:cd;
+    
+    Txns = SELECT t FROM Cards:cd -(Card_MADE_Transaction:e)- Transaction:t
+           ACCUM 
+               @@total_txns += 1,
+               @@total_amount += t.amount,
+               @@avg_amount += t.amount,
+               @@channel_dist += (t.channel -> 1),
+               @@region_dist += (to_string(t.addr1) -> 1);
+
+    PRINT @@total_txns AS total_txns, 
+          @@total_amount AS total_amount, 
+          @@avg_amount AS avg_amount, 
+          @@region_dist AS region_distribution, 
+          @@channel_dist AS channel_distribution;
+}
