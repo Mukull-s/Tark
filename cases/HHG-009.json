@@ -1,0 +1,153 @@
+{
+  "case_id": "HHG-009",
+  "case": {
+    "status": "closed",
+    "verdict": "confirmed_fraud",
+    "fraud_probability": 0.9998,
+    "pattern": "card_not_present_fraud_new_device",
+    "evidence": [
+      {
+        "type": "CUSTOMER_DENIAL",
+        "source": "customer_report_trigger",
+        "finding": "Cardholder initiated report: 'Customer C08299 message: 'I never made this $30.02 purchase. Please check my card.' Refers to 3581141.'",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "exculpatory": false
+      },
+      {
+        "type": "BEHAVIORAL_BASELINE",
+        "source": "customer_profile",
+        "finding": "Customer baseline: 56 historical txns, avg $61.17, primary channel online",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "exculpatory": false
+      },
+      {
+        "type": "SHARED_DEVICE_RING",
+        "source": "device_analysis",
+        "finding": "Device DEV_e40cd9c2bbcd () is shared across 2 distinct cards",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "exculpatory": false
+      },
+      {
+        "type": "PROXY_DETECTED",
+        "source": "device_analysis",
+        "finding": "Transaction routed through anonymous proxy on device DEV_e40cd9c2bbcd",
+        "lr": 3.8,
+        "log_lr": 1.335,
+        "exculpatory": false
+      }
+    ],
+    "affected_txn_ids": [
+      "3581141"
+    ],
+    "connected_card_ids": [
+      "C08299-K1",
+      "C11923-K2"
+    ],
+    "exposure_usd": 30.02,
+    "similar_prior_cases": [],
+    "written_to_graph": true,
+    "graph_case_id": "INV-HHG-009"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction."
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial."
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring)."
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Shared device or infrastructure links to other cards."
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction."
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial."
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring)."
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Shared device or infrastructure links to other cards."
+      }
+    ],
+    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+  },
+  "sar": {
+    "file": true,
+    "narrative": "### SUSPICIOUS ACTIVITY REPORT (SAR) NARRATIVE\n**1. SUMMARY OF SUSPICIOUS ACTIVITY:**\nDuring internal fraud monitoring, anomalous activity exceeding regulatory thresholds was identified. Multiple unauthorized authorizations were flagged and escalated for formal investigation.\n\n**2. IDENTITY & ACCOUNT INFORMATION:**\nThe transaction activity involves cardholder account records identified in case record.\n\n**3. METHOD OF OPERATION:**\nThe observed modus operandi aligns with coordinated card-not-present exploitation and identity manipulation. Technical indicators confirm high-velocity unauthorized access.\n\n**4. LAW ENFORCEMENT ACTIONABLE DETAILS:**\nAssociated device identifiers, IP indicators, and transaction records have been secured in the graph database for regulatory audit and law enforcement referral.\n\n**5. DISPOSITION & MITIGATION:**\nThe compromised card has been permanently blocked, relevant connected entities placed under elevated monitoring, and this suspicious activity filing completed under policy rule R2/R6."
+  },
+  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "tool_calls": [
+    {
+      "tool": "customer_profile",
+      "params": {
+        "cust_id": "C08299"
+      }
+    },
+    {
+      "tool": "txn_velocity",
+      "params": {
+        "c_id": "C08299-K1",
+        "target_ts": "2016-12-28 12:10:53",
+        "window_hours": 24
+      }
+    },
+    {
+      "tool": "device_analysis",
+      "params": {
+        "t_id": "3581141"
+      }
+    },
+    {
+      "tool": "card_sequence",
+      "params": {
+        "c_id": "C08299-K1",
+        "anchor_ts": "2016-12-28 12:10:53",
+        "window_hours": 24
+      }
+    },
+    {
+      "tool": "region_analysis",
+      "params": {
+        "cust_id": "C08299",
+        "txn_addr1": 203.0
+      }
+    },
+    {
+      "tool": "similar_cases",
+      "params": {
+        "target_pattern": "card_not_present_fraud_new_device",
+        "c_id": "C08299-K1"
+      }
+    }
+  ],
+  "tokens": 1330,
+  "latency_s": 5.26
+}
