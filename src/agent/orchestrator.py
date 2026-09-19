@@ -14,6 +14,13 @@ from src.compass.evoi import EvidenceCompass, EvidenceCompassRecommendation, Can
 from src.tools.base import ToolExecutionResult, EvidenceExecutionTrace
 from src.tools.dispatcher import EvidenceToolDispatcher
 from src.tools.llm_client import LLMClient
+from src.memory.models import SimilarCaseMatch, CaseMemoryRecord, MemoryProvenanceType
+from src.memory.store import CaseMemoryStore
+from src.memory.retriever import SimilarCaseRetriever
+from src.knowledge.models import RetrievedKnowledgeItem
+from src.knowledge.retriever import PolicyGraphRAGRetriever
+from src.synthesis.context import InvestigationContextAssembler
+from src.synthesis.synthesizer import GroundedInvestigationSynthesizer
 
 
 class InvestigationTerminationReason(str, Enum):
@@ -74,6 +81,11 @@ class InvestigationRunResult(BaseModel):
     execution_duration_sec: float
     executive_summary: str
 
+    # Phase 4.4 Case Memory & GraphRAG Fields
+    retrieved_precedents: List[SimilarCaseMatch] = Field(default_factory=list)
+    retrieved_knowledge: List[RetrievedKnowledgeItem] = Field(default_factory=list)
+    grounded_synthesis: Optional[str] = None
+
 
 class InvestigationOrchestrator:
     """Tark Phase 4.3 Autonomous Investigation Loop / Agentic Orchestration.
@@ -98,6 +110,9 @@ class InvestigationOrchestrator:
         compass: EvidenceCompass,
         dispatcher: EvidenceToolDispatcher,
         llm_client: Optional[LLMClient] = None,
+        case_memory: Optional[CaseMemoryStore] = None,
+        graphrag: Optional[PolicyGraphRAGRetriever] = None,
+        synthesizer: Optional[GroundedInvestigationSynthesizer] = None,
         max_steps: int = 5,
         consecutive_failure_limit: int = 2
     ):
@@ -106,6 +121,10 @@ class InvestigationOrchestrator:
         self.compass = compass
         self.dispatcher = dispatcher
         self.llm_client = llm_client
+        self.case_memory = case_memory
+        self.case_retriever = SimilarCaseRetriever(case_memory) if case_memory else None
+        self.graphrag = graphrag
+        self.synthesizer = synthesizer or (GroundedInvestigationSynthesizer(llm_client) if (case_memory or graphrag) else None)
         self.max_steps = max(1, max_steps)
         self.consecutive_failure_limit = max(1, consecutive_failure_limit)
 
@@ -315,15 +334,72 @@ class InvestigationOrchestrator:
 
         duration_sec = round(time.perf_counter() - start_perf, 4)
 
-        # Generate Executive Narrative
-        executive_summary = self._generate_executive_summary(
-            initial_state=initial_state,
-            final_state=current_state,
-            traces=traces,
-            termination_reason=termination_reason,
-            final_actions=final_policy_actions,
-            enable_llm_synthesis=enable_llm_synthesis
-        )
+        # Phase 4.4: Contextual Case Memory & GraphRAG Synthesis
+        retrieved_precedents: List[SimilarCaseMatch] = []
+        retrieved_knowledge: List[RetrievedKnowledgeItem] = []
+        grounded_synthesis: Optional[str] = None
+
+        if self.case_retriever or self.graphrag or self.synthesizer:
+            if self.case_retriever:
+                retrieved_precedents = self.case_retriever.retrieve_similar_cases(
+                    state=current_state,
+                    target_entities=current_state.target_entities,
+                    pattern=current_state.secondary_typology,
+                    exposure_usd=exposure_usd,
+                    top_k=3
+                )
+
+            if self.graphrag:
+                retrieved_knowledge = self.graphrag.retrieve_grounded_context(
+                    state=current_state,
+                    exposure_usd=exposure_usd,
+                    policy_actions=final_policy_actions,
+                    context=context
+                )
+
+            if self.synthesizer:
+                context_doc = InvestigationContextAssembler.assemble(
+                    state=current_state,
+                    similar_cases=retrieved_precedents,
+                    retrieved_knowledge=retrieved_knowledge,
+                    policy_actions=final_policy_actions,
+                    exposure_usd=exposure_usd
+                )
+                grounded_synthesis = self.synthesizer.synthesize(
+                    context=context_doc,
+                    use_llm=enable_llm_synthesis
+                )
+                executive_summary = grounded_synthesis
+            else:
+                executive_summary = self._generate_executive_summary(
+                    initial_state=initial_state,
+                    final_state=current_state,
+                    traces=traces,
+                    termination_reason=termination_reason,
+                    final_actions=final_policy_actions,
+                    enable_llm_synthesis=enable_llm_synthesis
+                )
+
+            # Phase 4.4 Case Memory Write-Back
+            if self.case_memory:
+                self._write_back_case_memory(
+                    final_state=current_state,
+                    final_actions=final_policy_actions,
+                    final_verdict=final_verdict,
+                    exposure_usd=exposure_usd,
+                    summary=executive_summary
+                )
+        else:
+            executive_summary = self._generate_executive_summary(
+                initial_state=initial_state,
+                final_state=current_state,
+                traces=traces,
+                termination_reason=termination_reason,
+                final_actions=final_policy_actions,
+                enable_llm_synthesis=enable_llm_synthesis
+            )
+
+        duration_sec = round(time.perf_counter() - start_perf, 4)
 
         return InvestigationRunResult(
             investigation_id=current_state.investigation_id,
@@ -334,8 +410,56 @@ class InvestigationOrchestrator:
             iteration_traces=traces,
             final_policy_actions=final_policy_actions,
             execution_duration_sec=duration_sec,
-            executive_summary=executive_summary
+            executive_summary=executive_summary,
+            retrieved_precedents=retrieved_precedents,
+            retrieved_knowledge=retrieved_knowledge,
+            grounded_synthesis=grounded_synthesis
         )
+
+    def _write_back_case_memory(
+        self,
+        final_state: InvestigationState,
+        final_actions: List[ActionRecommendation],
+        final_verdict: str,
+        exposure_usd: float,
+        summary: str
+    ):
+        """Creates and stores a historical investigation memory record at case conclusion."""
+        try:
+            txn_ids = []
+            for ev in final_state.evidence_items:
+                if ev.details.get("txn_ids"):
+                    txn_ids.extend([str(t) for t in ev.details["txn_ids"]])
+                if ev.target_entity and ev.target_entity.isdigit():
+                    txn_ids.append(ev.target_entity)
+            if final_state.trigger.get("flagged_txn_id"):
+                txn_ids.append(str(final_state.trigger["flagged_txn_id"]))
+            txn_ids = sorted(list(set(txn_ids)))
+
+            fam_names = sorted(list(set(item.evidence_type.value for item in final_state.evidence_items)))
+
+            record = CaseMemoryRecord(
+                case_id=final_state.investigation_id,
+                customer_id=final_state.target_entities.get("customer_id"),
+                card_id=final_state.target_entities.get("card_id"),
+                opened_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                closed_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                historical_outcome=final_verdict,
+                pattern=final_state.secondary_typology or "unknown",
+                first_fraud_txn_id=str(final_state.trigger.get("flagged_txn_id") or (txn_ids[0] if txn_ids else "")),
+                txn_ids=txn_ids,
+                n_txns=len(txn_ids) if txn_ids else 1,
+                exposure_usd=exposure_usd,
+                actions_taken=[a.action for a in final_actions],
+                report_filed=any(a.action == "FILE_REPORT" for a in final_actions),
+                analyst_notes=summary[:1000],
+                evidence_families_observed=fam_names,
+                approval_route=final_actions[0].approval_route if final_actions else "auto",
+                provenance=MemoryProvenanceType.INVESTIGATION_WRITEBACK.value
+            )
+            self.case_memory.add_case(record)
+        except Exception:
+            pass
 
     def _generate_executive_summary(
         self,
