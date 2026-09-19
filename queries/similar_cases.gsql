@@ -1,0 +1,21 @@
+// Query 6: similar_cases
+// Retrieves closed cases matching pattern or customer
+USE GRAPH FraudInvestigation
+
+CREATE OR REPLACE QUERY similar_cases(STRING target_pattern, STRING c_id) FOR GRAPH FraudInvestigation {
+    ListAccum<VERTEX<ClosedCase>> @@matched_cases;
+
+    Start = {ClosedCase.*};
+    Matched = SELECT cc FROM Start:cc
+              WHERE cc.pattern == target_pattern
+              LIMIT 5;
+
+    PRINT Matched[
+        Matched.case_id AS case_id,
+        Matched.outcome AS outcome,
+        Matched.pattern AS pattern,
+        Matched.exposure_usd AS exposure_usd,
+        Matched.actions_taken AS actions_taken,
+        Matched.analyst_notes AS analyst_notes
+    ];
+}
