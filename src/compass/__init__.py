@@ -8,7 +8,6 @@ from src.compass.evoi import (
     EvidenceCompassRecommendation,
     EvidenceActionType
 )
-
 __all__ = [
     "EvidenceCompass",
     "CandidateEvidenceEvaluation",
