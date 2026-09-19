@@ -1,0 +1,27 @@
+// Query 4: card_sequence
+// Detects card testing pattern: >=3 small authorizations (<=$5) followed by larger transaction
+USE GRAPH FraudInvestigation
+
+CREATE OR REPLACE QUERY card_sequence(STRING c_id, DATETIME anchor_ts, INT window_hours = 24) FOR GRAPH FraudInvestigation {
+    SumAccum<INT> @@micro_txns = 0;
+    SumAccum<FLOAT> @@anchor_amount = 0.0;
+    ListAccum<STRING> @@micro_txn_ids;
+
+    Start = {Card.*};
+    TargetCard = SELECT c FROM Start:c WHERE c.card_id == c_id;
+
+    Txns = SELECT t FROM TargetCard:c -(Card_MADE_Transaction:e)- Transaction:t
+           WHERE datetime_diff(anchor_ts, t.ts) >= 0 AND datetime_diff(anchor_ts, t.ts) <= (window_hours * 3600)
+           ACCUM 
+               CASE WHEN t.amount <= 5.0 THEN
+                   @@micro_txns += 1,
+                   @@micro_txn_ids += t.txn_id
+               ELSE
+                   @@anchor_amount += t.amount
+               END;
+
+    PRINT (@@micro_txns >= 3) AS is_card_testing,
+          @@micro_txns AS micro_count,
+          @@anchor_amount AS larger_amount,
+          @@micro_txn_ids AS micro_txn_ids;
+}
