@@ -1,0 +1,35 @@
+// Query 3: device_analysis
+// Analyzes device novelty and multi-card sharing blast radius
+USE GRAPH FraudInvestigation
+
+CREATE OR REPLACE QUERY device_analysis(STRING t_id) FOR GRAPH FraudInvestigation {
+    SetAccum<STRING> @@linked_cards;
+    SetAccum<STRING> @@linked_customers;
+    SumAccum<INT> @@card_count = 0;
+    OrAccum @@is_proxy = false;
+    SumAccum<STRING> @@device_id = "";
+    SumAccum<STRING> @@device_info = "";
+
+    Start = {Transaction.*};
+    TargetTxn = SELECT t FROM Start:t WHERE t.txn_id == t_id;
+
+    Dev = SELECT d FROM TargetTxn:t -(Transaction_FROM_DEVICE:e)- DeviceProfile:d
+          ACCUM 
+              @@device_id += d.profile_id,
+              @@device_info += d.device_info,
+              @@is_proxy += d.is_proxy;
+
+    OtherTxns = SELECT ot FROM Dev:d -(DeviceProfile_USED_IN_Transaction:e)- Transaction:ot;
+    
+    Cards = SELECT c FROM OtherTxns:ot -(Transaction_MADE_BY_Card:e)- Card:c
+            ACCUM @@linked_cards += c.card_id, @@linked_customers += c.customer_id;
+
+    @@card_count += @@linked_cards.size();
+
+    PRINT @@device_id AS device_id,
+          @@device_info AS device_info,
+          @@is_proxy AS is_proxy,
+          @@card_count AS shared_card_count,
+          @@linked_cards AS connected_cards,
+          @@linked_customers AS connected_customers;
+}
