@@ -1,0 +1,126 @@
+{
+  "case_id": "HHG-018",
+  "case": {
+    "status": "closed",
+    "verdict": "confirmed_fraud",
+    "fraud_probability": 0.9934,
+    "pattern": "card_not_present_fraud",
+    "evidence": [
+      {
+        "type": "CUSTOMER_DENIAL",
+        "source": "customer_report_trigger",
+        "finding": "Cardholder initiated report: 'Customer C02354 message: 'I never made this $39.08 purchase. Please check my card.' Refers to 3491361.'",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "exculpatory": false
+      },
+      {
+        "type": "BEHAVIORAL_BASELINE",
+        "source": "customer_profile",
+        "finding": "Customer baseline: 7091 historical txns, avg $141.15, primary channel in_person",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "exculpatory": false
+      },
+      {
+        "type": "BEHAVIORAL_BASELINE",
+        "source": "txn_velocity",
+        "finding": "High 24h velocity: 42 transactions totaling $6004.31",
+        "lr": 2.5,
+        "log_lr": 0.916,
+        "exculpatory": false
+      }
+    ],
+    "affected_txn_ids": [
+      "3491361"
+    ],
+    "connected_card_ids": [],
+    "exposure_usd": 39.08,
+    "similar_prior_cases": [
+      "CC-2399",
+      "CC-2212",
+      "CC-2286"
+    ],
+    "written_to_graph": true,
+    "graph_case_id": "INV-HHG-018"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction."
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial."
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction."
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial."
+      }
+    ],
+    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+  },
+  "sar": {
+    "file": false,
+    "narrative": null
+  },
+  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "tool_calls": [
+    {
+      "tool": "customer_profile",
+      "params": {
+        "cust_id": "C02354"
+      }
+    },
+    {
+      "tool": "txn_velocity",
+      "params": {
+        "c_id": "C02354-K2",
+        "target_ts": "2016-11-27 13:41:26",
+        "window_hours": 24
+      }
+    },
+    {
+      "tool": "device_analysis",
+      "params": {
+        "t_id": "3491361"
+      }
+    },
+    {
+      "tool": "card_sequence",
+      "params": {
+        "c_id": "C02354-K2",
+        "anchor_ts": "2016-11-27 13:41:26",
+        "window_hours": 24
+      }
+    },
+    {
+      "tool": "region_analysis",
+      "params": {
+        "cust_id": "C02354",
+        "txn_addr1": 126.0
+      }
+    },
+    {
+      "tool": "similar_cases",
+      "params": {
+        "target_pattern": "card_not_present_fraud",
+        "c_id": "C02354-K2"
+      }
+    }
+  ],
+  "tokens": 1210,
+  "latency_s": 1.02
+}
