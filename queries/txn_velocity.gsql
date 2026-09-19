@@ -1,0 +1,23 @@
+// Query 2: txn_velocity
+// Analyzes transaction velocity within a time window for a card
+USE GRAPH FraudInvestigation
+
+CREATE OR REPLACE QUERY txn_velocity(STRING c_id, DATETIME target_ts, INT window_hours) FOR GRAPH FraudInvestigation {
+    SumAccum<INT> @@recent_txns = 0;
+    SumAccum<FLOAT> @@recent_spend = 0.0;
+    ListAccum<STRING> @@recent_txn_ids;
+
+    Start = {Card.*};
+    TargetCard = SELECT c FROM Start:c WHERE c.card_id == c_id;
+
+    Txns = SELECT t FROM TargetCard:c -(Card_MADE_Transaction:e)- Transaction:t
+           WHERE datetime_diff(target_ts, t.ts) >= 0 AND datetime_diff(target_ts, t.ts) <= (window_hours * 3600)
+           ACCUM 
+               @@recent_txns += 1,
+               @@recent_spend += t.amount,
+               @@recent_txn_ids += t.txn_id;
+
+    PRINT @@recent_txns AS txn_count, 
+          @@recent_spend AS total_spend, 
+          @@recent_txn_ids AS txn_ids;
+}
