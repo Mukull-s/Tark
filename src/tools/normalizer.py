@@ -74,16 +74,25 @@ class EvidenceNormalizer:
 
         # 3. Handle NO_MATCH
         if scope_status == GraphScopeStatus.NO_MATCH:
+            fallback_type = cls._fallback_type_for_action(action_id)
+            is_gateway = tool_name.startswith("simulate_") or "gateway" in tool_name
+            src = f"gateway:{tool_name}" if is_gateway else f"tigergraph_query:{tool_name}"
+            prov = f"External communication gateway ({tool_name})" if is_gateway else f"TigerGraph GSQL execution ({tool_name})"
+            finding_text = (
+                f"Customer communication tool {tool_name} completed without cardholder response (UNAVAILABLE/TIMEOUT)."
+                if fallback_type == EvidenceType.CUSTOMER_COMMUNICATION_UNAVAILABLE
+                else f"Queried pattern {tool_name} was not observed within available query scope."
+            )
             return EvidenceItem(
                 evidence_id=evidence_id,
-                evidence_type=cls._fallback_type_for_action(action_id),
+                evidence_type=fallback_type,
                 value="NO_MATCH",
-                source=f"tigergraph_query:{tool_name}",
-                finding=f"Queried pattern {tool_name} was not observed within available query scope.",
-                provenance=f"TigerGraph GSQL execution ({tool_name})",
+                source=src,
+                finding=finding_text,
+                provenance=prov,
                 source_entity=card_id or customer_id,
                 target_entity=txn_id,
-                graph_query=tool_name,
+                graph_query=None if is_gateway else tool_name,
                 timestamp=now_ts,
                 lr=1.0,
                 log_lr=0.0,
@@ -398,7 +407,7 @@ class EvidenceNormalizer:
             else:
                 return EvidenceItem(
                     evidence_id=evidence_id,
-                    evidence_type=EvidenceType.CUSTOMER_CONFIRMATION,
+                    evidence_type=EvidenceType.CUSTOMER_COMMUNICATION_UNAVAILABLE,
                     value="NO_MATCH",
                     source="gateway:simulate_customer_reply",
                     finding="Customer verification challenge timed out; no out-of-band response received.",
@@ -410,7 +419,7 @@ class EvidenceNormalizer:
                     log_lr=0.0,
                     direction=EvidenceDirection.NEUTRAL,
                     is_exculpatory=False,
-                    details={"scope_status": "NO_MATCH", "reply": reply}
+                    details={"scope_status": "NO_MATCH", "reply": reply, "status": "UNAVAILABLE"}
                 )
 
         # Tool: simulate_step_up_auth (MFA Authentication Challenge)
@@ -455,7 +464,7 @@ class EvidenceNormalizer:
             else:
                 return EvidenceItem(
                     evidence_id=evidence_id,
-                    evidence_type=EvidenceType.CUSTOMER_CONFIRMATION,
+                    evidence_type=EvidenceType.CUSTOMER_COMMUNICATION_UNAVAILABLE,
                     value="NO_MATCH",
                     source="gateway:simulate_step_up_auth",
                     finding="Step-up authentication challenge expired without interaction.",
@@ -467,7 +476,7 @@ class EvidenceNormalizer:
                     log_lr=0.0,
                     direction=EvidenceDirection.NEUTRAL,
                     is_exculpatory=False,
-                    details={"scope_status": "NO_MATCH"}
+                    details={"scope_status": "NO_MATCH", "status": "TIMEOUT"}
                 )
 
         # Generic Fallback
@@ -497,8 +506,8 @@ class EvidenceNormalizer:
             return EvidenceType.HIGH_VELOCITY
         elif "REGION" in act:
             return EvidenceType.OUT_OF_REGION
-        elif "CUSTOMER" in act or "DISPUTE" in act:
-            return EvidenceType.CUSTOMER_CONFIRMATION
+        elif "CUSTOMER" in act or "DISPUTE" in act or "STEP_UP" in act:
+            return EvidenceType.CUSTOMER_COMMUNICATION_UNAVAILABLE
         elif "SIMILAR" in act or "CASE" in act:
             return EvidenceType.SIMILAR_CASE_PRECEDENT
         return EvidenceType.BEHAVIORAL_BASELINE

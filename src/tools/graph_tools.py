@@ -128,20 +128,30 @@ class CardSequenceTool(BaseGraphEvidenceTool):
 
     @property
     def required_parameters(self) -> List[str]:
-        return ["c_id"]
+        return ["c_id", "anchor_ts"]
 
     def execute(self, params: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> ToolExecutionResult:
-        if not self.validate_parameters(params):
+        # Merge context anchor_ts if not in params
+        anchor_ts = params.get("anchor_ts") or (context or {}).get("anchor_ts")
+        card_id = params.get("c_id")
+
+        if not card_id or not anchor_ts:
+            missing = []
+            if not card_id:
+                missing.append("c_id")
+            if not anchor_ts:
+                missing.append("anchor_ts")
             return ToolExecutionResult(
                 action_id=self.action_id,
                 tool_name=self.tool_name,
                 parameters=params,
                 status="REJECTED",
                 scope_status=GraphScopeStatus.GRAPH_QUERY_FAILURE,
-                message="Missing required parameter 'c_id'."
+                message=f"Missing required parameter(s): {missing}."
             )
-        card_id = str(params["c_id"])
-        anchor_ts = params.get("anchor_ts") or (context or {}).get("anchor_ts", "2016-12-31 23:59:59")
+        
+        card_id = str(card_id)
+        anchor_ts = str(anchor_ts)
         window_hours = int(params.get("window_hours", 24))
         
         query_params = {
@@ -169,20 +179,30 @@ class TxnVelocityTool(BaseGraphEvidenceTool):
 
     @property
     def required_parameters(self) -> List[str]:
-        return ["c_id"]
+        return ["c_id", "target_ts"]
 
     def execute(self, params: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> ToolExecutionResult:
-        if not self.validate_parameters(params):
+        # Merge context target_ts if not in params
+        target_ts = params.get("target_ts") or (context or {}).get("target_ts")
+        card_id = params.get("c_id")
+
+        if not card_id or not target_ts:
+            missing = []
+            if not card_id:
+                missing.append("c_id")
+            if not target_ts:
+                missing.append("target_ts")
             return ToolExecutionResult(
                 action_id=self.action_id,
                 tool_name=self.tool_name,
                 parameters=params,
                 status="REJECTED",
                 scope_status=GraphScopeStatus.GRAPH_QUERY_FAILURE,
-                message="Missing required parameter 'c_id'."
+                message=f"Missing required parameter(s): {missing}."
             )
-        card_id = str(params["c_id"])
-        target_ts = params.get("target_ts") or (context or {}).get("target_ts", "2016-12-31 23:59:59")
+        
+        card_id = str(card_id)
+        target_ts = str(target_ts)
         window_hours = int(params.get("window_hours", 24))
         
         query_params = {
