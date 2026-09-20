@@ -122,6 +122,15 @@ LIKELIHOOD_REGISTRY: Dict[str, LikelihoodRatioMetadata] = {
         description="Customer confirms transaction was authorized (strongly exculpatory)",
         family_ceiling_log_lr=5.0
     ),
+    "CUSTOMER_COMMUNICATION_UNAVAILABLE": LikelihoodRatioMetadata(
+        evidence_type="CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        lr=1.0,
+        log_lr=0.0,
+        family=EvidenceFamily.CUSTOMER_DISPUTE,
+        classification=CalibrationClassification.POLICY_DEFINED,
+        description="Customer verification or challenge was unavailable, timed out, or not completed (neutral)",
+        family_ceiling_log_lr=5.0
+    ),
     "OUT_OF_REGION": LikelihoodRatioMetadata(
         evidence_type="OUT_OF_REGION",
         lr=0.26,
