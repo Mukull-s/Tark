@@ -41,3 +41,4 @@ Thumbs.db
 # Documentation & Guidelines (Excluded from remote repo)
 docs/
 *.pdf
+scratch/
