@@ -324,12 +324,17 @@ class InvestigationOrchestrator:
         final_verdict = "fraud" if current_state.belief_state.get("fraud_probability", 0.5) >= 0.70 else (
             "legitimate" if current_state.belief_state.get("fraud_probability", 0.5) <= 0.30 else "uncertain"
         )
+        case_ctx = dict(context or {})
+        case_ctx.update(current_state.trigger)
+        if ("pattern" not in case_ctx or not case_ctx["pattern"]) and current_state.secondary_typology:
+            case_ctx["pattern"] = current_state.secondary_typology
+
         final_policy_actions = self.policy_engine.evaluate(
             fraud_probability=current_state.belief_state.get("fraud_probability", 0.5),
             verdict=final_verdict,
             exposure_usd=exposure_usd,
             ledger=EvidenceLedger(items=current_state.evidence_items),
-            case_context=context or {}
+            case_context=case_ctx
         )
 
         duration_sec = round(time.perf_counter() - start_perf, 4)
