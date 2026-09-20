@@ -156,6 +156,12 @@ class EvidenceCompass:
         card_id = target_entities.get("card_id", "")
         customer_id = target_entities.get("customer_id", "")
         txn_addr1 = state.trigger.get("txn_addr1", 0.0)
+        txn_ts = (
+            state.trigger.get("timestamp")
+            or state.trigger.get("ts")
+            or target_entities.get("timestamp")
+            or target_entities.get("ts")
+        )
 
         # Check existing evidence to prevent redundant re-querying of identical tools
         executed_types = {e.evidence_type for e in state.evidence_items}
@@ -169,11 +175,14 @@ class EvidenceCompass:
 
         # 1. card_sequence
         if EvidenceType.CARD_TESTING_SEQUENCE not in executed_types and "CARD_TESTING_SEQUENCE" not in out_of_scope_dimensions:
+            seq_params = {"c_id": card_id, "window_hours": 24}
+            if txn_ts:
+                seq_params["anchor_ts"] = txn_ts
             candidates.append({
                 "action_id": "QUERY_CARD_SEQUENCE",
                 "action_type": EvidenceActionType.GSQL_QUERY,
                 "tool_name": "card_sequence",
-                "parameters": {"c_id": card_id, "window_hours": 24},
+                "parameters": seq_params,
                 "family": EvidenceFamily.TRANSACTION_VELOCITY,
                 "operational_burden_cost": 1.0,
                 "outcomes": [
@@ -239,11 +248,14 @@ class EvidenceCompass:
 
         # 3. txn_velocity
         if EvidenceType.HIGH_VELOCITY not in executed_types and "HIGH_VELOCITY" not in out_of_scope_dimensions:
+            vel_params = {"c_id": card_id, "window_hours": 24}
+            if txn_ts:
+                vel_params["target_ts"] = txn_ts
             candidates.append({
                 "action_id": "QUERY_TXN_VELOCITY",
                 "action_type": EvidenceActionType.GSQL_QUERY,
                 "tool_name": "txn_velocity",
-                "parameters": {"c_id": card_id, "window_hours": 24},
+                "parameters": vel_params,
                 "family": EvidenceFamily.TRANSACTION_VELOCITY,
                 "operational_burden_cost": 1.0,
                 "outcomes": [
@@ -513,13 +525,16 @@ class EvidenceCompass:
                 if gate_unlocked:
                     gate_unlock_count += outcome_prob
 
-                # Determine admissible action under hypothetical state
-                resulting_action = self.resolve_admissible_action(
-                    state=hypo_state,
+                # Determine operational action supported by hypothetical state
+                verdict = "confirmed_fraud" if sim_p >= 0.70 else ("legitimate" if sim_p <= 0.30 else "uncertain")
+                policy_actions = self.policy_engine.evaluate(
+                    fraud_probability=sim_p,
+                    verdict=verdict,
                     exposure_usd=exposure_usd,
                     ledger=hypo_ledger,
                     case_context=case_ctx
                 )
+                resulting_action = policy_actions[0].action if policy_actions else "MONITOR_CARD"
                 action_flipped = (resulting_action != current_primary_action)
 
                 # Calculate operational expected loss for this outcome
