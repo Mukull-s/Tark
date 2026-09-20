@@ -758,25 +758,29 @@ def test_no_match_does_not_unlock_coverage_in_loop(belief_engine, policy_engine,
 def test_data_out_of_scope_does_not_become_negative_evidence(belief_engine, policy_engine, compass):
     """Verifies that DATA_OUT_OF_SCOPE records missing information and does not reduce fraud probability."""
     class MockOosTool(EvidenceTool):
+        def __init__(self, action_id="QUERY_DEVICE_ANALYSIS", tool_name="device_analysis", ev_type=EvidenceType.SHARED_DEVICE_RING):
+            self._action_id = action_id
+            self._tool_name = tool_name
+            self._ev_type = ev_type
         @property
         def action_id(self) -> str:
-            return "QUERY_CARD_SEQUENCE"
+            return self._action_id
         @property
         def action_type(self) -> str:
             return "GSQL_QUERY"
         @property
         def tool_name(self) -> str:
-            return "card_sequence"
+            return self._tool_name
         @property
         def required_parameters(self) -> list:
             return []
         def execute(self, params: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> ToolExecutionResult:
             ev = EvidenceItem(
-                evidence_type=EvidenceType.CARD_TESTING_SEQUENCE,
+                evidence_type=self._ev_type,
                 value="DATA_OUT_OF_SCOPE",
-                source="card_sequence",
-                finding="Historical card sequence data out of scope",
-                graph_query="card_sequence"
+                source=self._tool_name,
+                finding=f"Historical {self._tool_name} data out of scope",
+                graph_query=self._tool_name
             )
             return ToolExecutionResult(
                 action_id=self.action_id,
@@ -785,10 +789,11 @@ def test_data_out_of_scope_does_not_become_negative_evidence(belief_engine, poli
                 scope_status="DATA_OUT_OF_SCOPE",
                 status="OUT_OF_SCOPE",
                 evidence_item=ev,
-                message="Historical card sequence data unobserved."
+                message=f"Historical {self._tool_name} data unobserved."
             )
     disp = EvidenceToolDispatcher(belief_engine)
-    disp.register_tool(MockOosTool())
+    disp.register_tool(MockOosTool("QUERY_DEVICE_ANALYSIS", "device_analysis", EvidenceType.SHARED_DEVICE_RING))
+    disp.register_tool(MockOosTool("QUERY_CARD_SEQUENCE", "card_sequence", EvidenceType.CARD_TESTING_SEQUENCE))
     
     ledger = EvidenceLedger()
     ledger.add(EvidenceItem(evidence_type=EvidenceType.CALIBRATED_RISK_SCORE, source="m", finding="m", lr=2.4, log_lr=0.875))
