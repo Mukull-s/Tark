@@ -53,7 +53,8 @@ def generic_initial_state(belief_engine):
         trigger={
             "trigger_type": "risk_score",
             "flagged_txn_id": "3478561",
-            "txn_addr1": 299.0
+            "txn_addr1": 299.0,
+            "timestamp": "2016-11-22 20:11:00"
         },
         target_entities={
             "card_id": "C11923-K2",

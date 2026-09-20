@@ -298,9 +298,11 @@ def test_correlated_evidence_diminishing_value(compass, belief_engine):
     outcome_clean = next(o for o in cand_device_clean.possible_outcomes if o.outcome_label == "SHARED_DEVICE_RING")
     outcome_proxy = next(o for o in cand_device_proxy.possible_outcomes if o.outcome_label == "SHARED_DEVICE_RING")
     
-    # The clean state gets full log_lr = 2.653; proxy state gets damped addition
+    # The clean state gets full log_lr = 2.653; proxy state gets damped addition (w=0.5)
     assert outcome_clean.simulated_posterior > 0.90
-    assert cand_device_clean.expected_decision_value >= cand_device_proxy.expected_decision_value
+    delta_clean = belief_engine.prob_to_log_odds(outcome_clean.simulated_posterior) - belief_engine.prob_to_log_odds(0.50)
+    delta_proxy = belief_engine.prob_to_log_odds(outcome_proxy.simulated_posterior) - belief_engine.prob_to_log_odds(state_proxy.belief_state["fraud_probability"])
+    assert delta_clean > delta_proxy
 
 # 8. Zero Benchmark Leakage Test
 def test_zero_benchmark_leakage(compass, belief_engine):
