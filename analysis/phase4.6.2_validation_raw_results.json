@@ -1,0 +1,4388 @@
+[
+  {
+    "case_id": "HHG-001",
+    "opened_at": "2016-12-05 01:55:28",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3514030 ($77.07, in billing region 444.0) at 0.61. Review and decide.",
+    "flagged_txn_id": "3514030",
+    "card_id": "C12382-K1",
+    "customer_id": "C12382",
+    "risk_score": 0.61,
+    "exposure_usd": 77.07,
+    "initial_p_fraud": 0.9256,
+    "final_p_fraud": 0.9256,
+    "final_classification": "fraud",
+    "evidence_steps": 5,
+    "evidence_coverage": 0.2,
+    "decision_gate_passed": false,
+    "decision_state": "INSUFFICIENT_EVIDENCE",
+    "termination_reason": "MAX_STEPS_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "approval_route": "auto",
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 46.54,
+          "QUERY_CARD_SEQUENCE": 46.25,
+          "QUERY_TXN_VELOCITY": 45.73,
+          "QUERY_REGION_ANALYSIS": 43.43,
+          "VERIFY_WITH_CUSTOMER": 27.06
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9256,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=1.0, log_lr=0.0): Device  shows clean single-card profile; no multi-card ring observed.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 2,
+        "selected_action": "QUERY_CARD_SEQUENCE",
+        "candidate_net_decision_values": {
+          "QUERY_CARD_SEQUENCE": 46.25,
+          "QUERY_TXN_VELOCITY": 45.73,
+          "QUERY_REGION_ANALYSIS": 43.43,
+          "VERIFY_WITH_CUSTOMER": 27.06
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9256,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CARD_TESTING_SEQUENCE (LR=1.0, log_lr=0.0): No micro-authorization card testing sequence observed within 24h window.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 3,
+        "selected_action": "QUERY_TXN_VELOCITY",
+        "candidate_net_decision_values": {
+          "QUERY_TXN_VELOCITY": 45.73,
+          "QUERY_REGION_ANALYSIS": 43.43,
+          "VERIFY_WITH_CUSTOMER": 27.06
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9256,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "HIGH_VELOCITY (LR=1.0, log_lr=0.0): Transaction velocity within normal bounds (4 transactions within 24h window).",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 4,
+        "selected_action": "QUERY_REGION_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_REGION_ANALYSIS": 43.43,
+          "VERIFY_WITH_CUSTOMER": 27.06
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9256,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "OUT_OF_REGION (LR=1.0, log_lr=0.0): Transaction billing region matches customer historical profile.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 5,
+        "selected_action": "VERIFY_WITH_CUSTOMER",
+        "candidate_net_decision_values": {
+          "VERIFY_WITH_CUSTOMER": 27.06
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9256,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CUSTOMER_COMMUNICATION_UNAVAILABLE (LR=1.0, log_lr=0.0): Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "MAX_STEPS_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-001-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 2.4,
+        "log_lr": 0.875,
+        "finding": "Real-time fraud risk score: 0.61",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-913D2BAB",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-68434AF7",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-BD953F9D",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (4 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-06A7DBAD",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-072AA7CF",
+        "evidence_type": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "source": "gateway:simulate_customer_reply",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-3587",
+        "similarity_score": 0.5955,
+        "matching_features": [
+          "Identical card ID (C12382-K1)",
+          "Identical customer ID (C12382)",
+          "Comparable dollar exposure ($49.09 vs $77.07, proximity 64%)"
+        ],
+        "historical_timestamp": "2016-09-21 01:08:08",
+        "eligibility_reason": "Historical case closed at 2016-09-21 01:08:08 on/before evaluation cutoff 2016-12-05 01:55:28; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-1673",
+        "similarity_score": 0.55,
+        "matching_features": [
+          "Identical card ID (C12382-K1)",
+          "Identical customer ID (C12382)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-08-06 00:29:12",
+        "eligibility_reason": "Historical case closed at 2016-08-06 00:29:12 on/before evaluation cutoff 2016-12-05 01:55:28; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-1066",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C12382-K1)",
+          "Identical customer ID (C12382)"
+        ],
+        "historical_timestamp": "2016-07-29 18:41:00",
+        "eligibility_reason": "Historical case closed at 2016-07-29 18:41:00 on/before evaluation cutoff 2016-12-05 01:55:28; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R5",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Card testing sequence requires mandatory transaction decline under L1 authorization review.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($77.07) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-CARDTESTING",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R9",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.94,
+        "match_rationale": "High assessed fraud probability on undocumented pattern requires case creation and L2 reporting under Rule R9.",
+        "applicable_statute_or_rule": "Rule R9"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R4",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.92,
+        "match_rationale": "Out-of-region card-present transaction requires transaction decline and customer verification under Rule R4.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-OUT-OF-REGION",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.9,
+        "match_rationale": "Observed OUT_OF_REGION evidence indicates geographic displacement without registered travel profile.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.4073,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-002",
+    "opened_at": "2016-11-22 23:27:07",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3478782 ($292.36, online) at 0.79. Review and decide.",
+    "flagged_txn_id": "3478782",
+    "card_id": "C11891-K1",
+    "customer_id": "C11891",
+    "risk_score": 0.79,
+    "exposure_usd": 292.36,
+    "initial_p_fraud": 0.9256,
+    "final_p_fraud": 0.9256,
+    "final_classification": "fraud",
+    "evidence_steps": 5,
+    "evidence_coverage": 0.2,
+    "decision_gate_passed": false,
+    "decision_state": "INSUFFICIENT_EVIDENCE",
+    "termination_reason": "MAX_STEPS_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "approval_route": "auto",
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 186.03,
+          "QUERY_CARD_SEQUENCE": 185.74,
+          "QUERY_TXN_VELOCITY": 185.22,
+          "QUERY_REGION_ANALYSIS": 182.92,
+          "VERIFY_WITH_CUSTOMER": 162.26
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9256,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=1.0, log_lr=0.0): Device  shows clean single-card profile; no multi-card ring observed.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 2,
+        "selected_action": "QUERY_CARD_SEQUENCE",
+        "candidate_net_decision_values": {
+          "QUERY_CARD_SEQUENCE": 185.74,
+          "QUERY_TXN_VELOCITY": 185.22,
+          "QUERY_REGION_ANALYSIS": 182.92,
+          "VERIFY_WITH_CUSTOMER": 162.26
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9256,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CARD_TESTING_SEQUENCE (LR=1.0, log_lr=0.0): No micro-authorization card testing sequence observed within 24h window.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 3,
+        "selected_action": "QUERY_TXN_VELOCITY",
+        "candidate_net_decision_values": {
+          "QUERY_TXN_VELOCITY": 185.22,
+          "QUERY_REGION_ANALYSIS": 182.92,
+          "VERIFY_WITH_CUSTOMER": 162.26
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9256,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "HIGH_VELOCITY (LR=1.0, log_lr=0.0): Transaction velocity within normal bounds (1 transactions within 24h window).",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 4,
+        "selected_action": "QUERY_REGION_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_REGION_ANALYSIS": 182.92,
+          "VERIFY_WITH_CUSTOMER": 162.26
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9256,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "OUT_OF_REGION (LR=1.0, log_lr=0.0): Transaction billing region matches customer historical profile.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 5,
+        "selected_action": "VERIFY_WITH_CUSTOMER",
+        "candidate_net_decision_values": {
+          "VERIFY_WITH_CUSTOMER": 162.26
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9256,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CUSTOMER_COMMUNICATION_UNAVAILABLE (LR=1.0, log_lr=0.0): Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "MAX_STEPS_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-002-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 2.4,
+        "log_lr": 0.875,
+        "finding": "Real-time fraud risk score: 0.79",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-49D12110",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-22424A25",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-2D310B82",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (1 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-AC18099E",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-3367DF4F",
+        "evidence_type": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "source": "gateway:simulate_customer_reply",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-4160",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C11891-K1)",
+          "Identical customer ID (C11891)"
+        ],
+        "historical_timestamp": "2016-10-02 18:59:51",
+        "eligibility_reason": "Historical case closed at 2016-10-02 18:59:51 on/before evaluation cutoff 2016-11-22 23:27:07; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2985",
+        "similarity_score": 0.415,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($381.40 vs $292.36, proximity 77%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-09 08:20:00",
+        "eligibility_reason": "Historical case closed at 2016-09-09 08:20:00 on/before evaluation cutoff 2016-11-22 23:27:07; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2649",
+        "similarity_score": 0.4124,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($390.04 vs $292.36, proximity 75%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-08-31 12:53:00",
+        "eligibility_reason": "Historical case closed at 2016-08-31 12:53:00 on/before evaluation cutoff 2016-11-22 23:27:07; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R5",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Card testing sequence requires mandatory transaction decline under L1 authorization review.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($292.36) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-CARDTESTING",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R9",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.94,
+        "match_rationale": "High assessed fraud probability on undocumented pattern requires case creation and L2 reporting under Rule R9.",
+        "applicable_statute_or_rule": "Rule R9"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R4",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.92,
+        "match_rationale": "Out-of-region card-present transaction requires transaction decline and customer verification under Rule R4.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-OUT-OF-REGION",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.9,
+        "match_rationale": "Observed OUT_OF_REGION evidence indicates geographic displacement without registered travel profile.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.1716,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-003",
+    "opened_at": "2016-12-10 15:01:21",
+    "trigger_type": "customer_report",
+    "trigger_text": "Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 3530164.",
+    "flagged_txn_id": "3530164",
+    "card_id": "C08623-K2",
+    "customer_id": "C08623",
+    "risk_score": null,
+    "exposure_usd": 49.0,
+    "initial_p_fraud": 0.9897,
+    "final_p_fraud": 0.9897,
+    "final_classification": "fraud",
+    "evidence_steps": 4,
+    "evidence_coverage": 0.2,
+    "decision_gate_passed": false,
+    "decision_state": "INSUFFICIENT_EVIDENCE",
+    "termination_reason": "NO_ADMISSIBLE_EVIDENCE",
+    "next_best_action": "BLOCK_CARD",
+    "primary_action": "BLOCK_CARD",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "CREATE_CASE"
+    ],
+    "policy_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      }
+    ],
+    "approval_route": "L1",
+    "policy_reason": "R2: Customer reported/denied transaction.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 32.64,
+          "QUERY_CARD_SEQUENCE": 32.59,
+          "QUERY_TXN_VELOCITY": 32.52,
+          "QUERY_REGION_ANALYSIS": 32.18
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=1.0, log_lr=0.0): Device  shows clean single-card profile; no multi-card ring observed.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 2,
+        "selected_action": "QUERY_CARD_SEQUENCE",
+        "candidate_net_decision_values": {
+          "QUERY_CARD_SEQUENCE": 32.59,
+          "QUERY_TXN_VELOCITY": 32.52,
+          "QUERY_REGION_ANALYSIS": 32.18
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CARD_TESTING_SEQUENCE (LR=1.0, log_lr=0.0): No micro-authorization card testing sequence observed within 24h window.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 3,
+        "selected_action": "QUERY_TXN_VELOCITY",
+        "candidate_net_decision_values": {
+          "QUERY_TXN_VELOCITY": 32.52,
+          "QUERY_REGION_ANALYSIS": 32.18
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "HIGH_VELOCITY (LR=1.0, log_lr=0.0): Transaction velocity within normal bounds (6 transactions within 24h window).",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 4,
+        "selected_action": "QUERY_REGION_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_REGION_ANALYSIS": 32.18
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "OUT_OF_REGION (LR=1.0, log_lr=0.0): Transaction billing region matches customer historical profile.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-003-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 3530164.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-A9590C12",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-5362EB9D",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-8CDED557",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (6 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-90244E98",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-4957",
+        "similarity_score": 0.647,
+        "matching_features": [
+          "Identical card ID (C08623-K2)",
+          "Identical customer ID (C08623)",
+          "Comparable dollar exposure ($48.02 vs $49.00, proximity 98%)"
+        ],
+        "historical_timestamp": "2016-10-22 22:16:26",
+        "eligibility_reason": "Historical case closed at 2016-10-22 22:16:26 on/before evaluation cutoff 2016-12-10 15:01:21; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2817",
+        "similarity_score": 0.6193,
+        "matching_features": [
+          "Identical card ID (C08623-K2)",
+          "Identical customer ID (C08623)",
+          "Comparable dollar exposure ($38.96 vs $49.00, proximity 80%)"
+        ],
+        "historical_timestamp": "2016-09-03 20:17:33",
+        "eligibility_reason": "Historical case closed at 2016-09-03 20:17:33 on/before evaluation cutoff 2016-12-10 15:01:21; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-1589",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C08623-K2)",
+          "Identical customer ID (C08623)"
+        ],
+        "historical_timestamp": "2016-08-05 21:37:36",
+        "eligibility_reason": "Historical case closed at 2016-08-05 21:37:36 on/before evaluation cutoff 2016-12-10 15:01:21; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R5",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Card testing sequence requires mandatory transaction decline under L1 authorization review.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R2",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Direct cardholder denial mandates card block and investigation under Regulation E.",
+        "applicable_statute_or_rule": "Rule R2"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($49.00) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-CARDTESTING",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-REGE",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.94,
+        "match_rationale": "Customer reported unauthorized debit triggering Regulation E error resolution statutory protections.",
+        "applicable_statute_or_rule": "12 CFR \u00a7\u00a7 1005.6, 1005.11"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R4",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.92,
+        "match_rationale": "Out-of-region card-present transaction requires transaction decline and customer verification under Rule R4.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-OUT-OF-REGION",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.9,
+        "match_rationale": "Observed OUT_OF_REGION evidence indicates geographic displacement without registered travel profile.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.1692,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-004",
+    "opened_at": "2016-12-29 07:53:54",
+    "trigger_type": "customer_report",
+    "trigger_text": "Customer C08106 message: 'I never made this $128.33 purchase. Please check my card.' Refers to 3583227.",
+    "flagged_txn_id": "3583227",
+    "card_id": "C08106-K1",
+    "customer_id": "C08106",
+    "risk_score": null,
+    "exposure_usd": 128.33,
+    "initial_p_fraud": 0.9897,
+    "final_p_fraud": 0.9897,
+    "final_classification": "fraud",
+    "evidence_steps": 4,
+    "evidence_coverage": 0.2,
+    "decision_gate_passed": false,
+    "decision_state": "INSUFFICIENT_EVIDENCE",
+    "termination_reason": "NO_ADMISSIBLE_EVIDENCE",
+    "next_best_action": "BLOCK_CARD",
+    "primary_action": "BLOCK_CARD",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "CREATE_CASE"
+    ],
+    "policy_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      }
+    ],
+    "approval_route": "L1",
+    "policy_reason": "R2: Customer reported/denied transaction.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 87.6,
+          "QUERY_CARD_SEQUENCE": 87.55,
+          "QUERY_TXN_VELOCITY": 87.48,
+          "QUERY_REGION_ANALYSIS": 87.14
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=1.0, log_lr=0.0): Device DEV_c83a1f7b195c shows clean single-card profile; no multi-card ring observed.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 2,
+        "selected_action": "QUERY_CARD_SEQUENCE",
+        "candidate_net_decision_values": {
+          "QUERY_CARD_SEQUENCE": 87.55,
+          "QUERY_TXN_VELOCITY": 87.48,
+          "QUERY_REGION_ANALYSIS": 87.14
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CARD_TESTING_SEQUENCE (LR=1.0, log_lr=0.0): No micro-authorization card testing sequence observed within 24h window.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 3,
+        "selected_action": "QUERY_TXN_VELOCITY",
+        "candidate_net_decision_values": {
+          "QUERY_TXN_VELOCITY": 87.48,
+          "QUERY_REGION_ANALYSIS": 87.14
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "HIGH_VELOCITY (LR=1.0, log_lr=0.0): Transaction velocity within normal bounds (1 transactions within 24h window).",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 4,
+        "selected_action": "QUERY_REGION_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_REGION_ANALYSIS": 87.14
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "OUT_OF_REGION (LR=1.0, log_lr=0.0): Transaction billing region matches customer historical profile.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-004-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C08106 message: 'I never made this $128.33 purchase. Please check my card.' Refers to 3583227.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-1BA455BB",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device DEV_c83a1f7b195c shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-F7CF5DE8",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-87CD8781",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (1 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-AAEBECE2",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-2121",
+        "similarity_score": 0.62,
+        "matching_features": [
+          "Identical card ID (C08106-K1)",
+          "Identical customer ID (C08106)",
+          "Comparable dollar exposure ($102.68 vs $128.33, proximity 80%)"
+        ],
+        "historical_timestamp": "2016-08-16 01:40:42",
+        "eligibility_reason": "Historical case closed at 2016-08-16 01:40:42 on/before evaluation cutoff 2016-12-29 07:53:54; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-0696",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C08106-K1)",
+          "Identical customer ID (C08106)"
+        ],
+        "historical_timestamp": "2016-07-19 00:30:15",
+        "eligibility_reason": "Historical case closed at 2016-07-19 00:30:15 on/before evaluation cutoff 2016-12-29 07:53:54; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-1736",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C08106-K1)",
+          "Identical customer ID (C08106)"
+        ],
+        "historical_timestamp": "2016-08-07 20:08:22",
+        "eligibility_reason": "Historical case closed at 2016-08-07 20:08:22 on/before evaluation cutoff 2016-12-29 07:53:54; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R5",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Card testing sequence requires mandatory transaction decline under L1 authorization review.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R2",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Direct cardholder denial mandates card block and investigation under Regulation E.",
+        "applicable_statute_or_rule": "Rule R2"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($128.33) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-CARDTESTING",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-REGE",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.94,
+        "match_rationale": "Customer reported unauthorized debit triggering Regulation E error resolution statutory protections.",
+        "applicable_statute_or_rule": "12 CFR \u00a7\u00a7 1005.6, 1005.11"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R4",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.92,
+        "match_rationale": "Out-of-region card-present transaction requires transaction decline and customer verification under Rule R4.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-OUT-OF-REGION",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.9,
+        "match_rationale": "Observed OUT_OF_REGION evidence indicates geographic displacement without registered travel profile.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.1678,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-005",
+    "opened_at": "2016-12-08 03:38:37",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3523199 ($100.07, online) at 0.54. Review and decide.",
+    "flagged_txn_id": "3523199",
+    "card_id": "C02923-K1",
+    "customer_id": "C02923",
+    "risk_score": 0.54,
+    "exposure_usd": 100.07,
+    "initial_p_fraud": 0.8149,
+    "final_p_fraud": 0.9843,
+    "final_classification": "fraud",
+    "evidence_steps": 1,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 49.56,
+          "QUERY_CARD_SEQUENCE": 48.94,
+          "QUERY_TXN_VELOCITY": 47.79,
+          "QUERY_REGION_ANALYSIS": 41.22,
+          "VERIFY_WITH_CUSTOMER": 31.29
+        },
+        "belief_before": 0.8149,
+        "belief_after": 0.9843,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=14.2, log_lr=2.653): Device DEV_af548b01f1ec is shared across 4 distinct cards in graph ring (proxy=False).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-005-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 0.85,
+        "log_lr": -0.163,
+        "finding": "Real-time fraud risk score: 0.54",
+        "source": "bank_detection_model",
+        "is_exculpatory": true
+      },
+      {
+        "evidence_id": "EVD-F27E73CB",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_af548b01f1ec is shared across 4 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-2400",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C02923-K1)",
+          "Identical customer ID (C02923)"
+        ],
+        "historical_timestamp": "2016-08-25 16:57:31",
+        "eligibility_reason": "Historical case closed at 2016-08-25 16:57:31 on/before evaluation cutoff 2016-12-08 03:38:37; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2717",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C02923-K1)",
+          "Identical customer ID (C02923)"
+        ],
+        "historical_timestamp": "2016-09-02 19:04:23",
+        "eligibility_reason": "Historical case closed at 2016-09-02 19:04:23 on/before evaluation cutoff 2016-12-08 03:38:37; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2857",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C02923-K1)",
+          "Identical customer ID (C02923)"
+        ],
+        "historical_timestamp": "2016-09-05 22:18:13",
+        "eligibility_reason": "Historical case closed at 2016-09-05 22:18:13 on/before evaluation cutoff 2016-12-08 03:38:37; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($100.07) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.0732,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-006",
+    "opened_at": "2016-11-22 02:30:00",
+    "trigger_type": "customer_report",
+    "trigger_text": "Customer C07297 message: 'I never made this $482.12 purchase. Please check my card.' Refers to 3476682.",
+    "flagged_txn_id": "3476682",
+    "card_id": "C07297-K1",
+    "customer_id": "C07297",
+    "risk_score": null,
+    "exposure_usd": 482.12,
+    "initial_p_fraud": 0.9897,
+    "final_p_fraud": 0.9993,
+    "final_classification": "fraud",
+    "evidence_steps": 1,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "BLOCK_CARD",
+    "primary_action": "BLOCK_CARD",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "policy_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring).",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Shared device or infrastructure links to other cards.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "L1",
+    "policy_reason": "R2: Customer reported/denied transaction.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 332.7,
+          "QUERY_CARD_SEQUENCE": 332.65,
+          "QUERY_TXN_VELOCITY": 332.58,
+          "QUERY_REGION_ANALYSIS": 332.24
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9993,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=14.2, log_lr=2.653): Device DEV_1e3c32210a00 is shared across 9 distinct cards in graph ring (proxy=False).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-006-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C07297 message: 'I never made this $482.12 purchase. Please check my card.' Refers to 3476682.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-B80FF54C",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_1e3c32210a00 is shared across 9 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-2649",
+        "similarity_score": 0.4214,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($390.04 vs $482.12, proximity 81%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-08-31 12:53:00",
+        "eligibility_reason": "Historical case closed at 2016-08-31 12:53:00 on/before evaluation cutoff 2016-11-22 02:30:00; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2985",
+        "similarity_score": 0.4187,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($381.40 vs $482.12, proximity 79%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-09 08:20:00",
+        "eligibility_reason": "Historical case closed at 2016-09-09 08:20:00 on/before evaluation cutoff 2016-11-22 02:30:00; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2971",
+        "similarity_score": 0.3,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-05 19:25:00",
+        "eligibility_reason": "Historical case closed at 2016-09-05 19:25:00 on/before evaluation cutoff 2016-11-22 02:30:00; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R2",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Direct cardholder denial mandates card block and investigation under Regulation E.",
+        "applicable_statute_or_rule": "Rule R2"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($482.12) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-REGE",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.94,
+        "match_rationale": "Customer reported unauthorized debit triggering Regulation E error resolution statutory protections.",
+        "applicable_statute_or_rule": "12 CFR \u00a7\u00a7 1005.6, 1005.11"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.0709,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-007",
+    "opened_at": "2016-12-05 03:46:14",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3514948 ($111.92, in billing region 264.0) at 0.87. Review and decide.",
+    "flagged_txn_id": "3514948",
+    "card_id": "C09933-K2",
+    "customer_id": "C09933",
+    "risk_score": 0.87,
+    "exposure_usd": 111.92,
+    "initial_p_fraud": 0.9724,
+    "final_p_fraud": 0.9888,
+    "final_classification": "fraud",
+    "evidence_steps": 3,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "approval_route": "auto",
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 74.33,
+          "QUERY_CARD_SEQUENCE": 74.22,
+          "QUERY_TXN_VELOCITY": 74.02,
+          "QUERY_REGION_ANALYSIS": 73.12,
+          "VERIFY_WITH_CUSTOMER": 53.68
+        },
+        "belief_before": 0.9724,
+        "belief_after": 0.9724,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=1.0, log_lr=0.0): Device  shows clean single-card profile; no multi-card ring observed.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 2,
+        "selected_action": "QUERY_CARD_SEQUENCE",
+        "candidate_net_decision_values": {
+          "QUERY_CARD_SEQUENCE": 74.22,
+          "QUERY_TXN_VELOCITY": 74.02,
+          "QUERY_REGION_ANALYSIS": 73.12,
+          "VERIFY_WITH_CUSTOMER": 53.68
+        },
+        "belief_before": 0.9724,
+        "belief_after": 0.9724,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CARD_TESTING_SEQUENCE (LR=1.0, log_lr=0.0): No micro-authorization card testing sequence observed within 24h window.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 3,
+        "selected_action": "QUERY_TXN_VELOCITY",
+        "candidate_net_decision_values": {
+          "QUERY_TXN_VELOCITY": 74.02,
+          "QUERY_REGION_ANALYSIS": 73.12,
+          "VERIFY_WITH_CUSTOMER": 53.68
+        },
+        "belief_before": 0.9724,
+        "belief_after": 0.9888,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "HIGH_VELOCITY (LR=2.5, log_lr=0.916): High transaction velocity: 18 transactions totaling $8653.93 within 24h.",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-007-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 6.8,
+        "log_lr": 1.917,
+        "finding": "Real-time fraud risk score: 0.87",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-5FA4A77E",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-03EA6391",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-3DCDE0D8",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 2.5,
+        "log_lr": 0.916,
+        "finding": "High transaction velocity: 18 transactions totaling $8653.93 within 24h.",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-0104",
+        "similarity_score": 0.6233,
+        "matching_features": [
+          "Identical card ID (C09933-K2)",
+          "Identical customer ID (C09933)",
+          "Comparable dollar exposure ($92.02 vs $111.92, proximity 82%)"
+        ],
+        "historical_timestamp": "2016-07-08 15:32:11",
+        "eligibility_reason": "Historical case closed at 2016-07-08 15:32:11 on/before evaluation cutoff 2016-12-05 03:46:14; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-3136",
+        "similarity_score": 0.5992,
+        "matching_features": [
+          "Identical card ID (C09933-K2)",
+          "Identical customer ID (C09933)",
+          "Comparable dollar exposure ($73.99 vs $111.92, proximity 66%)"
+        ],
+        "historical_timestamp": "2016-09-08 02:41:27",
+        "eligibility_reason": "Historical case closed at 2016-09-08 02:41:27 on/before evaluation cutoff 2016-12-05 03:46:14; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-4597",
+        "similarity_score": 0.5924,
+        "matching_features": [
+          "Identical card ID (C09933-K2)",
+          "Identical customer ID (C09933)",
+          "Comparable dollar exposure ($68.91 vs $111.92, proximity 62%)"
+        ],
+        "historical_timestamp": "2016-10-15 00:42:26",
+        "eligibility_reason": "Historical case closed at 2016-10-15 00:42:26 on/before evaluation cutoff 2016-12-05 03:46:14; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R5",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Card testing sequence requires mandatory transaction decline under L1 authorization review.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($111.92) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-CARDTESTING",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R9",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.94,
+        "match_rationale": "High assessed fraud probability on undocumented pattern requires case creation and L2 reporting under Rule R9.",
+        "applicable_statute_or_rule": "Rule R9"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.1437,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-008",
+    "opened_at": "2016-12-20 03:08:56",
+    "trigger_type": "customer_report",
+    "trigger_text": "Customer C13171 message: 'I never made this $55.68 purchase. Please check my card.' Refers to 3558054.",
+    "flagged_txn_id": "3558054",
+    "card_id": "C13171-K2",
+    "customer_id": "C13171",
+    "risk_score": null,
+    "exposure_usd": 55.68,
+    "initial_p_fraud": 0.9897,
+    "final_p_fraud": 0.9993,
+    "final_classification": "fraud",
+    "evidence_steps": 1,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "BLOCK_CARD",
+    "primary_action": "BLOCK_CARD",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "policy_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring).",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Shared device or infrastructure links to other cards.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "L1",
+    "policy_reason": "R2: Customer reported/denied transaction.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 37.27,
+          "QUERY_CARD_SEQUENCE": 37.22,
+          "QUERY_TXN_VELOCITY": 37.15,
+          "QUERY_REGION_ANALYSIS": 36.81
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9993,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=14.2, log_lr=2.653): Device DEV_1e60de19dac9 is shared across 4 distinct cards in graph ring (proxy=False).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-008-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C13171 message: 'I never made this $55.68 purchase. Please check my card.' Refers to 3558054.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-12573A73",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_1e60de19dac9 is shared across 4 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-0056",
+        "similarity_score": 0.6583,
+        "matching_features": [
+          "Identical card ID (C13171-K2)",
+          "Identical customer ID (C13171)",
+          "Comparable dollar exposure ($40.21 vs $55.68, proximity 72%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-07-06 15:17:38",
+        "eligibility_reason": "Historical case closed at 2016-07-06 15:17:38 on/before evaluation cutoff 2016-12-20 03:08:56; matched on 4 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-4485",
+        "similarity_score": 0.6295,
+        "matching_features": [
+          "Identical card ID (C13171-K2)",
+          "Identical customer ID (C13171)",
+          "Comparable dollar exposure ($105.12 vs $55.68, proximity 53%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-10-11 03:02:14",
+        "eligibility_reason": "Historical case closed at 2016-10-11 03:02:14 on/before evaluation cutoff 2016-12-20 03:08:56; matched on 4 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2244",
+        "similarity_score": 0.6256,
+        "matching_features": [
+          "Identical card ID (C13171-K2)",
+          "Identical customer ID (C13171)",
+          "Comparable dollar exposure ($110.46 vs $55.68, proximity 50%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-08-22 20:58:15",
+        "eligibility_reason": "Historical case closed at 2016-08-22 20:58:15 on/before evaluation cutoff 2016-12-20 03:08:56; matched on 4 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R2",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Direct cardholder denial mandates card block and investigation under Regulation E.",
+        "applicable_statute_or_rule": "Rule R2"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($55.68) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-REGE",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.94,
+        "match_rationale": "Customer reported unauthorized debit triggering Regulation E error resolution statutory protections.",
+        "applicable_statute_or_rule": "12 CFR \u00a7\u00a7 1005.6, 1005.11"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.071,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-009",
+    "opened_at": "2016-12-28 17:10:53",
+    "trigger_type": "customer_report",
+    "trigger_text": "Customer C08299 message: 'I never made this $30.02 purchase. Please check my card.' Refers to 3581141.",
+    "flagged_txn_id": "3581141",
+    "card_id": "C08299-K1",
+    "customer_id": "C08299",
+    "risk_score": null,
+    "exposure_usd": 30.02,
+    "initial_p_fraud": 0.9897,
+    "final_p_fraud": 0.9973,
+    "final_classification": "fraud",
+    "evidence_steps": 1,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "BLOCK_CARD",
+    "primary_action": "BLOCK_CARD",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "CREATE_CASE"
+    ],
+    "policy_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      }
+    ],
+    "approval_route": "L1",
+    "policy_reason": "R2: Customer reported/denied transaction.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 19.49,
+          "QUERY_CARD_SEQUENCE": 19.44,
+          "QUERY_TXN_VELOCITY": 19.37,
+          "QUERY_REGION_ANALYSIS": 19.03
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9973,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "PROXY_DETECTED (LR=3.8, log_lr=1.335): Device DEV_e40cd9c2bbcd proxy connection detected in graph.",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-009-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C08299 message: 'I never made this $30.02 purchase. Please check my card.' Refers to 3581141.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-446BB425",
+        "evidence_type": "PROXY_DETECTED",
+        "lr": 3.8,
+        "log_lr": 1.335,
+        "finding": "Device DEV_e40cd9c2bbcd proxy connection detected in graph.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-2649",
+        "similarity_score": 0.3,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-08-31 12:53:00",
+        "eligibility_reason": "Historical case closed at 2016-08-31 12:53:00 on/before evaluation cutoff 2016-12-28 17:10:53; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2971",
+        "similarity_score": 0.3,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-05 19:25:00",
+        "eligibility_reason": "Historical case closed at 2016-09-05 19:25:00 on/before evaluation cutoff 2016-12-28 17:10:53; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2985",
+        "similarity_score": 0.3,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-09 08:20:00",
+        "eligibility_reason": "Historical case closed at 2016-09-09 08:20:00 on/before evaluation cutoff 2016-12-28 17:10:53; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R2",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Direct cardholder denial mandates card block and investigation under Regulation E.",
+        "applicable_statute_or_rule": "Rule R2"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-REGE",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.94,
+        "match_rationale": "Customer reported unauthorized debit triggering Regulation E error resolution statutory protections.",
+        "applicable_statute_or_rule": "12 CFR \u00a7\u00a7 1005.6, 1005.11"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.0742,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-010",
+    "opened_at": "2016-12-02 18:18:27",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3506725 ($1,000.03, online) at 0.90. Review and decide.",
+    "flagged_txn_id": "3506725",
+    "card_id": "C10434-K1",
+    "customer_id": "C10434",
+    "risk_score": 0.9,
+    "exposure_usd": 1000.03,
+    "initial_p_fraud": 0.9724,
+    "final_p_fraud": 0.998,
+    "final_classification": "fraud",
+    "evidence_steps": 1,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 678.85,
+          "QUERY_CARD_SEQUENCE": 678.74,
+          "QUERY_TXN_VELOCITY": 678.54,
+          "QUERY_REGION_ANALYSIS": 677.64,
+          "VERIFY_WITH_CUSTOMER": 657.46
+        },
+        "belief_before": 0.9724,
+        "belief_after": 0.998,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=14.2, log_lr=2.653): Device DEV_1a67ac84a467 is shared across 9 distinct cards in graph ring (proxy=False).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-010-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 6.8,
+        "log_lr": 1.917,
+        "finding": "Real-time fraud risk score: 0.90",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-8BE651AC",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_1a67ac84a467 is shared across 9 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-0873",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C10434-K1)",
+          "Identical customer ID (C10434)"
+        ],
+        "historical_timestamp": "2016-07-23 05:56:18",
+        "eligibility_reason": "Historical case closed at 2016-07-23 05:56:18 on/before evaluation cutoff 2016-12-02 18:18:27; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-4086",
+        "similarity_score": 0.3302,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($1871.13 vs $1000.03, proximity 53%)"
+        ],
+        "historical_timestamp": "2016-10-02 20:30:00",
+        "eligibility_reason": "Historical case closed at 2016-10-02 20:30:00 on/before evaluation cutoff 2016-12-02 18:18:27; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-3841",
+        "similarity_score": 0.329,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($1899.30 vs $1000.03, proximity 53%)"
+        ],
+        "historical_timestamp": "2016-09-24 21:21:00",
+        "eligibility_reason": "Historical case closed at 2016-09-24 21:21:00 on/before evaluation cutoff 2016-12-02 18:18:27; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($1,000.03) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.075,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-011",
+    "opened_at": "2016-12-29 06:27:44",
+    "trigger_type": "customer_report",
+    "trigger_text": "Customer C11923 message: 'I never made this $131.30 purchase. Please check my card.' Refers to 3583368.",
+    "flagged_txn_id": "3583368",
+    "card_id": "C11923-K2",
+    "customer_id": "C11923",
+    "risk_score": null,
+    "exposure_usd": 131.3,
+    "initial_p_fraud": 0.9897,
+    "final_p_fraud": 0.9997,
+    "final_classification": "fraud",
+    "evidence_steps": 2,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "DECLINE_TRANSACTION",
+    "primary_action": "DECLINE_TRANSACTION",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "BLOCK_CARD"
+    ],
+    "policy_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "action_recommendations": [
+      {
+        "action": "DECLINE_TRANSACTION",
+        "approval_route": "L1",
+        "reason": "R5: Card testing sequence detected (micro-authorizations followed by purchase).",
+        "role": "PRIMARY",
+        "scope": "TRANSACTION"
+      },
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R5: Card testing sequence cleared a charge over $100.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "L1",
+    "policy_reason": "R5: Card testing sequence detected (micro-authorizations followed by purchase).",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 89.65,
+          "QUERY_CARD_SEQUENCE": 89.6,
+          "QUERY_TXN_VELOCITY": 89.53,
+          "QUERY_REGION_ANALYSIS": 89.19
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=1.0, log_lr=0.0): Device DEV_d339a8c89ee2 shows clean single-card profile; no multi-card ring observed.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 2,
+        "selected_action": "QUERY_CARD_SEQUENCE",
+        "candidate_net_decision_values": {
+          "QUERY_CARD_SEQUENCE": 89.6,
+          "QUERY_TXN_VELOCITY": 89.53,
+          "QUERY_REGION_ANALYSIS": 89.19
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9997,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "CARD_TESTING_SEQUENCE (LR=34.3, log_lr=3.535): Card testing sequence observed: 3 micro-authorizations totaling $0.00.",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-011-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C11923 message: 'I never made this $131.30 purchase. Please check my card.' Refers to 3583368.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-89EA4961",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device DEV_d339a8c89ee2 shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-114FFE6C",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 34.3,
+        "log_lr": 3.535,
+        "finding": "Card testing sequence observed: 3 micro-authorizations totaling $0.00.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-3039",
+        "similarity_score": 0.6744,
+        "matching_features": [
+          "Identical card ID (C11923-K2)",
+          "Identical customer ID (C11923)",
+          "Comparable dollar exposure ($108.85 vs $131.30, proximity 83%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-09 01:18:26",
+        "eligibility_reason": "Historical case closed at 2016-09-09 01:18:26 on/before evaluation cutoff 2016-12-29 06:27:44; matched on 4 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-3206",
+        "similarity_score": 0.6645,
+        "matching_features": [
+          "Identical card ID (C11923-K2)",
+          "Identical customer ID (C11923)",
+          "Comparable dollar exposure ($100.24 vs $131.30, proximity 76%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-13 02:12:22",
+        "eligibility_reason": "Historical case closed at 2016-09-13 02:12:22 on/before evaluation cutoff 2016-12-29 06:27:44; matched on 4 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-0290",
+        "similarity_score": 0.6362,
+        "matching_features": [
+          "Identical card ID (C11923-K2)",
+          "Identical customer ID (C11923)",
+          "Comparable dollar exposure ($144.56 vs $131.30, proximity 91%)"
+        ],
+        "historical_timestamp": "2016-07-10 23:59:09",
+        "eligibility_reason": "Historical case closed at 2016-07-10 23:59:09 on/before evaluation cutoff 2016-12-29 06:27:44; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R5",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Card testing sequence requires mandatory transaction decline under L1 authorization review.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R2",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Direct cardholder denial mandates card block and investigation under Regulation E.",
+        "applicable_statute_or_rule": "Rule R2"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($131.30) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-CARDTESTING",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-REGE",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.94,
+        "match_rationale": "Customer reported unauthorized debit triggering Regulation E error resolution statutory protections.",
+        "applicable_statute_or_rule": "12 CFR \u00a7\u00a7 1005.6, 1005.11"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.1085,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-012",
+    "opened_at": "2016-12-18 05:00:31",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3553342 ($30.91, in billing region 494.0) at 0.55. Review and decide.",
+    "flagged_txn_id": "3553342",
+    "card_id": "C05876-K2",
+    "customer_id": "C05876",
+    "risk_score": 0.55,
+    "exposure_usd": 30.91,
+    "initial_p_fraud": 0.8149,
+    "final_p_fraud": 0.815,
+    "final_classification": "fraud",
+    "evidence_steps": 4,
+    "evidence_coverage": 0.2,
+    "decision_gate_passed": false,
+    "decision_state": "INSUFFICIENT_EVIDENCE",
+    "termination_reason": "NEGATIVE_EVOI",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "approval_route": "auto",
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 10.11,
+          "QUERY_CARD_SEQUENCE": 9.49,
+          "QUERY_TXN_VELOCITY": 8.34,
+          "QUERY_REGION_ANALYSIS": 5.7,
+          "VERIFY_WITH_CUSTOMER": -6.23
+        },
+        "belief_before": 0.8149,
+        "belief_after": 0.815,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=1.0, log_lr=0.0): Device  shows clean single-card profile; no multi-card ring observed.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 2,
+        "selected_action": "QUERY_CARD_SEQUENCE",
+        "candidate_net_decision_values": {
+          "QUERY_CARD_SEQUENCE": 9.49,
+          "QUERY_TXN_VELOCITY": 8.34,
+          "QUERY_REGION_ANALYSIS": 5.7,
+          "VERIFY_WITH_CUSTOMER": -6.23
+        },
+        "belief_before": 0.815,
+        "belief_after": 0.815,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CARD_TESTING_SEQUENCE (LR=1.0, log_lr=0.0): No micro-authorization card testing sequence observed within 24h window.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 3,
+        "selected_action": "QUERY_TXN_VELOCITY",
+        "candidate_net_decision_values": {
+          "QUERY_TXN_VELOCITY": 8.34,
+          "QUERY_REGION_ANALYSIS": 5.7,
+          "VERIFY_WITH_CUSTOMER": -6.23
+        },
+        "belief_before": 0.815,
+        "belief_after": 0.815,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "HIGH_VELOCITY (LR=1.0, log_lr=0.0): Transaction velocity within normal bounds (5 transactions within 24h window).",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 4,
+        "selected_action": "QUERY_REGION_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_REGION_ANALYSIS": 5.7,
+          "VERIFY_WITH_CUSTOMER": -6.23
+        },
+        "belief_before": 0.815,
+        "belief_after": 0.815,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "OUT_OF_REGION (LR=1.0, log_lr=0.0): Transaction billing region matches customer historical profile.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-012-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 0.85,
+        "log_lr": -0.163,
+        "finding": "Real-time fraud risk score: 0.55",
+        "source": "bank_detection_model",
+        "is_exculpatory": true
+      },
+      {
+        "evidence_id": "EVD-47261BAF",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-4DE86E5C",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-D55407B8",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (5 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-7EAE0300",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-0003",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C05876-K2)",
+          "Identical customer ID (C05876)"
+        ],
+        "historical_timestamp": "2016-07-05 13:34:01",
+        "eligibility_reason": "Historical case closed at 2016-07-05 13:34:01 on/before evaluation cutoff 2016-12-18 05:00:31; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2370",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C05876-K2)",
+          "Identical customer ID (C05876)"
+        ],
+        "historical_timestamp": "2016-08-22 20:47:41",
+        "eligibility_reason": "Historical case closed at 2016-08-22 20:47:41 on/before evaluation cutoff 2016-12-18 05:00:31; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2649",
+        "similarity_score": 0.3,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-08-31 12:53:00",
+        "eligibility_reason": "Historical case closed at 2016-08-31 12:53:00 on/before evaluation cutoff 2016-12-18 05:00:31; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R5",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Card testing sequence requires mandatory transaction decline under L1 authorization review.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($30.91) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-CARDTESTING",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R9",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.94,
+        "match_rationale": "High assessed fraud probability on undocumented pattern requires case creation and L2 reporting under Rule R9.",
+        "applicable_statute_or_rule": "Rule R9"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R4",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.92,
+        "match_rationale": "Out-of-region card-present transaction requires transaction decline and customer verification under Rule R4.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-OUT-OF-REGION",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.9,
+        "match_rationale": "Observed OUT_OF_REGION evidence indicates geographic displacement without registered travel profile.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.1798,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-013",
+    "opened_at": "2016-12-09 05:39:29",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3526826 ($35.66, online) at 0.76. Review and decide.",
+    "flagged_txn_id": "3526826",
+    "card_id": "C07671-K2",
+    "customer_id": "C07671",
+    "risk_score": 0.76,
+    "exposure_usd": 35.66,
+    "initial_p_fraud": 0.9256,
+    "final_p_fraud": 0.9944,
+    "final_classification": "fraud",
+    "evidence_steps": 1,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 19.71,
+          "QUERY_CARD_SEQUENCE": 19.42,
+          "QUERY_TXN_VELOCITY": 18.9,
+          "QUERY_REGION_ANALYSIS": 16.6,
+          "VERIFY_WITH_CUSTOMER": 1.06
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9944,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=14.2, log_lr=2.653): Device DEV_4895b33f375c is shared across 7 distinct cards in graph ring (proxy=False).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-013-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 2.4,
+        "log_lr": 0.875,
+        "finding": "Real-time fraud risk score: 0.76",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-CA9E9F47",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_4895b33f375c is shared across 7 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-3216",
+        "similarity_score": 0.55,
+        "matching_features": [
+          "Identical card ID (C07671-K2)",
+          "Identical customer ID (C07671)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-12 01:21:18",
+        "eligibility_reason": "Historical case closed at 2016-09-12 01:21:18 on/before evaluation cutoff 2016-12-09 05:39:29; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-1475",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C07671-K2)",
+          "Identical customer ID (C07671)"
+        ],
+        "historical_timestamp": "2016-08-01 20:50:27",
+        "eligibility_reason": "Historical case closed at 2016-08-01 20:50:27 on/before evaluation cutoff 2016-12-09 05:39:29; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-3761",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C07671-K2)",
+          "Identical customer ID (C07671)"
+        ],
+        "historical_timestamp": "2016-09-22 00:32:39",
+        "eligibility_reason": "Historical case closed at 2016-09-22 00:32:39 on/before evaluation cutoff 2016-12-09 05:39:29; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($35.66) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.073,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-014",
+    "opened_at": "2016-11-22 20:11:00",
+    "trigger_type": "analyst_request",
+    "trigger_text": "Analyst request: several cards this month show purchases from the same unusual device profile. Review transaction 3478561 on card C13487-K1 and look for related activity.",
+    "flagged_txn_id": "3478561",
+    "card_id": "C13487-K1",
+    "customer_id": "C13487",
+    "risk_score": null,
+    "exposure_usd": 74.96,
+    "initial_p_fraud": 0.8383,
+    "final_p_fraud": 0.9866,
+    "final_classification": "fraud",
+    "evidence_steps": 5,
+    "evidence_coverage": 0.2,
+    "decision_gate_passed": false,
+    "decision_state": "INSUFFICIENT_EVIDENCE",
+    "termination_reason": "MAX_STEPS_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 37.39,
+          "QUERY_CARD_SEQUENCE": 36.83,
+          "QUERY_TXN_VELOCITY": 35.8,
+          "QUERY_REGION_ANALYSIS": 30.52,
+          "VERIFY_WITH_CUSTOMER": 19.22
+        },
+        "belief_before": 0.8383,
+        "belief_after": 0.9866,
+        "coverage_before": 0.0,
+        "coverage_after": 0.2,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=14.2, log_lr=2.653): Device DEV_c5a193fe0d03 is shared across 52 distinct cards in graph ring (proxy=True).",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 2,
+        "selected_action": "QUERY_CARD_SEQUENCE",
+        "candidate_net_decision_values": {
+          "QUERY_CARD_SEQUENCE": 50.31,
+          "QUERY_TXN_VELOCITY": 50.21,
+          "QUERY_REGION_ANALYSIS": 49.77,
+          "VERIFY_WITH_CUSTOMER": 31.16
+        },
+        "belief_before": 0.9866,
+        "belief_after": 0.9866,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CARD_TESTING_SEQUENCE (LR=1.0, log_lr=0.0): No micro-authorization card testing sequence observed within 24h window.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 3,
+        "selected_action": "QUERY_TXN_VELOCITY",
+        "candidate_net_decision_values": {
+          "QUERY_TXN_VELOCITY": 50.21,
+          "QUERY_REGION_ANALYSIS": 49.77,
+          "VERIFY_WITH_CUSTOMER": 31.16
+        },
+        "belief_before": 0.9866,
+        "belief_after": 0.9866,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "HIGH_VELOCITY (LR=1.0, log_lr=0.0): Transaction velocity within normal bounds (3 transactions within 24h window).",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 4,
+        "selected_action": "QUERY_REGION_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_REGION_ANALYSIS": 49.77,
+          "VERIFY_WITH_CUSTOMER": 31.16
+        },
+        "belief_before": 0.9866,
+        "belief_after": 0.9866,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "OUT_OF_REGION (LR=1.0, log_lr=0.0): Transaction billing region matches customer historical profile.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 5,
+        "selected_action": "VERIFY_WITH_CUSTOMER",
+        "candidate_net_decision_values": {
+          "VERIFY_WITH_CUSTOMER": 31.16
+        },
+        "belief_before": 0.9866,
+        "belief_after": 0.9866,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CUSTOMER_COMMUNICATION_UNAVAILABLE (LR=1.0, log_lr=0.0): Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "MAX_STEPS_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-4C0D1E40",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_c5a193fe0d03 is shared across 52 distinct cards in graph ring (proxy=True).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-D70EA0BB",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-BFD1A7E0",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (3 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-33D514DC",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-D1649EE8",
+        "evidence_type": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "source": "gateway:simulate_customer_reply",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-2971",
+        "similarity_score": 0.4038,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($108.36 vs $74.96, proximity 69%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-05 19:25:00",
+        "eligibility_reason": "Historical case closed at 2016-09-05 19:25:00 on/before evaluation cutoff 2016-11-22 20:11:00; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-3035",
+        "similarity_score": 0.3798,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($140.95 vs $74.96, proximity 53%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-09 22:44:00",
+        "eligibility_reason": "Historical case closed at 2016-09-09 22:44:00 on/before evaluation cutoff 2016-11-22 20:11:00; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2649",
+        "similarity_score": 0.3,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-08-31 12:53:00",
+        "eligibility_reason": "Historical case closed at 2016-08-31 12:53:00 on/before evaluation cutoff 2016-11-22 20:11:00; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R5",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Card testing sequence requires mandatory transaction decline under L1 authorization review.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($74.96) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-CARDTESTING",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R4",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.92,
+        "match_rationale": "Out-of-region card-present transaction requires transaction decline and customer verification under Rule R4.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-OUT-OF-REGION",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.9,
+        "match_rationale": "Observed OUT_OF_REGION evidence indicates geographic displacement without registered travel profile.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.1793,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-015",
+    "opened_at": "2016-11-17 19:03:36",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3464869 ($599.94, online) at 0.77. Review and decide.",
+    "flagged_txn_id": "3464869",
+    "card_id": "C03042-K1",
+    "customer_id": "C03042",
+    "risk_score": 0.77,
+    "exposure_usd": 599.94,
+    "initial_p_fraud": 0.9256,
+    "final_p_fraud": 0.9944,
+    "final_classification": "fraud",
+    "evidence_steps": 1,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 385.32,
+          "QUERY_CARD_SEQUENCE": 385.03,
+          "QUERY_TXN_VELOCITY": 384.51,
+          "QUERY_REGION_ANALYSIS": 382.21,
+          "VERIFY_WITH_CUSTOMER": 365.07
+        },
+        "belief_before": 0.9256,
+        "belief_after": 0.9944,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=14.2, log_lr=2.653): Device DEV_9528e7f99855 is shared across 3 distinct cards in graph ring (proxy=False).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-015-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 2.4,
+        "log_lr": 0.875,
+        "finding": "Real-time fraud risk score: 0.77",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-61B5A6C7",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_9528e7f99855 is shared across 3 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-0615",
+        "similarity_score": 0.55,
+        "matching_features": [
+          "Identical card ID (C03042-K1)",
+          "Identical customer ID (C03042)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-07-21 00:03:49",
+        "eligibility_reason": "Historical case closed at 2016-07-21 00:03:49 on/before evaluation cutoff 2016-11-17 19:03:36; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-3886",
+        "similarity_score": 0.55,
+        "matching_features": [
+          "Identical card ID (C03042-K1)",
+          "Identical customer ID (C03042)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-27 07:19:55",
+        "eligibility_reason": "Historical case closed at 2016-09-27 07:19:55 on/before evaluation cutoff 2016-11-17 19:03:36; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-1313",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C03042-K1)",
+          "Identical customer ID (C03042)"
+        ],
+        "historical_timestamp": "2016-07-28 22:03:51",
+        "eligibility_reason": "Historical case closed at 2016-07-28 22:03:51 on/before evaluation cutoff 2016-11-17 19:03:36; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($599.94) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.0724,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-016",
+    "opened_at": "2016-12-12 01:39:08",
+    "trigger_type": "customer_report",
+    "trigger_text": "Customer C09988 message: 'I never made this $59.67 purchase. Please check my card.' Refers to 3534820.",
+    "flagged_txn_id": "3534820",
+    "card_id": "C09988-K1",
+    "customer_id": "C09988",
+    "risk_score": null,
+    "exposure_usd": 59.67,
+    "initial_p_fraud": 0.9897,
+    "final_p_fraud": 0.9993,
+    "final_classification": "fraud",
+    "evidence_steps": 1,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "BLOCK_CARD",
+    "primary_action": "BLOCK_CARD",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "policy_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring).",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Shared device or infrastructure links to other cards.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "L1",
+    "policy_reason": "R2: Customer reported/denied transaction.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 40.03,
+          "QUERY_CARD_SEQUENCE": 39.98,
+          "QUERY_TXN_VELOCITY": 39.91,
+          "QUERY_REGION_ANALYSIS": 39.57
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9993,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=14.2, log_lr=2.653): Device DEV_db08695bc376 is shared across 4 distinct cards in graph ring (proxy=False).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-016-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C09988 message: 'I never made this $59.67 purchase. Please check my card.' Refers to 3534820.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-975B9F0D",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_db08695bc376 is shared across 4 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-2971",
+        "similarity_score": 0.3826,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($108.36 vs $59.67, proximity 55%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-05 19:25:00",
+        "eligibility_reason": "Historical case closed at 2016-09-05 19:25:00 on/before evaluation cutoff 2016-12-12 01:39:08; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2649",
+        "similarity_score": 0.3,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-08-31 12:53:00",
+        "eligibility_reason": "Historical case closed at 2016-08-31 12:53:00 on/before evaluation cutoff 2016-12-12 01:39:08; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2985",
+        "similarity_score": 0.3,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-09 08:20:00",
+        "eligibility_reason": "Historical case closed at 2016-09-09 08:20:00 on/before evaluation cutoff 2016-12-12 01:39:08; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R2",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Direct cardholder denial mandates card block and investigation under Regulation E.",
+        "applicable_statute_or_rule": "Rule R2"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($59.67) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-REGE",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.94,
+        "match_rationale": "Customer reported unauthorized debit triggering Regulation E error resolution statutory protections.",
+        "applicable_statute_or_rule": "12 CFR \u00a7\u00a7 1005.6, 1005.11"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.0734,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-017",
+    "opened_at": "2016-11-12 00:46:24",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3450629 ($100.09, online) at 0.57. Review and decide.",
+    "flagged_txn_id": "3450629",
+    "card_id": "C04570-K1",
+    "customer_id": "C04570",
+    "risk_score": 0.57,
+    "exposure_usd": 100.09,
+    "initial_p_fraud": 0.8149,
+    "final_p_fraud": 0.9843,
+    "final_classification": "fraud",
+    "evidence_steps": 1,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 49.57,
+          "QUERY_CARD_SEQUENCE": 48.95,
+          "QUERY_TXN_VELOCITY": 47.8,
+          "QUERY_REGION_ANALYSIS": 41.23,
+          "VERIFY_WITH_CUSTOMER": 31.29
+        },
+        "belief_before": 0.8149,
+        "belief_after": 0.9843,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=14.2, log_lr=2.653): Device DEV_c37b877bcc5f is shared across 6 distinct cards in graph ring (proxy=False).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-017-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 0.85,
+        "log_lr": -0.163,
+        "finding": "Real-time fraud risk score: 0.57",
+        "source": "bank_detection_model",
+        "is_exculpatory": true
+      },
+      {
+        "evidence_id": "EVD-4415E51E",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_c37b877bcc5f is shared across 6 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-1383",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C04570-K1)",
+          "Identical customer ID (C04570)"
+        ],
+        "historical_timestamp": "2016-08-01 00:30:41",
+        "eligibility_reason": "Historical case closed at 2016-08-01 00:30:41 on/before evaluation cutoff 2016-11-12 00:46:24; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2971",
+        "similarity_score": 0.4386,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($108.36 vs $100.09, proximity 92%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-05 19:25:00",
+        "eligibility_reason": "Historical case closed at 2016-09-05 19:25:00 on/before evaluation cutoff 2016-11-12 00:46:24; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-3035",
+        "similarity_score": 0.4065,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($140.95 vs $100.09, proximity 71%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-09 22:44:00",
+        "eligibility_reason": "Historical case closed at 2016-09-09 22:44:00 on/before evaluation cutoff 2016-11-12 00:46:24; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($100.09) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.072,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-018",
+    "opened_at": "2016-11-27 14:41:26",
+    "trigger_type": "customer_report",
+    "trigger_text": "Customer C02354 message: 'I never made this $39.08 purchase. Please check my card.' Refers to 3491361.",
+    "flagged_txn_id": "3491361",
+    "card_id": "C02354-K2",
+    "customer_id": "C02354",
+    "risk_score": null,
+    "exposure_usd": 39.08,
+    "initial_p_fraud": 0.9897,
+    "final_p_fraud": 0.9958,
+    "final_classification": "fraud",
+    "evidence_steps": 3,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "BLOCK_CARD",
+    "primary_action": "BLOCK_CARD",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "CREATE_CASE"
+    ],
+    "policy_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      }
+    ],
+    "approval_route": "L1",
+    "policy_reason": "R2: Customer reported/denied transaction.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 25.76,
+          "QUERY_CARD_SEQUENCE": 25.71,
+          "QUERY_TXN_VELOCITY": 25.64,
+          "QUERY_REGION_ANALYSIS": 25.3
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=1.0, log_lr=0.0): Device  shows clean single-card profile; no multi-card ring observed.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 2,
+        "selected_action": "QUERY_CARD_SEQUENCE",
+        "candidate_net_decision_values": {
+          "QUERY_CARD_SEQUENCE": 25.71,
+          "QUERY_TXN_VELOCITY": 25.64,
+          "QUERY_REGION_ANALYSIS": 25.3
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9897,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CARD_TESTING_SEQUENCE (LR=1.0, log_lr=0.0): No micro-authorization card testing sequence observed within 24h window.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 3,
+        "selected_action": "QUERY_TXN_VELOCITY",
+        "candidate_net_decision_values": {
+          "QUERY_TXN_VELOCITY": 25.64,
+          "QUERY_REGION_ANALYSIS": 25.3
+        },
+        "belief_before": 0.9897,
+        "belief_after": 0.9958,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "HIGH_VELOCITY (LR=2.5, log_lr=0.916): High transaction velocity: 42 transactions totaling $6603.09 within 24h.",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-018-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C02354 message: 'I never made this $39.08 purchase. Please check my card.' Refers to 3491361.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-16191F84",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-32F270E4",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-CFDBA6CB",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 2.5,
+        "log_lr": 0.916,
+        "finding": "High transaction velocity: 42 transactions totaling $6603.09 within 24h.",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-0255",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C02354-K2)",
+          "Identical customer ID (C02354)"
+        ],
+        "historical_timestamp": "2016-07-12 18:09:53",
+        "eligibility_reason": "Historical case closed at 2016-07-12 18:09:53 on/before evaluation cutoff 2016-11-27 14:41:26; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-0405",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C02354-K2)",
+          "Identical customer ID (C02354)"
+        ],
+        "historical_timestamp": "2016-07-14 22:45:36",
+        "eligibility_reason": "Historical case closed at 2016-07-14 22:45:36 on/before evaluation cutoff 2016-11-27 14:41:26; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-0454",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C02354-K2)",
+          "Identical customer ID (C02354)"
+        ],
+        "historical_timestamp": "2016-07-18 04:11:34",
+        "eligibility_reason": "Historical case closed at 2016-07-18 04:11:34 on/before evaluation cutoff 2016-11-27 14:41:26; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R5",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Card testing sequence requires mandatory transaction decline under L1 authorization review.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R2",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Direct cardholder denial mandates card block and investigation under Regulation E.",
+        "applicable_statute_or_rule": "Rule R2"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($39.08) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-CARDTESTING",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-REGE",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.94,
+        "match_rationale": "Customer reported unauthorized debit triggering Regulation E error resolution statutory protections.",
+        "applicable_statute_or_rule": "12 CFR \u00a7\u00a7 1005.6, 1005.11"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.144,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-019",
+    "opened_at": "2016-12-01 22:28:53",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3503878 ($99.92, online) at 0.90. Review and decide.",
+    "flagged_txn_id": "3503878",
+    "card_id": "C07987-K2",
+    "customer_id": "C07987",
+    "risk_score": 0.9,
+    "exposure_usd": 99.92,
+    "initial_p_fraud": 0.9724,
+    "final_p_fraud": 0.9724,
+    "final_classification": "fraud",
+    "evidence_steps": 5,
+    "evidence_coverage": 0.2,
+    "decision_gate_passed": false,
+    "decision_state": "INSUFFICIENT_EVIDENCE",
+    "termination_reason": "MAX_STEPS_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "approval_route": "auto",
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 66.16,
+          "QUERY_CARD_SEQUENCE": 66.05,
+          "QUERY_TXN_VELOCITY": 65.85,
+          "QUERY_REGION_ANALYSIS": 64.95,
+          "VERIFY_WITH_CUSTOMER": 45.73
+        },
+        "belief_before": 0.9724,
+        "belief_after": 0.9724,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=1.0, log_lr=0.0): Device DEV_7649fe80460a shows clean single-card profile; no multi-card ring observed.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 2,
+        "selected_action": "QUERY_CARD_SEQUENCE",
+        "candidate_net_decision_values": {
+          "QUERY_CARD_SEQUENCE": 66.05,
+          "QUERY_TXN_VELOCITY": 65.85,
+          "QUERY_REGION_ANALYSIS": 64.95,
+          "VERIFY_WITH_CUSTOMER": 45.73
+        },
+        "belief_before": 0.9724,
+        "belief_after": 0.9724,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CARD_TESTING_SEQUENCE (LR=1.0, log_lr=0.0): No micro-authorization card testing sequence observed within 24h window.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 3,
+        "selected_action": "QUERY_TXN_VELOCITY",
+        "candidate_net_decision_values": {
+          "QUERY_TXN_VELOCITY": 65.85,
+          "QUERY_REGION_ANALYSIS": 64.95,
+          "VERIFY_WITH_CUSTOMER": 45.73
+        },
+        "belief_before": 0.9724,
+        "belief_after": 0.9724,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "HIGH_VELOCITY (LR=1.0, log_lr=0.0): Transaction velocity within normal bounds (1 transactions within 24h window).",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 4,
+        "selected_action": "QUERY_REGION_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_REGION_ANALYSIS": 64.95,
+          "VERIFY_WITH_CUSTOMER": 45.73
+        },
+        "belief_before": 0.9724,
+        "belief_after": 0.9724,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "OUT_OF_REGION (LR=1.0, log_lr=0.0): Transaction billing region matches customer historical profile.",
+        "termination_check": "CONTINUE",
+        "termination_reason": null
+      },
+      {
+        "iteration": 5,
+        "selected_action": "VERIFY_WITH_CUSTOMER",
+        "candidate_net_decision_values": {
+          "VERIFY_WITH_CUSTOMER": 45.73
+        },
+        "belief_before": 0.9724,
+        "belief_after": 0.9724,
+        "coverage_before": 0.2,
+        "coverage_after": 0.2,
+        "evidence_observed": "CUSTOMER_COMMUNICATION_UNAVAILABLE (LR=1.0, log_lr=0.0): Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "MAX_STEPS_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-019-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 6.8,
+        "log_lr": 1.917,
+        "finding": "Real-time fraud risk score: 0.90",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-F849443D",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device DEV_7649fe80460a shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-C3A7313F",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-FDD2AF61",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (1 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-10E7D0A6",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-89CD7C2E",
+        "evidence_type": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "source": "gateway:simulate_customer_reply",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-2860",
+        "similarity_score": 0.6,
+        "matching_features": [
+          "Identical card ID (C07987-K2)",
+          "Identical customer ID (C07987)",
+          "Comparable dollar exposure ($149.92 vs $99.92, proximity 67%)"
+        ],
+        "historical_timestamp": "2016-09-02 14:34:41",
+        "eligibility_reason": "Historical case closed at 2016-09-02 14:34:41 on/before evaluation cutoff 2016-12-01 22:28:53; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2011",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C07987-K2)",
+          "Identical customer ID (C07987)"
+        ],
+        "historical_timestamp": "2016-08-17 22:59:36",
+        "eligibility_reason": "Historical case closed at 2016-08-17 22:59:36 on/before evaluation cutoff 2016-12-01 22:28:53; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2087",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C07987-K2)",
+          "Identical customer ID (C07987)"
+        ],
+        "historical_timestamp": "2016-08-16 18:38:57",
+        "eligibility_reason": "Historical case closed at 2016-08-16 18:38:57 on/before evaluation cutoff 2016-12-01 22:28:53; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R5",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Card testing sequence requires mandatory transaction decline under L1 authorization review.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($99.92) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-CARDTESTING",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
+        "applicable_statute_or_rule": "Rule R5"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R9",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.94,
+        "match_rationale": "High assessed fraud probability on undocumented pattern requires case creation and L2 reporting under Rule R9.",
+        "applicable_statute_or_rule": "Rule R9"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R4",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.92,
+        "match_rationale": "Out-of-region card-present transaction requires transaction decline and customer verification under Rule R4.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-OUT-OF-REGION",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.9,
+        "match_rationale": "Observed OUT_OF_REGION evidence indicates geographic displacement without registered travel profile.",
+        "applicable_statute_or_rule": "Rule R4"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.1796,
+    "investigation_status": "COMPLETED",
+    "error": null
+  },
+  {
+    "case_id": "HHG-020",
+    "opened_at": "2016-12-03 12:04:26",
+    "trigger_type": "risk_score",
+    "trigger_text": "Real-time model scored transaction 3509359 ($125.08, online) at 0.52. Review and decide.",
+    "flagged_txn_id": "3509359",
+    "card_id": "C12265-K2",
+    "customer_id": "C12265",
+    "risk_score": 0.52,
+    "exposure_usd": 125.08,
+    "initial_p_fraud": 0.8149,
+    "final_p_fraud": 0.9843,
+    "final_classification": "fraud",
+    "evidence_steps": 1,
+    "evidence_coverage": 0.4,
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "termination_reason": "DECISION_REACHED",
+    "next_best_action": "CREATE_CASE",
+    "primary_action": "CREATE_CASE",
+    "secondary_actions": [],
+    "consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "policy_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "approval_route": "auto",
+    "policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "iteration_traces": [
+      {
+        "iteration": 1,
+        "selected_action": "QUERY_DEVICE_ANALYSIS",
+        "candidate_net_decision_values": {
+          "QUERY_DEVICE_ANALYSIS": 63.83,
+          "QUERY_CARD_SEQUENCE": 63.21,
+          "QUERY_TXN_VELOCITY": 62.06,
+          "QUERY_REGION_ANALYSIS": 54.07,
+          "VERIFY_WITH_CUSTOMER": 44.86
+        },
+        "belief_before": 0.8149,
+        "belief_after": 0.9843,
+        "coverage_before": 0.2,
+        "coverage_after": 0.4,
+        "evidence_observed": "SHARED_DEVICE_RING (LR=14.2, log_lr=2.653): Device DEV_2355cad97cd1 is shared across 9 distinct cards in graph ring (proxy=False).",
+        "termination_check": "TERMINATE",
+        "termination_reason": "DECISION_REACHED"
+      }
+    ],
+    "evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-020-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 0.85,
+        "log_lr": -0.163,
+        "finding": "Real-time fraud risk score: 0.52",
+        "source": "bank_detection_model",
+        "is_exculpatory": true
+      },
+      {
+        "evidence_id": "EVD-CC391854",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_2355cad97cd1 is shared across 9 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "retrieved_precedents": [
+      {
+        "case_id": "CC-2277",
+        "similarity_score": 0.5983,
+        "matching_features": [
+          "Identical card ID (C12265-K2)",
+          "Identical customer ID (C12265)",
+          "Comparable dollar exposure ($81.93 vs $125.08, proximity 66%)"
+        ],
+        "historical_timestamp": "2016-08-22 16:23:30",
+        "eligibility_reason": "Historical case closed at 2016-08-22 16:23:30 on/before evaluation cutoff 2016-12-03 12:04:26; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-2447",
+        "similarity_score": 0.5,
+        "matching_features": [
+          "Identical card ID (C12265-K2)",
+          "Identical customer ID (C12265)"
+        ],
+        "historical_timestamp": "2016-08-26 16:40:17",
+        "eligibility_reason": "Historical case closed at 2016-08-26 16:40:17 on/before evaluation cutoff 2016-12-03 12:04:26; matched on 2 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      },
+      {
+        "case_id": "CC-3035",
+        "similarity_score": 0.4331,
+        "matching_features": [
+          "Matching fraud typology pattern ('undocumented')",
+          "Comparable dollar exposure ($140.95 vs $125.08, proximity 89%)",
+          "Shared device infrastructure / multi-card ring topology"
+        ],
+        "historical_timestamp": "2016-09-09 22:44:00",
+        "eligibility_reason": "Historical case closed at 2016-09-09 22:44:00 on/before evaluation cutoff 2016-12-03 12:04:26; matched on 3 active scoring dimensions.",
+        "role": "CONTEXTUAL_PRECEDENT_ONLY"
+      }
+    ],
+    "retrieved_knowledge": [
+      {
+        "chunk_id": "KNOW-POLICY-R6",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.98,
+        "match_rationale": "Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-REG-FINCEN-SAR",
+        "category": "REGULATORY_STATUTE",
+        "relevance_score": 0.96,
+        "match_rationale": "Exposure ($125.08) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
+        "applicable_statute_or_rule": "31 CFR \u00a7 1020.320"
+      },
+      {
+        "chunk_id": "KNOW-TYPO-SHARED-DEVICE",
+        "category": "FRAUD_TYPOLOGY",
+        "relevance_score": 0.95,
+        "match_rationale": "Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
+        "applicable_statute_or_rule": "Rule R6"
+      },
+      {
+        "chunk_id": "KNOW-POLICY-R10",
+        "category": "POLICY_RULE",
+        "relevance_score": 0.8,
+        "match_rationale": "General bank disposition thresholds and calibrated belief gating governance.",
+        "applicable_statute_or_rule": "Rule R10"
+      }
+    ],
+    "duration_sec": 0.0751,
+    "investigation_status": "COMPLETED",
+    "error": null
+  }
+]

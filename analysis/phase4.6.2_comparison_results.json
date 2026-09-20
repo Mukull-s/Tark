@@ -1,0 +1,2045 @@
+[
+  {
+    "case_id": "HHG-001",
+    "trigger_type": "risk_score",
+    "risk_score": 0.61,
+    "exposure_usd": 77.07,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9256,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_p_fraud": 0.9256,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_nba_match": true,
+    "val_steps": 5,
+    "val_coverage": 0.2,
+    "val_gate_passed": false,
+    "val_termination": "MAX_STEPS_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 9,
+    "val_policy_reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "approval_route": "auto",
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-001-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 2.4,
+        "log_lr": 0.875,
+        "finding": "Real-time fraud risk score: 0.61",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-913D2BAB",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-68434AF7",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-BD953F9D",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (4 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-06A7DBAD",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-072AA7CF",
+        "evidence_type": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "source": "gateway:simulate_customer_reply",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9256,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "CLOSE_NO_FRAUD",
+    "base_nba_match": false,
+    "base_steps": 4,
+    "base_coverage": 0.2,
+    "base_gate_passed": false,
+    "base_termination": "NEGATIVE_EVOI",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 7
+  },
+  {
+    "case_id": "HHG-002",
+    "trigger_type": "risk_score",
+    "risk_score": 0.79,
+    "exposure_usd": 292.36,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9256,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_p_fraud": 0.9256,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_nba_match": true,
+    "val_steps": 5,
+    "val_coverage": 0.2,
+    "val_gate_passed": false,
+    "val_termination": "MAX_STEPS_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 9,
+    "val_policy_reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "approval_route": "auto",
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-002-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 2.4,
+        "log_lr": 0.875,
+        "finding": "Real-time fraud risk score: 0.79",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-49D12110",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-22424A25",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-2D310B82",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (1 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-AC18099E",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-3367DF4F",
+        "evidence_type": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "source": "gateway:simulate_customer_reply",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9256,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "CLOSE_NO_FRAUD",
+    "base_nba_match": false,
+    "base_steps": 4,
+    "base_coverage": 0.2,
+    "base_gate_passed": false,
+    "base_termination": "NEGATIVE_EVOI",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 7
+  },
+  {
+    "case_id": "HHG-003",
+    "trigger_type": "customer_report",
+    "risk_score": null,
+    "exposure_usd": 49.0,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9897,
+    "gt_primary_action": "BLOCK_CARD",
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "val_p_fraud": 0.9897,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "BLOCK_CARD",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "CREATE_CASE"
+    ],
+    "val_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "val_nba_match": true,
+    "val_steps": 4,
+    "val_coverage": 0.2,
+    "val_gate_passed": false,
+    "val_termination": "NO_ADMISSIBLE_EVIDENCE",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 10,
+    "val_policy_reason": "R2: Customer reported/denied transaction.",
+    "val_action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-003-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 3530164.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-A9590C12",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-5362EB9D",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-8CDED557",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (6 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-90244E98",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9897,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 3,
+    "base_coverage": 0.2,
+    "base_gate_passed": false,
+    "base_termination": "NEGATIVE_EVOI",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 8
+  },
+  {
+    "case_id": "HHG-004",
+    "trigger_type": "customer_report",
+    "risk_score": null,
+    "exposure_usd": 128.33,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9897,
+    "gt_primary_action": "BLOCK_CARD",
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "val_p_fraud": 0.9897,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "BLOCK_CARD",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "CREATE_CASE"
+    ],
+    "val_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "val_nba_match": true,
+    "val_steps": 4,
+    "val_coverage": 0.2,
+    "val_gate_passed": false,
+    "val_termination": "NO_ADMISSIBLE_EVIDENCE",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 10,
+    "val_policy_reason": "R2: Customer reported/denied transaction.",
+    "val_action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-004-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C08106 message: 'I never made this $128.33 purchase. Please check my card.' Refers to 3583227.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-1BA455BB",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device DEV_c83a1f7b195c shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-F7CF5DE8",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-87CD8781",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (1 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-AAEBECE2",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9897,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 3,
+    "base_coverage": 0.2,
+    "base_gate_passed": false,
+    "base_termination": "NEGATIVE_EVOI",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 8
+  },
+  {
+    "case_id": "HHG-005",
+    "trigger_type": "risk_score",
+    "risk_score": 0.54,
+    "exposure_usd": 100.07,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9843,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.9843,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_nba_match": true,
+    "val_steps": 1,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 4,
+    "val_policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-005-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 0.85,
+        "log_lr": -0.163,
+        "finding": "Real-time fraud risk score: 0.54",
+        "source": "bank_detection_model",
+        "is_exculpatory": true
+      },
+      {
+        "evidence_id": "EVD-F27E73CB",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_af548b01f1ec is shared across 4 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9843,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 2,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 6
+  },
+  {
+    "case_id": "HHG-006",
+    "trigger_type": "customer_report",
+    "risk_score": null,
+    "exposure_usd": 482.12,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9993,
+    "gt_primary_action": "BLOCK_CARD",
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.9993,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "BLOCK_CARD",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_nba_match": true,
+    "val_steps": 1,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 6,
+    "val_policy_reason": "R2: Customer reported/denied transaction.",
+    "val_action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring).",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Shared device or infrastructure links to other cards.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-006-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C07297 message: 'I never made this $482.12 purchase. Please check my card.' Refers to 3476682.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-B80FF54C",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_1e3c32210a00 is shared across 9 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9993,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 2,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 8
+  },
+  {
+    "case_id": "HHG-007",
+    "trigger_type": "risk_score",
+    "risk_score": 0.87,
+    "exposure_usd": 111.92,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9824,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_p_fraud": 0.9888,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_nba_match": true,
+    "val_steps": 3,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 7,
+    "val_policy_reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "approval_route": "auto",
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-007-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 6.8,
+        "log_lr": 1.917,
+        "finding": "Real-time fraud risk score: 0.87",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-5FA4A77E",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-03EA6391",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-3DCDE0D8",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 2.5,
+        "log_lr": 0.916,
+        "finding": "High transaction velocity: 18 transactions totaling $8653.93 within 24h.",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9888,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 3,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 6
+  },
+  {
+    "case_id": "HHG-008",
+    "trigger_type": "customer_report",
+    "risk_score": null,
+    "exposure_usd": 55.68,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9993,
+    "gt_primary_action": "BLOCK_CARD",
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.9993,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "BLOCK_CARD",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_nba_match": true,
+    "val_steps": 1,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 6,
+    "val_policy_reason": "R2: Customer reported/denied transaction.",
+    "val_action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring).",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Shared device or infrastructure links to other cards.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-008-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C13171 message: 'I never made this $55.68 purchase. Please check my card.' Refers to 3558054.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-12573A73",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_1e60de19dac9 is shared across 4 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9993,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 2,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 8
+  },
+  {
+    "case_id": "HHG-009",
+    "trigger_type": "customer_report",
+    "risk_score": null,
+    "exposure_usd": 30.02,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9998,
+    "gt_primary_action": "BLOCK_CARD",
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.9973,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "BLOCK_CARD",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "CREATE_CASE"
+    ],
+    "val_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "val_nba_match": true,
+    "val_steps": 1,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 4,
+    "val_policy_reason": "R2: Customer reported/denied transaction.",
+    "val_action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-009-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C08299 message: 'I never made this $30.02 purchase. Please check my card.' Refers to 3581141.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-446BB425",
+        "evidence_type": "PROXY_DETECTED",
+        "lr": 3.8,
+        "log_lr": 1.335,
+        "finding": "Device DEV_e40cd9c2bbcd proxy connection detected in graph.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9973,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 2,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 6
+  },
+  {
+    "case_id": "HHG-010",
+    "trigger_type": "risk_score",
+    "risk_score": 0.9,
+    "exposure_usd": 1000.03,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.998,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.998,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_nba_match": true,
+    "val_steps": 1,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 4,
+    "val_policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-010-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 6.8,
+        "log_lr": 1.917,
+        "finding": "Real-time fraud risk score: 0.90",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-8BE651AC",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_1a67ac84a467 is shared across 9 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.998,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 2,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 6
+  },
+  {
+    "case_id": "HHG-011",
+    "trigger_type": "customer_report",
+    "risk_score": null,
+    "exposure_usd": 131.3,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9998,
+    "gt_primary_action": "DECLINE_TRANSACTION",
+    "gt_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "val_p_fraud": 0.9997,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "DECLINE_TRANSACTION",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "BLOCK_CARD"
+    ],
+    "val_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "val_nba_match": true,
+    "val_steps": 2,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 8,
+    "val_policy_reason": "R5: Card testing sequence detected (micro-authorizations followed by purchase).",
+    "val_action_recommendations": [
+      {
+        "action": "DECLINE_TRANSACTION",
+        "approval_route": "L1",
+        "reason": "R5: Card testing sequence detected (micro-authorizations followed by purchase).",
+        "role": "PRIMARY",
+        "scope": "TRANSACTION"
+      },
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R5: Card testing sequence cleared a charge over $100.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-011-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C11923 message: 'I never made this $131.30 purchase. Please check my card.' Refers to 3583368.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-89EA4961",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device DEV_d339a8c89ee2 shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-114FFE6C",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 34.3,
+        "log_lr": 3.535,
+        "finding": "Card testing sequence observed: 3 micro-authorizations totaling $0.00.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9897,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": true,
+    "base_steps": 3,
+    "base_coverage": 0.2,
+    "base_gate_passed": false,
+    "base_termination": "NEGATIVE_EVOI",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 8
+  },
+  {
+    "case_id": "HHG-012",
+    "trigger_type": "risk_score",
+    "risk_score": 0.55,
+    "exposure_usd": 30.91,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.8149,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_p_fraud": 0.815,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_nba_match": true,
+    "val_steps": 4,
+    "val_coverage": 0.2,
+    "val_gate_passed": false,
+    "val_termination": "NEGATIVE_EVOI",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 9,
+    "val_policy_reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "approval_route": "auto",
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-012-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 0.85,
+        "log_lr": -0.163,
+        "finding": "Real-time fraud risk score: 0.55",
+        "source": "bank_detection_model",
+        "is_exculpatory": true
+      },
+      {
+        "evidence_id": "EVD-47261BAF",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-4DE86E5C",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-D55407B8",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (5 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-7EAE0300",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.815,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 3,
+    "base_coverage": 0.2,
+    "base_gate_passed": false,
+    "base_termination": "NEGATIVE_EVOI",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 6
+  },
+  {
+    "case_id": "HHG-013",
+    "trigger_type": "risk_score",
+    "risk_score": 0.76,
+    "exposure_usd": 35.66,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9964,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.9944,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_nba_match": true,
+    "val_steps": 1,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 4,
+    "val_policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-013-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 2.4,
+        "log_lr": 0.875,
+        "finding": "Real-time fraud risk score: 0.76",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-CA9E9F47",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_4895b33f375c is shared across 7 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9944,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 2,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 6
+  },
+  {
+    "case_id": "HHG-014",
+    "trigger_type": "analyst_request",
+    "risk_score": null,
+    "exposure_usd": 74.96,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9964,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.9866,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_nba_match": true,
+    "val_steps": 5,
+    "val_coverage": 0.2,
+    "val_gate_passed": false,
+    "val_termination": "MAX_STEPS_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 8,
+    "val_policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-4C0D1E40",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_c5a193fe0d03 is shared across 52 distinct cards in graph ring (proxy=True).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-D70EA0BB",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-BFD1A7E0",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (3 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-33D514DC",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-D1649EE8",
+        "evidence_type": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "source": "gateway:simulate_customer_reply",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.8383,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "BLOCK_CARD",
+    "base_nba_match": false,
+    "base_steps": 0,
+    "base_coverage": 0.0,
+    "base_gate_passed": false,
+    "base_termination": "NEGATIVE_EVOI",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 1
+  },
+  {
+    "case_id": "HHG-015",
+    "trigger_type": "risk_score",
+    "risk_score": 0.77,
+    "exposure_usd": 599.94,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9944,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.9944,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_nba_match": true,
+    "val_steps": 1,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 4,
+    "val_policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-015-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 2.4,
+        "log_lr": 0.875,
+        "finding": "Real-time fraud risk score: 0.77",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-61B5A6C7",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_9528e7f99855 is shared across 3 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9944,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 2,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 6
+  },
+  {
+    "case_id": "HHG-016",
+    "trigger_type": "customer_report",
+    "risk_score": null,
+    "exposure_usd": 59.67,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9993,
+    "gt_primary_action": "BLOCK_CARD",
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.9993,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "BLOCK_CARD",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_nba_match": true,
+    "val_steps": 1,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 6,
+    "val_policy_reason": "R2: Customer reported/denied transaction.",
+    "val_action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring).",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Shared device or infrastructure links to other cards.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-016-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C09988 message: 'I never made this $59.67 purchase. Please check my card.' Refers to 3534820.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-975B9F0D",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_db08695bc376 is shared across 4 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9993,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 2,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 8
+  },
+  {
+    "case_id": "HHG-017",
+    "trigger_type": "risk_score",
+    "risk_score": 0.57,
+    "exposure_usd": 100.09,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9843,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.9843,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_nba_match": true,
+    "val_steps": 1,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 4,
+    "val_policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-017-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 0.85,
+        "log_lr": -0.163,
+        "finding": "Real-time fraud risk score: 0.57",
+        "source": "bank_detection_model",
+        "is_exculpatory": true
+      },
+      {
+        "evidence_id": "EVD-4415E51E",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_c37b877bcc5f is shared across 6 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9843,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 2,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 6
+  },
+  {
+    "case_id": "HHG-018",
+    "trigger_type": "customer_report",
+    "risk_score": null,
+    "exposure_usd": 39.08,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9934,
+    "gt_primary_action": "BLOCK_CARD",
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "val_p_fraud": 0.9958,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "BLOCK_CARD",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "CREATE_CASE"
+    ],
+    "val_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "val_nba_match": true,
+    "val_steps": 3,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 8,
+    "val_policy_reason": "R2: Customer reported/denied transaction.",
+    "val_action_recommendations": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-018-TRIGGER",
+        "evidence_type": "CUSTOMER_DENIAL",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "finding": "Cardholder initiated report: 'Customer C02354 message: 'I never made this $39.08 purchase. Please check my card.' Refers to 3491361.'",
+        "source": "customer_report_trigger",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-16191F84",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device  shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-32F270E4",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-CFDBA6CB",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 2.5,
+        "log_lr": 0.916,
+        "finding": "High transaction velocity: 42 transactions totaling $6603.09 within 24h.",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9897,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 3,
+    "base_coverage": 0.2,
+    "base_gate_passed": false,
+    "base_termination": "NEGATIVE_EVOI",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 8
+  },
+  {
+    "case_id": "HHG-019",
+    "trigger_type": "risk_score",
+    "risk_score": 0.9,
+    "exposure_usd": 99.92,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9724,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_p_fraud": 0.9724,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "val_nba_match": true,
+    "val_steps": 5,
+    "val_coverage": 0.2,
+    "val_gate_passed": false,
+    "val_termination": "MAX_STEPS_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 9,
+    "val_policy_reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "ESCALATE_TO_ANALYST",
+        "approval_route": "auto",
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-019-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 6.8,
+        "log_lr": 1.917,
+        "finding": "Real-time fraud risk score: 0.90",
+        "source": "bank_detection_model",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-F849443D",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Device DEV_7649fe80460a shows clean single-card profile; no multi-card ring observed.",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-C3A7313F",
+        "evidence_type": "CARD_TESTING_SEQUENCE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "No micro-authorization card testing sequence observed within 24h window.",
+        "source": "tigergraph_query:card_sequence",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-FDD2AF61",
+        "evidence_type": "HIGH_VELOCITY",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction velocity within normal bounds (1 transactions within 24h window).",
+        "source": "tigergraph_query:txn_velocity",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-10E7D0A6",
+        "evidence_type": "OUT_OF_REGION",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Transaction billing region matches customer historical profile.",
+        "source": "tigergraph_query:region_analysis",
+        "is_exculpatory": false
+      },
+      {
+        "evidence_id": "EVD-89CD7C2E",
+        "evidence_type": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "finding": "Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+        "source": "gateway:simulate_customer_reply",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9724,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "CLOSE_NO_FRAUD",
+    "base_nba_match": false,
+    "base_steps": 4,
+    "base_coverage": 0.2,
+    "base_gate_passed": false,
+    "base_termination": "NEGATIVE_EVOI",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 7
+  },
+  {
+    "case_id": "HHG-020",
+    "trigger_type": "risk_score",
+    "risk_score": 0.52,
+    "exposure_usd": 125.08,
+    "gt_verdict": "fraud",
+    "gt_p_fraud": 0.9843,
+    "gt_primary_action": "CREATE_CASE",
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_p_fraud": 0.9843,
+    "val_verdict": "fraud",
+    "val_verdict_match": true,
+    "val_primary_action": "CREATE_CASE",
+    "val_secondary_actions": [],
+    "val_consequential_actions": [
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "val_nba_match": true,
+    "val_steps": 1,
+    "val_coverage": 0.4,
+    "val_gate_passed": true,
+    "val_termination": "DECISION_REACHED",
+    "val_precedents_count": 3,
+    "val_knowledge_count": 4,
+    "val_policy_reason": "R6: Coordinated fraud ring detected across shared device/region.",
+    "val_action_recommendations": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
+      }
+    ],
+    "val_evidence_items": [
+      {
+        "evidence_id": "EVD-HHG-020-TRIGGER",
+        "evidence_type": "CALIBRATED_RISK_SCORE",
+        "lr": 0.85,
+        "log_lr": -0.163,
+        "finding": "Real-time fraud risk score: 0.52",
+        "source": "bank_detection_model",
+        "is_exculpatory": true
+      },
+      {
+        "evidence_id": "EVD-CC391854",
+        "evidence_type": "SHARED_DEVICE_RING",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "finding": "Device DEV_2355cad97cd1 is shared across 9 distinct cards in graph ring (proxy=False).",
+        "source": "tigergraph_query:device_analysis",
+        "is_exculpatory": false
+      }
+    ],
+    "base_p_fraud": 0.9843,
+    "base_verdict": "fraud",
+    "base_verdict_match": true,
+    "base_primary_action": "DECLINE_TRANSACTION",
+    "base_nba_match": false,
+    "base_steps": 2,
+    "base_coverage": 0.4,
+    "base_gate_passed": true,
+    "base_termination": "DECISION_REACHED",
+    "base_precedents_count": 3,
+    "base_knowledge_count": 6
+  }
+]
