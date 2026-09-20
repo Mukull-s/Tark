@@ -45,8 +45,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-WORKSPACE_ROOT = r"c:\Users\Mukul\Desktop\Tark"
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+WORKSPACE_ROOT = os.environ.get("WORKSPACE_ROOT", BASE_DIR)
 CSV_PATH = os.path.join(WORKSPACE_ROOT, "case_pack.csv")
+CASES_DIR = os.environ.get("CASES_DIR", os.path.join(WORKSPACE_ROOT, "cases"))
 WEB_DIST_DIR = os.path.join(WORKSPACE_ROOT, "web", "dist")
 
 # State & Global Authorities
@@ -81,16 +83,88 @@ def load_cases_from_csv() -> List[Dict[str, Any]]:
     df = pd.read_csv(CSV_PATH)
     cases = []
     for _, row in df.iterrows():
+        cid = str(row["case_id"])
+        t_type = str(row["trigger_type"])
+        t_text = str(row["trigger_text"])
         r_score = float(row["risk_score"]) if pd.notna(row.get("risk_score")) else None
+
+        # Parse amount from trigger_text
+        amount = 100.00
+        match = re.search(r'\$([0-9,]+\.[0-9]{2})', t_text)
+        if match:
+            try:
+                amount = float(match.group(1).replace(",", ""))
+            except Exception:
+                pass
+
+        # Check for pre-generated case output in cases/
+        json_path = os.path.join(CASES_DIR, f"{cid}.json")
+        mock_path = os.path.join(CASES_DIR, f"{cid}.mock.json")
+        target_path = json_path if os.path.exists(json_path) else (mock_path if os.path.exists(mock_path) else None)
+
+        verdict = "fraud" if (r_score and r_score >= 0.70) or t_type == "customer_report" else "uncertain"
+        pattern = "card_not_present_fraud"
+        exposure_usd = amount
+        fraud_probability = r_score or 0.85
+        sar_filed = True if verdict == "fraud" else False
+        actions = ["BLOCK_CARD", "CREATE_CASE"]
+        status = "Investigating"
+
+        if target_path and os.path.exists(target_path):
+            try:
+                with open(target_path, "r", encoding="utf-8") as fp:
+                    data = json.load(fp)
+                    c_inner = data.get("case", {})
+                    verdict = c_inner.get("verdict", verdict)
+                    pattern = c_inner.get("pattern", pattern)
+                    exposure_usd = c_inner.get("exposure_usd", exposure_usd)
+                    fraud_probability = c_inner.get("fraud_probability", fraud_probability)
+                    
+                    if "sar" in data and isinstance(data["sar"], dict):
+                        sar_filed = data["sar"].get("file", sar_filed)
+                    
+                    nba_final = data.get("next_best_actions", {}).get("final", [])
+                    if nba_final:
+                        actions = [a.get("action", "") for a in nba_final if isinstance(a, dict)]
+
+                    c_status = c_inner.get("status", "")
+                    if c_status in ["closed", "closed_fraud", "closed_legitimate"]:
+                        status = "Resolved"
+                    elif verdict == "uncertain":
+                        status = "Review"
+                    else:
+                        status = "Investigating"
+            except Exception:
+                pass
+
+        if fraud_probability >= 0.75 or (r_score and r_score >= 0.75):
+            risk_level = "HIGH"
+        elif fraud_probability >= 0.40 or (r_score and r_score >= 0.40):
+            risk_level = "MEDIUM"
+        else:
+            risk_level = "LOW"
+
         cases.append({
-            "case_id": str(row["case_id"]),
+            "id": cid,
+            "case_id": cid,
             "opened_at": str(row["opened_at"]),
-            "trigger_type": str(row["trigger_type"]),
-            "trigger_text": str(row["trigger_text"]),
+            "trigger_type": t_type,
+            "trigger": "Customer Report" if t_type == "customer_report" else ("Analyst Request" if t_type == "analyst_request" else "Risk Score"),
+            "trigger_text": t_text,
             "flagged_txn_id": str(row["flagged_txn_id"]),
             "card_id": str(row["card_id"]),
             "customer_id": str(row["customer_id"]),
             "risk_score": r_score,
+            "fraud_probability": fraud_probability,
+            "amount": exposure_usd or amount,
+            "exposure_usd": exposure_usd or amount,
+            "risk": risk_level,
+            "risk_level": risk_level,
+            "status": status,
+            "pattern": pattern.replace("_", " ").title() if pattern else "Suspicious Activity",
+            "actions": actions,
+            "last_action": actions[0] if actions else "MONITOR_CARD",
+            "sar_filed": sar_filed
         })
     return cases
 
@@ -116,8 +190,7 @@ def get_health():
 
 @app.get("/api/cases")
 def list_cases():
-    cases = load_cases_from_csv()
-    return cases
+    return load_cases_from_csv()
 
 
 @app.get("/api/cases/{case_id}")
@@ -1109,6 +1182,15 @@ if os.path.exists(WEB_DIST_DIR):
             return FileResponse(file_path)
         return FileResponse(os.path.join(WEB_DIST_DIR, "index.html"))
 
+<<<<<<< HEAD
+=======
+@app.get("/", response_class=HTMLResponse)
+def serve_dashboard():
+    if os.path.exists(WEB_INDEX):
+        with open(WEB_INDEX, "r", encoding="utf-8") as f:
+            return f.read()
+    return "<h1>Tark Backend API Online</h1>"
+>>>>>>> 628be1b (feat(frontend): enterprise case management table, 3-area investigation workspace, and live API integration)
 
 if __name__ == "__main__":
     import uvicorn

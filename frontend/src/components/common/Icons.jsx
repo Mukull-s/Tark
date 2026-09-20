@@ -40,6 +40,15 @@ import DollarSign from 'lucide-react/dist/esm/icons/dollar-sign.mjs';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle.mjs';
 import SkipBack from 'lucide-react/dist/esm/icons/skip-back.mjs';
 import SkipForward from 'lucide-react/dist/esm/icons/skip-forward.mjs';
+import Filter from 'lucide-react/dist/esm/icons/filter.mjs';
+import CreditCard from 'lucide-react/dist/esm/icons/credit-card.mjs';
+import Smartphone from 'lucide-react/dist/esm/icons/smartphone.mjs';
+import User from 'lucide-react/dist/esm/icons/user.mjs';
+import ExternalLink from 'lucide-react/dist/esm/icons/external-link.mjs';
+import SlidersHorizontal from 'lucide-react/dist/esm/icons/sliders-horizontal.mjs';
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw.mjs';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right.mjs';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle.mjs';
 
 export {
   Shield,
@@ -83,5 +92,14 @@ export {
   DollarSign,
   AlertCircle,
   SkipBack,
-  SkipForward
+  SkipForward,
+  Filter,
+  CreditCard,
+  Smartphone,
+  User,
+  ExternalLink,
+  SlidersHorizontal,
+  RefreshCw,
+  ChevronRight,
+  CheckCircle
 };

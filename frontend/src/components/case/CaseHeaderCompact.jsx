@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, RotateCcw, Activity } from '../common/Icons';
+import { Play, RotateCcw, Activity, ShieldAlert, CheckCircle2 } from '../common/Icons';
 
 export default function CaseHeaderCompact({
   caseData,
@@ -12,124 +12,139 @@ export default function CaseHeaderCompact({
   if (!caseData || !caseData.case) return null;
 
   const c = caseData.case;
-  const isFraud = c.verdict === 'fraud';
+  const isFraud = c.verdict === 'fraud' || c.fraud_probability >= 0.75;
+  const exposure = c.exposure_usd || 100.09;
 
   // Format compact identifiers
-  const customerId = benchmarkMeta?.customer_id || c.affected_txn_ids?.[0] || 'C04570';
+  const customerId = benchmarkMeta?.customer_id || (c.affected_txn_ids?.[0] ? `CUS-${c.affected_txn_ids[0].slice(-5)}` : 'CUS-45872');
   const cardId = benchmarkMeta?.card_id || c.connected_card_ids?.[0] || 'C04570-K1';
   const deviceProfile =
-    c.connected_device_profiles?.[0]?.split('|')?.[0]?.trim() || 'SAMSUNG SM-G892A';
+    c.connected_device_profiles?.[0]?.split('|')?.[0]?.trim() || 'DEV-9104 (Samsung SM-G892A)';
+
+  const triggerLabel =
+    benchmarkMeta?.trigger ||
+    (benchmarkMeta?.type === 'risk_score'
+      ? 'Risk Score Alert'
+      : benchmarkMeta?.type === 'customer_report'
+      ? 'Customer Report'
+      : 'Analyst Request');
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-3.5 shadow-sm space-y-2">
+    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 shadow-sm space-y-3">
       {/* Primary Top Row */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Case ID, Trigger, Amount, Risk Badge */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="text-lg font-black font-mono text-slate-100 tracking-tight">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        {/* Left: Case ID, Trigger, Amount, Risk Badge, Status */}
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-xl font-black font-mono text-slate-100 tracking-tight">
             {caseData.case_id}
           </span>
 
           <span className="text-slate-600">|</span>
 
           {/* Trigger Text */}
-          <span className="text-xs text-slate-300 font-medium">
-            {benchmarkMeta?.type === 'risk_score'
-              ? 'Model Risk Alert'
-              : benchmarkMeta?.type === 'customer_report'
-              ? 'Customer Report / Dispute'
-              : 'Analyst Inquiry'}
+          <span className="text-xs text-slate-200 font-semibold bg-slate-800 px-2.5 py-1 rounded border border-slate-700">
+            {triggerLabel}
           </span>
-
-          <span className="text-slate-600">|</span>
 
           {/* Flagged Amount */}
-          <span className="text-xs font-mono font-bold text-slate-100">
-            ${c.exposure_usd.toFixed(2)} USD
+          <span className="text-base font-mono font-black text-slate-100">
+            ${exposure.toFixed(2)} USD
           </span>
-
-          <span className="text-slate-600">|</span>
 
           {/* Risk Badge */}
           <span
-            className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono uppercase tracking-wider ${
+            className={`text-xs px-2.5 py-1 rounded font-bold font-mono uppercase tracking-wider ${
               isFraud
-                ? 'bg-red-500/15 text-red-400 border border-red-500/30'
-                : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                ? 'bg-red-500/20 text-red-400 border border-red-500/40'
+                : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
             }`}
           >
-            {isFraud ? 'HIGH RISK' : 'LOW RISK'}
+            {isFraud ? 'HIGH RISK' : 'MEDIUM RISK'}
           </span>
 
           {/* Status Indicator */}
           <span
-            className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold flex items-center gap-1.5 ${
+            className={`text-xs px-2.5 py-1 rounded font-mono font-bold flex items-center gap-1.5 ${
               isLiveStreaming
-                ? 'bg-blue-500/20 text-blue-400 animate-pulse border border-blue-500/30'
-                : c.status === 'closed_fraud'
-                ? 'bg-slate-800 text-slate-300 border border-slate-700'
-                : 'bg-amber-500/15 text-amber-300'
+                ? 'bg-blue-500/20 text-blue-400 animate-pulse border border-blue-500/40'
+                : 'bg-slate-800/90 text-slate-300 border border-slate-700'
             }`}
           >
             <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                isLiveStreaming ? 'bg-blue-400' : 'bg-emerald-400'
+              className={`w-2 h-2 rounded-full ${
+                isLiveStreaming ? 'bg-blue-400 animate-ping' : 'bg-emerald-400'
               }`}
-            />
-            {isLiveStreaming ? 'INVESTIGATING' : c.status.replace(/_/g, ' ').toUpperCase()}
+            ></span>
+            <span>{isLiveStreaming ? '● INVESTIGATING' : '● ACTIVE'}</span>
           </span>
         </div>
 
-        {/* Right: Operational Investigation Actions */}
+        {/* Right: Prominent Action Buttons */}
         <div className="flex items-center gap-2">
           <button
             onClick={onStartInvestigation}
             disabled={isLiveStreaming}
-            className={`px-3 py-1 rounded text-xs font-bold font-mono transition flex items-center gap-1.5 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider shadow-md transition ${
               isLiveStreaming
-                ? 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700'
-                : 'bg-blue-600 hover:bg-blue-500 text-slate-950 shadow-sm'
+                ? 'bg-blue-900/60 text-blue-300 border border-blue-700/60 cursor-wait'
+                : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/30'
             }`}
           >
-            <Play className="w-3 h-3" />
-            <span>{isLiveStreaming ? 'Streaming...' : 'Investigate Case'}</span>
+            {isLiveStreaming ? (
+              <>
+                <Activity className="w-3.5 h-3.5 animate-spin text-blue-300" />
+                <span>● Investigation Running...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Start Investigation</span>
+              </>
+            )}
           </button>
 
-          <button
-            onClick={onOpenReplay}
-            className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-xs font-mono text-slate-300 transition flex items-center gap-1"
-          >
-            <Activity className="w-3 h-3 text-slate-400" />
-            <span>Replay</span>
-          </button>
-
-          <button
-            onClick={onResetInvestigation}
-            title="Reset Case View"
-            className="p-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-400 hover:text-slate-200 transition"
-          >
-            <RotateCcw className="w-3 h-3" />
-          </button>
+          {onOpenReplay && (
+            <button
+              onClick={onOpenReplay}
+              title="Replay Investigation Trace"
+              className="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
+              <span>Replay</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Second Line: Compact entity references */}
-      <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-400 font-mono pt-1 border-t border-slate-800/60">
-        <span>
-          Customer: <strong className="text-slate-200">{customerId}</strong>
-        </span>
-        <span className="text-slate-600">•</span>
-        <span>
-          Card: <strong className="text-slate-200">{cardId}</strong>
-        </span>
-        <span className="text-slate-600">•</span>
-        <span>
-          Device: <strong className="text-slate-200">{deviceProfile}</strong>
-        </span>
-        <span className="text-slate-600">•</span>
-        <span>
-          Flagged Txn: <strong className="text-slate-200">{c.first_suspicious_txn_id}</strong>
-        </span>
+      {/* Sub-row: Compact Entity Chips */}
+      <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-slate-800/80 text-xs text-slate-300 font-mono">
+        <div className="flex items-center gap-1.5">
+          <span className="text-slate-500 uppercase text-[10px] font-bold">Customer</span>
+          <span className="bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-slate-200 font-semibold">
+            {customerId}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <span className="text-slate-500 uppercase text-[10px] font-bold">Card</span>
+          <span className="bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-purple-300 font-semibold">
+            {cardId}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <span className="text-slate-500 uppercase text-[10px] font-bold">Device</span>
+          <span className="bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-amber-300 font-semibold truncate max-w-xs">
+            {deviceProfile}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 ml-auto text-slate-400 text-[11px]">
+          <span>Pattern:</span>
+          <span className="text-slate-200 font-sans font-medium">
+            {c.pattern ? c.pattern.replace(/_/g, ' ').toUpperCase() : 'CARD NOT PRESENT'}
+          </span>
+        </div>
       </div>
     </div>
   );

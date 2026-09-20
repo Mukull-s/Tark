@@ -1,95 +1,108 @@
 import React from 'react';
-import { Shield, Database, Cpu, Lock, Play, RotateCcw, Wifi, WifiOff } from 'lucide-react';
-import { ApiConfig } from '../../services/api';
+import {
+  Shield,
+  Search,
+  Database,
+  Activity,
+  CheckCircle2,
+  Wifi,
+  WifiOff,
+  User,
+  Settings
+} from '../common/Icons';
 
 export default function Header({
-  isLiveStreaming,
-  onStartInvestigation,
-  onResetInvestigation,
-  isMockMode,
-  onToggleMockMode
+  searchTerm = '',
+  onSearchChange,
+  isMockMode = false,
+  onToggleMockMode,
+  selectedCaseId,
+  isLiveStreaming = false
 }) {
   return (
-    <header className="border-b border-slate-800 bg-slate-950/95 backdrop-blur px-6 py-3 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-40">
-      {/* Brand & System Title */}
-      <div className="flex items-center gap-3.5">
-        <div className="p-2 bg-blue-600/15 text-blue-400 border border-blue-500/30 rounded-lg shadow-inner">
-          <Shield className="w-5 h-5" />
+    <header className="h-14 border-b border-slate-800 bg-slate-950 px-5 flex items-center justify-between gap-6 shrink-0 z-40 select-none">
+      {/* LEFT: TARK Brand */}
+      <div className="flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 rounded bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center font-black">
+          <Shield className="w-4 h-4" />
         </div>
-        <div>
+        <div className="leading-tight">
           <div className="flex items-center gap-2">
-            <h1 className="text-sm font-black tracking-widest uppercase bg-gradient-to-r from-blue-400 via-indigo-200 to-purple-400 bg-clip-text text-transparent">
+            <span className="text-sm font-black tracking-wider text-slate-100 uppercase font-mono">
               TARK
-            </h1>
-            <span className="text-[10px] bg-blue-950/80 text-blue-300 font-mono font-bold px-2 py-0.5 rounded border border-blue-800/60">
-              ANALYST WORKSTATION
+            </span>
+            <span className="text-[10px] bg-slate-800 text-slate-300 font-mono font-semibold px-1.5 py-0.2 rounded border border-slate-700">
+              v1.0
             </span>
           </div>
-          <p className="text-[10px] text-slate-400 tracking-wider uppercase font-mono">
-            TigerGraph Savanna • Agentic Fraud Investigation • HHGOA
+          <p className="text-[11px] text-slate-400 font-medium">
+            Fraud Investigation Workstation
           </p>
         </div>
       </div>
 
-      {/* Engine & Telemetry Badges */}
-      <div className="flex flex-wrap items-center gap-2.5 text-xs">
-        {/* TigerGraph Engine Status */}
-        <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-md">
-          <Database className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="text-slate-400 font-medium">TigerGraph:</span>
-          <span className="text-emerald-400 font-mono font-bold text-[11px]">SAVANNA (GSQL)</span>
+      {/* CENTER: Global Search */}
+      <div className="flex-1 max-w-xl">
+        <div className="relative flex items-center">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+            placeholder="Search cases, customers, cards, transactions... (e.g. HHG-017, C04570)"
+            className="w-full bg-slate-900 border border-slate-800 rounded-md pl-9 pr-14 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition font-sans"
+          />
+          <kbd className="absolute right-2.5 px-1.5 py-0.5 text-[10px] font-mono bg-slate-800 border border-slate-700 text-slate-400 rounded">
+            ⌘K
+          </kbd>
         </div>
+      </div>
 
-        {/* LangGraph Agent Engine */}
-        <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-md">
-          <Cpu className="w-3.5 h-3.5 text-purple-400" />
-          <span className="text-slate-400 font-medium">Agent:</span>
-          <span className="text-purple-400 font-mono font-bold text-[11px]">LANGGRAPH STATE</span>
-        </div>
-
-        {/* Policy Firewall Routing */}
-        <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-md">
-          <Lock className="w-3.5 h-3.5 text-amber-400" />
-          <span className="text-slate-400 font-medium">Policy Firewall:</span>
-          <span className="text-amber-400 font-mono font-bold text-[11px]">DETERMINISTIC L1/L2</span>
-        </div>
-
-        {/* Mode Toggle (Live Backend vs Mock Offline) */}
+      {/* RIGHT: Telemetry & Analyst Profile */}
+      <div className="flex items-center gap-4 text-xs shrink-0">
+        {/* API Connection Indicator */}
         <button
           onClick={onToggleMockMode}
-          title="Toggle between Live FastAPI Backend and Offline Mock Fixtures"
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-semibold transition ${
-            isMockMode
-              ? 'bg-amber-950/40 border-amber-800/80 text-amber-300 hover:bg-amber-900/50'
-              : 'bg-emerald-950/40 border-emerald-800/80 text-emerald-300 hover:bg-emerald-900/50'
-          }`}
+          title="Click to toggle between Live Backend and Offline Mock Fixtures"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 transition"
         >
-          {isMockMode ? <WifiOff className="w-3.5 h-3.5 text-amber-400" /> : <Wifi className="w-3.5 h-3.5 text-emerald-400" />}
-          <span>{isMockMode ? 'MOCK MODE' : 'LIVE API (:8000)'}</span>
+          {isMockMode ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span className="text-[11px] font-mono text-amber-300">MOCK DATA</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="text-[11px] font-mono text-emerald-300">API CONNECTED (:8000)</span>
+            </>
+          )}
         </button>
 
-        {/* Investigation Stream Trigger */}
-        <div className="flex items-center gap-1.5 ml-1">
-          <button
-            onClick={onStartInvestigation}
-            disabled={isLiveStreaming}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md font-bold text-xs shadow transition ${
-              isLiveStreaming
-                ? 'bg-blue-900/50 text-blue-300 border border-blue-700/50 cursor-wait animate-pulse'
-                : 'bg-blue-600 hover:bg-blue-500 text-slate-950'
-            }`}
-          >
-            <Play className="w-3.5 h-3.5" />
-            <span>{isLiveStreaming ? 'INVESTIGATING...' : 'RUN INVESTIGATION'}</span>
-          </button>
+        {/* TigerGraph Savanna Status */}
+        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">
+          <Database className="w-3.5 h-3.5 text-blue-400" />
+          <span className="text-[11px] font-mono text-slate-300">Savanna GSQL</span>
+          <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1 rounded">24ms</span>
+        </div>
 
-          <button
-            onClick={onResetInvestigation}
-            title="Reset Timeline & Stream"
-            className="p-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md text-slate-400 hover:text-slate-200 transition"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
+        {/* Active Case Badge */}
+        {selectedCaseId && (
+          <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded bg-blue-950/60 border border-blue-800/80 text-blue-300 font-mono text-[11px]">
+            <Activity className={`w-3 h-3 ${isLiveStreaming ? 'animate-spin text-blue-400' : ''}`} />
+            <span>CASE: {selectedCaseId}</span>
+          </div>
+        )}
+
+        {/* Analyst Profile */}
+        <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
+          <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-semibold text-xs">
+            <User className="w-3.5 h-3.5" />
+          </div>
+          <div className="leading-none text-left hidden lg:block">
+            <div className="text-[11px] font-semibold text-slate-200">Person 3</div>
+            <div className="text-[9px] font-mono text-slate-400">Lead Investigator</div>
+          </div>
         </div>
       </div>
     </header>
