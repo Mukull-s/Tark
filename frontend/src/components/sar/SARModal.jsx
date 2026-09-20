@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { FileBadge, X, Copy, Check } from '../common/Icons';
 
 export default function SARModal({ isOpen, onClose, sar }) {
