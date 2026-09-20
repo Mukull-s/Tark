@@ -1,0 +1,499 @@
+[
+  {
+    "case_id": "HHG-001",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.9256,
+    "gt_p_fraud": 0.9256,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "CLOSE_NO_FRAUD",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "CLOSE_NO_FRAUD"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "tark_steps": 4,
+    "tark_coverage": 0.2,
+    "gate_passed": false,
+    "termination": "NEGATIVE_EVOI"
+  },
+  {
+    "case_id": "HHG-002",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.9256,
+    "gt_p_fraud": 0.9256,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "CLOSE_NO_FRAUD",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "CLOSE_NO_FRAUD"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "tark_steps": 4,
+    "tark_coverage": 0.2,
+    "gate_passed": false,
+    "termination": "NEGATIVE_EVOI"
+  },
+  {
+    "case_id": "HHG-003",
+    "trigger_type": "customer_report",
+    "tark_p_fraud": 0.9897,
+    "gt_p_fraud": 0.9897,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "BLOCK_CARD",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "STEP_UP_AUTH"
+    ],
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "tark_steps": 3,
+    "tark_coverage": 0.2,
+    "gate_passed": false,
+    "termination": "NEGATIVE_EVOI"
+  },
+  {
+    "case_id": "HHG-004",
+    "trigger_type": "customer_report",
+    "tark_p_fraud": 0.9897,
+    "gt_p_fraud": 0.9897,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "BLOCK_CARD",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "tark_steps": 3,
+    "tark_coverage": 0.2,
+    "gate_passed": false,
+    "termination": "NEGATIVE_EVOI"
+  },
+  {
+    "case_id": "HHG-005",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.9843,
+    "gt_p_fraud": 0.9843,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 2,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  },
+  {
+    "case_id": "HHG-006",
+    "trigger_type": "customer_report",
+    "tark_p_fraud": 0.9993,
+    "gt_p_fraud": 0.9993,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "BLOCK_CARD",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 2,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  },
+  {
+    "case_id": "HHG-007",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.9888,
+    "gt_p_fraud": 0.9824,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "tark_steps": 3,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  },
+  {
+    "case_id": "HHG-008",
+    "trigger_type": "customer_report",
+    "tark_p_fraud": 0.9993,
+    "gt_p_fraud": 0.9993,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "BLOCK_CARD",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "STEP_UP_AUTH"
+    ],
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 2,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  },
+  {
+    "case_id": "HHG-009",
+    "trigger_type": "customer_report",
+    "tark_p_fraud": 0.9973,
+    "gt_p_fraud": 0.9998,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "BLOCK_CARD",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "STEP_UP_AUTH"
+    ],
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 2,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  },
+  {
+    "case_id": "HHG-010",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.998,
+    "gt_p_fraud": 0.998,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 2,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  },
+  {
+    "case_id": "HHG-011",
+    "trigger_type": "customer_report",
+    "tark_p_fraud": 0.9897,
+    "gt_p_fraud": 0.9998,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "DECLINE_TRANSACTION",
+    "action_match": true,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "gt_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "tark_steps": 3,
+    "tark_coverage": 0.2,
+    "gate_passed": false,
+    "termination": "NEGATIVE_EVOI"
+  },
+  {
+    "case_id": "HHG-012",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.815,
+    "gt_p_fraud": 0.8149,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "STEP_UP_AUTH"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "tark_steps": 3,
+    "tark_coverage": 0.2,
+    "gate_passed": false,
+    "termination": "NEGATIVE_EVOI"
+  },
+  {
+    "case_id": "HHG-013",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.9944,
+    "gt_p_fraud": 0.9964,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "STEP_UP_AUTH"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 2,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  },
+  {
+    "case_id": "HHG-014",
+    "trigger_type": "analyst_request",
+    "tark_p_fraud": 0.8383,
+    "gt_p_fraud": 0.9964,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "BLOCK_CARD",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 0,
+    "tark_coverage": 0.0,
+    "gate_passed": false,
+    "termination": "NEGATIVE_EVOI"
+  },
+  {
+    "case_id": "HHG-015",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.9944,
+    "gt_p_fraud": 0.9944,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 2,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  },
+  {
+    "case_id": "HHG-016",
+    "trigger_type": "customer_report",
+    "tark_p_fraud": 0.9993,
+    "gt_p_fraud": 0.9993,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "BLOCK_CARD",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "STEP_UP_AUTH"
+    ],
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 2,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  },
+  {
+    "case_id": "HHG-017",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.9843,
+    "gt_p_fraud": 0.9843,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 2,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  },
+  {
+    "case_id": "HHG-018",
+    "trigger_type": "customer_report",
+    "tark_p_fraud": 0.9897,
+    "gt_p_fraud": 0.9934,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "BLOCK_CARD",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "STEP_UP_AUTH"
+    ],
+    "gt_all_actions": [
+      "BLOCK_CARD",
+      "CREATE_CASE"
+    ],
+    "tark_steps": 3,
+    "tark_coverage": 0.2,
+    "gate_passed": false,
+    "termination": "NEGATIVE_EVOI"
+  },
+  {
+    "case_id": "HHG-019",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.9724,
+    "gt_p_fraud": 0.9724,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "CLOSE_NO_FRAUD",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "CLOSE_NO_FRAUD"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "ESCALATE_TO_ANALYST"
+    ],
+    "tark_steps": 4,
+    "tark_coverage": 0.2,
+    "gate_passed": false,
+    "termination": "NEGATIVE_EVOI"
+  },
+  {
+    "case_id": "HHG-020",
+    "trigger_type": "risk_score",
+    "tark_p_fraud": 0.9843,
+    "gt_p_fraud": 0.9843,
+    "tark_verdict": "fraud",
+    "gt_verdict": "fraud",
+    "verdict_match": true,
+    "tark_primary_action": "DECLINE_TRANSACTION",
+    "gt_primary_action": "CREATE_CASE",
+    "action_match": false,
+    "tark_all_actions": [
+      "DECLINE_TRANSACTION",
+      "BLOCK_CARD"
+    ],
+    "gt_all_actions": [
+      "CREATE_CASE",
+      "FILE_REPORT",
+      "MONITOR_CONNECTED_CARDS"
+    ],
+    "tark_steps": 2,
+    "tark_coverage": 0.4,
+    "gate_passed": true,
+    "termination": "DECISION_REACHED"
+  }
+]
