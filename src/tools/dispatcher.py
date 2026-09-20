@@ -138,6 +138,16 @@ class EvidenceToolDispatcher:
             params["cust_id"] = state.target_entities["customer_id"]
         if "txn_addr1" not in params and state.trigger.get("txn_addr1"):
             params["txn_addr1"] = state.trigger["txn_addr1"]
+        txn_ts = (
+            state.trigger.get("timestamp")
+            or state.trigger.get("ts")
+            or state.target_entities.get("timestamp")
+            or state.target_entities.get("ts")
+        )
+        if "anchor_ts" not in params and txn_ts:
+            params["anchor_ts"] = txn_ts
+        if "target_ts" not in params and txn_ts:
+            params["target_ts"] = txn_ts
 
         # Baseline metrics before execution
         belief_before = state.belief_state.get("fraud_probability", 0.5)
