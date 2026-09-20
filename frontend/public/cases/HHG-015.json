@@ -1,0 +1,144 @@
+{
+  "case_id": "HHG-015",
+  "case": {
+    "status": "closed",
+    "verdict": "confirmed_fraud",
+    "fraud_probability": 0.9944,
+    "pattern": "card_not_present_fraud_new_device",
+    "evidence": [
+      {
+        "type": "CALIBRATED_RISK_SCORE",
+        "source": "bank_detection_model",
+        "finding": "Model risk score 0.77",
+        "lr": 2.4,
+        "log_lr": 0.875,
+        "exculpatory": false
+      },
+      {
+        "type": "BEHAVIORAL_BASELINE",
+        "source": "customer_profile",
+        "finding": "Customer baseline: 79 historical txns, avg $144.57, primary channel online",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "exculpatory": false
+      },
+      {
+        "type": "SHARED_DEVICE_RING",
+        "source": "device_analysis",
+        "finding": "Device DEV_9528e7f99855 (Trident/7.0) is shared across 3 distinct cards",
+        "lr": 14.2,
+        "log_lr": 2.653,
+        "exculpatory": false
+      }
+    ],
+    "affected_txn_ids": [
+      "3464869"
+    ],
+    "connected_card_ids": [
+      "C02354-K2",
+      "C07987-K2",
+      "C03042-K1"
+    ],
+    "exposure_usd": 599.94,
+    "similar_prior_cases": [],
+    "written_to_graph": true,
+    "graph_case_id": "INV-HHG-015"
+  },
+  "evidence_requests": [
+    {
+      "type": "VERIFY_WITH_CUSTOMER",
+      "prompt": "Did you authorize this transaction?",
+      "status": "UNAVAILABLE",
+      "response": "Customer verification challenge timed out; no out-of-band response received via SMS/Email gateway.",
+      "provenance": "external_gateway_timeout"
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region."
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring."
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring."
+      }
+    ],
+    "final": [
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R6: Coordinated fraud ring detected across shared device/region."
+      },
+      {
+        "action": "FILE_REPORT",
+        "approval_route": "L2",
+        "reason": "R6: Suspicious activity report filing for syndicate fraud ring."
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "approval_route": "auto",
+        "reason": "R6: Place all connected cards on elevated monitoring."
+      }
+    ],
+    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+  },
+  "sar": {
+    "file": true,
+    "narrative": "### SUSPICIOUS ACTIVITY REPORT (SAR) NARRATIVE\n**1. SUMMARY OF SUSPICIOUS ACTIVITY:**\nDuring internal fraud monitoring, anomalous activity exceeding regulatory thresholds was identified. Multiple unauthorized authorizations were flagged and escalated for formal investigation.\n\n**2. IDENTITY & ACCOUNT INFORMATION:**\nThe transaction activity involves cardholder account records identified in case record.\n\n**3. METHOD OF OPERATION:**\nThe observed modus operandi aligns with coordinated card-not-present exploitation and identity manipulation. Technical indicators confirm high-velocity unauthorized access.\n\n**4. LAW ENFORCEMENT ACTIONABLE DETAILS:**\nAssociated device identifiers, IP indicators, and transaction records have been secured in the graph database for regulatory audit and law enforcement referral.\n\n**5. DISPOSITION & MITIGATION:**\nThe compromised card has been permanently blocked, relevant connected entities placed under elevated monitoring, and this suspicious activity filing completed under policy rule R2/R6."
+  },
+  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "tool_calls": [
+    {
+      "tool": "customer_profile",
+      "params": {
+        "cust_id": "C03042"
+      }
+    },
+    {
+      "tool": "txn_velocity",
+      "params": {
+        "c_id": "C03042-K1",
+        "target_ts": "2016-11-17 14:03:36",
+        "window_hours": 24
+      }
+    },
+    {
+      "tool": "device_analysis",
+      "params": {
+        "t_id": "3464869"
+      }
+    },
+    {
+      "tool": "card_sequence",
+      "params": {
+        "c_id": "C03042-K1",
+        "anchor_ts": "2016-11-17 14:03:36",
+        "window_hours": 24
+      }
+    },
+    {
+      "tool": "region_analysis",
+      "params": {
+        "cust_id": "C03042",
+        "txn_addr1": 327.0
+      }
+    },
+    {
+      "tool": "similar_cases",
+      "params": {
+        "target_pattern": "card_not_present_fraud_new_device",
+        "c_id": "C03042-K1"
+      }
+    }
+  ],
+  "tokens": 1210,
+  "latency_s": 5.48
+}

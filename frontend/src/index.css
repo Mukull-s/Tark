@@ -1,31 +1,57 @@
-/* Tark Fraud Workstation Base Styles */
+@import "tailwindcss";
+
+:root {
+  --bg-pitch: #050505;
+  --card-bg: #0F0F0F;
+  --border-color: #222222;
+  --text-primary: #FFFFFF;
+  --text-muted: #777777;
+}
+
 body {
-  background-color: #020617;
-  color: #f8fafc;
+  background-color: #050505 !important;
+  color: #FFFFFF !important;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
-code, pre, .font-mono {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+.font-space {
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 
-/* Custom Workstation Scrollbars */
+.font-mono {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Keyframes for crimson link flow pulse */
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.animate-dash {
+  stroke-dasharray: 6 6;
+  animation: dash 1.5s linear infinite;
+}
+
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: #050505;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 3px;
+  background: #222222;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #333333;
 }

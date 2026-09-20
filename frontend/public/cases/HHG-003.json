@@ -1,0 +1,118 @@
+{
+  "case_id": "HHG-003",
+  "case": {
+    "status": "closed",
+    "verdict": "confirmed_fraud",
+    "fraud_probability": 0.9897,
+    "pattern": "card_not_present_fraud",
+    "evidence": [
+      {
+        "type": "CUSTOMER_DENIAL",
+        "source": "customer_report_trigger",
+        "finding": "Cardholder initiated report: 'Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 3530164.'",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "exculpatory": false
+      },
+      {
+        "type": "BEHAVIORAL_BASELINE",
+        "source": "customer_profile",
+        "finding": "Customer baseline: 1140 historical txns, avg $129.36, primary channel in_person",
+        "lr": 1.0,
+        "log_lr": 0.0,
+        "exculpatory": false
+      }
+    ],
+    "affected_txn_ids": [
+      "3530164"
+    ],
+    "connected_card_ids": [],
+    "exposure_usd": 49.0,
+    "similar_prior_cases": [
+      "CC-0054",
+      "CC-0942",
+      "CC-0740"
+    ],
+    "written_to_graph": true,
+    "graph_case_id": "INV-HHG-003"
+  },
+  "evidence_requests": [],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction."
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial."
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction."
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial."
+      }
+    ],
+    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+  },
+  "sar": {
+    "file": false,
+    "narrative": null
+  },
+  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "tool_calls": [
+    {
+      "tool": "customer_profile",
+      "params": {
+        "cust_id": "C08623"
+      }
+    },
+    {
+      "tool": "txn_velocity",
+      "params": {
+        "c_id": "C08623-K2",
+        "target_ts": "2016-12-10 13:01:21",
+        "window_hours": 24
+      }
+    },
+    {
+      "tool": "device_analysis",
+      "params": {
+        "t_id": "3530164"
+      }
+    },
+    {
+      "tool": "card_sequence",
+      "params": {
+        "c_id": "C08623-K2",
+        "anchor_ts": "2016-12-10 13:01:21",
+        "window_hours": 24
+      }
+    },
+    {
+      "tool": "region_analysis",
+      "params": {
+        "cust_id": "C08623",
+        "txn_addr1": 330.0
+      }
+    },
+    {
+      "tool": "similar_cases",
+      "params": {
+        "target_pattern": "card_not_present_fraud",
+        "c_id": "C08623-K2"
+      }
+    }
+  ],
+  "tokens": 1090,
+  "latency_s": 1.25
+}
