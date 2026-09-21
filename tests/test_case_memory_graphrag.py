@@ -211,6 +211,14 @@ def test_policy_retrieval_provenance(belief_engine, graphrag_retriever):
     assert r5.chunk.section_reference == "Policy Manual § 4.5 (Rule R5)"
     assert r5.chunk.governing_body == "Bank Risk Governance"
     assert "DECLINE_TRANSACTION" in r5.chunk.text
+    
+    # Audit provenance fields (MODIFICATION 4)
+    assert r5.source_id == "KNOW-POLICY-R5"
+    assert r5.source_type == "POLICY_RULE"
+    assert r5.source_text == r5.chunk.text
+    assert "Bank Risk Governance" in r5.source_location
+    assert r5.relevance >= 0.90
+    assert r5.retrieval_path != ""
 
 
 # ==============================================================================

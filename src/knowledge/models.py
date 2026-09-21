@@ -36,3 +36,24 @@ class RetrievedKnowledgeItem(BaseModel):
     relevance_score: float = Field(ge=0.0, le=1.0, description="GraphRAG relevance affinity [0.0 - 1.0]")
     match_rationale: str = Field(description="Explicit explanation of why this rule or statute applies to current graph evidence")
     applicable_statute_or_rule: str = Field(description="Primary rule/statute code")
+    
+    # Audit provenance fields (MODIFICATION 4)
+    source_id: str = Field(default="", description="Unique identifier of source document or chunk")
+    source_type: str = Field(default="POLICY_RULE", description="Document taxonomy type (POLICY_RULE, FRAUD_TYPOLOGY, REGULATORY_STATUTE)")
+    source_text: str = Field(default="", description="Verbatim source passage")
+    source_location: str = Field(default="", description="Statutory or manual section reference")
+    retrieval_path: str = Field(default="", description="Multi-hop traversal path from empirical evidence to policy node")
+    relevance: float = Field(default=0.0, description="Relevance affinity [0.0 - 1.0]")
+
+    def model_post_init(self, __context):
+        if not self.source_id and self.chunk:
+            self.source_id = self.chunk.chunk_id
+        if not self.source_type and self.chunk:
+            self.source_type = self.chunk.category.value if hasattr(self.chunk.category, "value") else str(self.chunk.category)
+        if not self.source_text and self.chunk:
+            self.source_text = self.chunk.text
+        if not self.source_location and self.chunk:
+            self.source_location = f"{self.chunk.governing_body} § {self.chunk.section_reference}"
+        if not self.relevance:
+            self.relevance = self.relevance_score
+

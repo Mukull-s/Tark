@@ -55,7 +55,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.95,
                     match_rationale="Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.",
-                    applicable_statute_or_rule="Rule R5"
+                    applicable_statute_or_rule="Rule R5",
+                    retrieval_path="GraphEvidence -> CARD_TESTING_SEQUENCE -> Typology:CardTesting"
                 )
 
         if EvidenceType.SHARED_DEVICE_RING in evidence_types or EvidenceType.PROXY_DETECTED in evidence_types:
@@ -65,7 +66,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.95,
                     match_rationale="Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.",
-                    applicable_statute_or_rule="Rule R6"
+                    applicable_statute_or_rule="Rule R6",
+                    retrieval_path="GraphEvidence -> SHARED_DEVICE_RING -> Typology:DeviceSyndicate"
                 )
 
         if EvidenceType.OUT_OF_REGION in evidence_types:
@@ -75,7 +77,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.90,
                     match_rationale="Observed OUT_OF_REGION evidence indicates geographic displacement without registered travel profile.",
-                    applicable_statute_or_rule="Rule R4"
+                    applicable_statute_or_rule="Rule R4",
+                    retrieval_path="GraphEvidence -> OUT_OF_REGION -> Typology:GeographicDisplacement"
                 )
 
         if EvidenceType.CNP_NEW_DEVICE in evidence_types or EvidenceType.ACCOUNT_TAKEOVER in evidence_types:
@@ -85,7 +88,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.90,
                     match_rationale="Observed CNP_NEW_DEVICE indicates potential account takeover / credential stuffing signature.",
-                    applicable_statute_or_rule="Rule R2/R6"
+                    applicable_statute_or_rule="Rule R2/R6",
+                    retrieval_path="GraphEvidence -> CNP_NEW_DEVICE -> Typology:AccountTakeover"
                 )
 
         # 2. Hop: Graph Evidence -> Policy Rules (R1 - R10)
@@ -97,7 +101,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.98,
                     match_rationale="Card testing sequence requires mandatory transaction decline under L1 authorization review.",
-                    applicable_statute_or_rule="Rule R5"
+                    applicable_statute_or_rule="Rule R5",
+                    retrieval_path="GraphEvidence -> CARD_TESTING_SEQUENCE -> Policy:Rule R5"
                 )
 
         # Rule R6: Shared Device Ring
@@ -108,7 +113,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.98,
                     match_rationale="Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.",
-                    applicable_statute_or_rule="Rule R6"
+                    applicable_statute_or_rule="Rule R6",
+                    retrieval_path="GraphEvidence -> SHARED_DEVICE_RING -> Policy:Rule R6"
                 )
 
         # Rule R4: Out-of-Region Activity
@@ -119,7 +125,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.92,
                     match_rationale="Out-of-region card-present transaction requires transaction decline and customer verification under Rule R4.",
-                    applicable_statute_or_rule="Rule R4"
+                    applicable_statute_or_rule="Rule R4",
+                    retrieval_path="GraphEvidence -> OUT_OF_REGION -> Policy:Rule R4"
                 )
 
         # Rule R2: Customer Denial / Dispute
@@ -130,7 +137,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.98,
                     match_rationale="Direct cardholder denial mandates card block and investigation under Regulation E.",
-                    applicable_statute_or_rule="Rule R2"
+                    applicable_statute_or_rule="Rule R2",
+                    retrieval_path="GraphEvidence -> CUSTOMER_DENIAL -> Policy:Rule R2"
                 )
 
         # Rule R3: Customer Confirmation
@@ -141,7 +149,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.98,
                     match_rationale="Cardholder confirmation warrants immediate closure without punitive action.",
-                    applicable_statute_or_rule="Rule R3"
+                    applicable_statute_or_rule="Rule R3",
+                    retrieval_path="GraphEvidence -> CUSTOMER_CONFIRMATION -> Policy:Rule R3"
                 )
 
         # Rule R7: Recurring Charge Dispute
@@ -152,7 +161,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.95,
                     match_rationale="Disputed transaction matches verified recurring subscription cadence.",
-                    applicable_statute_or_rule="Rule R7"
+                    applicable_statute_or_rule="Rule R7",
+                    retrieval_path="GraphEvidence -> RECURRING_CHARGE_MATCH -> Policy:Rule R7"
                 )
 
         p_fraud = state.belief_state.get("fraud_probability", 0.5)
@@ -170,7 +180,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.94,
                     match_rationale="High assessed fraud probability on undocumented pattern requires case creation and L2 reporting under Rule R9.",
-                    applicable_statute_or_rule="Rule R9"
+                    applicable_statute_or_rule="Rule R9",
+                    retrieval_path="GraphEvidence -> HighBeliefUndocumented -> Policy:Rule R9"
                 )
 
         # Rule R8: Uncertain with Exposure > $500
@@ -181,7 +192,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.92,
                     match_rationale=f"Belief is unresolved ({p_fraud:.2f}) with exposure ${exposure_usd:,.2f} > $500 threshold.",
-                    applicable_statute_or_rule="Rule R8"
+                    applicable_statute_or_rule="Rule R8",
+                    retrieval_path="GraphEvidence -> HighExposureUncertain -> Policy:Rule R8"
                 )
 
         # Rule R1: Single Signal Weak Warning
@@ -192,7 +204,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.85,
                     match_rationale="Weak uncorroborated single signal; punitive blocking is restricted pending customer outreach.",
-                    applicable_statute_or_rule="Rule R1"
+                    applicable_statute_or_rule="Rule R1",
+                    retrieval_path="GraphEvidence -> SingleSignalWeak -> Policy:Rule R1"
                 )
 
         # Bidirectional Rule Mapping: Ensure any explicitly applied policy rules in actions are present
@@ -208,7 +221,8 @@ class PolicyGraphRAGRetriever:
                                 chunk=c,
                                 relevance_score=0.92,
                                 match_rationale=f"Authoritative governing rule for mandated action {a.action}: {a.reason}",
-                                applicable_statute_or_rule=f"Rule {rule_tag}"
+                                applicable_statute_or_rule=f"Rule {rule_tag}",
+                                retrieval_path=f"PolicyAction -> {a.action} -> Policy:Rule {rule_tag}"
                             )
 
         # Rule R10: General Dispositions
@@ -218,7 +232,8 @@ class PolicyGraphRAGRetriever:
                 chunk=chunk_r10,
                 relevance_score=0.80,
                 match_rationale="General bank disposition thresholds and calibrated belief gating governance.",
-                applicable_statute_or_rule="Rule R10"
+                applicable_statute_or_rule="Rule R10",
+                retrieval_path="BeliefState -> CalibratedGate -> Policy:Rule R10"
             )
 
         # 3. Hop: Actions & Exposure -> Regulatory Statutes
@@ -232,7 +247,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.96,
                     match_rationale=f"Exposure (${exposure_usd:,.2f}) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.",
-                    applicable_statute_or_rule="31 CFR § 1020.320"
+                    applicable_statute_or_rule="31 CFR § 1020.320",
+                    retrieval_path="PolicyAction / ExposureThreshold -> Regulation:31 CFR § 1020.320"
                 )
 
         # Regulation E Consumer Protection (12 CFR 1005)
@@ -243,7 +259,8 @@ class PolicyGraphRAGRetriever:
                     chunk=chunk,
                     relevance_score=0.94,
                     match_rationale="Customer reported unauthorized debit triggering Regulation E error resolution statutory protections.",
-                    applicable_statute_or_rule="12 CFR §§ 1005.6, 1005.11"
+                    applicable_statute_or_rule="12 CFR §§ 1005.6, 1005.11",
+                    retrieval_path="CustomerReport / Denial -> Regulation:12 CFR §§ 1005.6, 1005.11"
                 )
 
         # Sort by relevance descending
