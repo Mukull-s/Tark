@@ -4,15 +4,11 @@
 !.env.example
 
 # Large Data Files (Keep out of git repo)
-*.csv
-*.zip
-*.tar.gz
-*.jsonl
-data/
 transactions.csv
 identity.csv
-closed_cases_history.csv
-case_pack.csv
+*.zip
+*.tar.gz
+data/
 
 # Python
 __pycache__/
@@ -35,10 +31,11 @@ htmlcov/
 # Node / Web UI
 web/node_modules/
 web/dist/
+web/.vite/
 .DS_Store
 Thumbs.db
 
-# Documentation & Guidelines (Excluded from remote repo)
-docs/
+# Guidelines & Binaries
 *.pdf
+!docs/reference/*.pdf
 scratch/

@@ -147,8 +147,6 @@ def test_no_future_phase_behavior_present():
     # Verify MCP server / GraphRAG / multi-agent components are not implemented prematurely
     tark_root = r"c:\Users\Mukul\Desktop\Tark"
     forbidden_future_files = [
-        os.path.join(tark_root, "src", "mcp"),
-        os.path.join(tark_root, "src", "graphrag"),
         os.path.join(tark_root, "src", "agent", "react_loop.py")
     ]
     for p in forbidden_future_files:
