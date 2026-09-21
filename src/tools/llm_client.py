@@ -1,12 +1,17 @@
 import os
+import logging
 import requests
 from dotenv import load_dotenv
 
-load_dotenv(r"c:\Users\Mukul\Desktop\Tark\.env")
+logger = logging.getLogger(__name__)
+
+# Resolve .env relative to project workspace root
+_project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+load_dotenv(os.path.join(_project_root, ".env"))
 
 class LLMClient:
     def __init__(self):
-        self.api_key = os.getenv("DEEPSEEK_API_KEY")
+        self.api_key = os.getenv("MERGE_GATEWAY_API_KEY") or os.getenv("MERGE_API_KEY") or os.getenv("DEEPSEEK_API_KEY")
         self.base_url = os.getenv("LLM_BASE_URL", "https://api-gateway.merge.dev/v1")
         self.model = os.getenv("LLM_MODEL", "deepseek/deepseek-v4-flash")
 
@@ -33,7 +38,7 @@ class LLMClient:
             if content and len(content.strip()) > 0:
                 return content.strip()
         except Exception as e:
-            print(f"LLM API warning ({e}); generating regulatory fallback narrative.")
+            logger.warning("LLM API warning (%s); generating regulatory fallback narrative.", e)
 
         # Fallback FinCEN template for SAR narrative
         return f"""### SUSPICIOUS ACTIVITY REPORT (SAR) NARRATIVE

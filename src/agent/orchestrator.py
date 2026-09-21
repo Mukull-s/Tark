@@ -14,6 +14,8 @@ from src.compass.evoi import EvidenceCompass, EvidenceCompassRecommendation, Can
 from src.tools.base import ToolExecutionResult, EvidenceExecutionTrace
 from src.tools.dispatcher import EvidenceToolDispatcher
 from src.tools.llm_client import LLMClient
+from src.mcp.client import TigerGraphMCPClient
+from src.mcp.server import TigerGraphMCPServer
 from src.memory.models import SimilarCaseMatch, CaseMemoryRecord, MemoryProvenanceType
 from src.memory.store import CaseMemoryStore
 from src.memory.retriever import SimilarCaseRetriever
@@ -55,6 +57,7 @@ class InvestigationIterationTrace(BaseModel):
     # Tool execution & evidence
     dispatcher_execution_trace: Optional[EvidenceExecutionTrace] = None
     observed_evidence_summary: Optional[str] = None
+    mcp_telemetry: Optional[Dict[str, Any]] = None
     
     # State after iteration
     belief_after: float
@@ -109,6 +112,7 @@ class InvestigationOrchestrator:
         policy_engine: PolicyEngine,
         compass: EvidenceCompass,
         dispatcher: EvidenceToolDispatcher,
+        mcp_client: Optional[TigerGraphMCPClient] = None,
         llm_client: Optional[LLMClient] = None,
         case_memory: Optional[CaseMemoryStore] = None,
         graphrag: Optional[PolicyGraphRAGRetriever] = None,
@@ -120,6 +124,7 @@ class InvestigationOrchestrator:
         self.policy_engine = policy_engine
         self.compass = compass
         self.dispatcher = dispatcher
+        self.mcp_client = mcp_client or TigerGraphMCPClient(server=TigerGraphMCPServer(dispatcher=dispatcher))
         self.llm_client = llm_client
         self.case_memory = case_memory
         self.case_retriever = SimilarCaseRetriever(case_memory) if case_memory else None
@@ -214,7 +219,16 @@ class InvestigationOrchestrator:
                 admissible_ids = [c.action_id for c in unexecuted_candidates]
                 net_vals = {c.action_id: round(c.net_decision_value, 4) for c in unexecuted_candidates}
 
-                # Execute action via frozen EvidenceToolDispatcher
+                # Agent-facing protocol boundary: Record MCP execution request
+                tool_name = getattr(chosen_candidate, "tool_name", chosen_candidate.action_id)
+                self.mcp_client.call_tool(
+                    name=tool_name,
+                    arguments=chosen_candidate.parameters,
+                    context=context
+                )
+                mcp_telemetry = self.mcp_client.call_history[-1] if self.mcp_client.call_history else None
+
+                # Authoritative deterministic execution via EvidenceToolDispatcher
                 updated_state, tool_res, exec_trace = self.dispatcher.dispatch_and_update(
                     state=current_state,
                     candidate_action=chosen_candidate,
@@ -295,6 +309,7 @@ class InvestigationOrchestrator:
                     selection_rationale=getattr(chosen_candidate, "rationale", ""),
                     dispatcher_execution_trace=exec_trace,
                     observed_evidence_summary=evidence_summary,
+                    mcp_telemetry=mcp_telemetry,
                     belief_after=belief_after,
                     coverage_after=coverage_after,
                     uncertainty_after=uncertainty_after,
