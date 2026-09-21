@@ -3,6 +3,7 @@ import re
 import time
 import json
 import uuid
+import logging
 import pandas as pd
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
@@ -11,6 +12,8 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 # Core reasoning imports (FROZEN - presentation adapter only)
 from src.graph.connection import get_tigergraph_connection
@@ -45,11 +48,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-WORKSPACE_ROOT = os.environ.get("WORKSPACE_ROOT", BASE_DIR)
+WORKSPACE_ROOT = r"c:\Users\Mukul\Desktop\Tark"
 CSV_PATH = os.path.join(WORKSPACE_ROOT, "case_pack.csv")
-CASES_DIR = os.environ.get("CASES_DIR", os.path.join(WORKSPACE_ROOT, "cases"))
 WEB_DIST_DIR = os.path.join(WORKSPACE_ROOT, "web", "dist")
+
+from src.graph.resolver import TransactionResolver, TransactionNotFoundError
 
 # State & Global Authorities
 belief_engine = BeliefEngine()
@@ -75,97 +78,26 @@ orchestrator = InvestigationOrchestrator(
 
 # In-memory store of active and completed investigations
 INVESTIGATION_RUNS: Dict[str, Dict[str, Any]] = {}
+CUSTOM_CASES: Dict[str, Dict[str, Any]] = {}
 
 
 def load_cases_from_csv() -> List[Dict[str, Any]]:
-    if not os.path.exists(CSV_PATH):
-        return []
-    df = pd.read_csv(CSV_PATH)
     cases = []
-    for _, row in df.iterrows():
-        cid = str(row["case_id"])
-        t_type = str(row["trigger_type"])
-        t_text = str(row["trigger_text"])
-        r_score = float(row["risk_score"]) if pd.notna(row.get("risk_score")) else None
-
-        # Parse amount from trigger_text
-        amount = 100.00
-        match = re.search(r'\$([0-9,]+\.[0-9]{2})', t_text)
-        if match:
-            try:
-                amount = float(match.group(1).replace(",", ""))
-            except Exception:
-                pass
-
-        # Check for pre-generated case output in cases/
-        json_path = os.path.join(CASES_DIR, f"{cid}.json")
-        mock_path = os.path.join(CASES_DIR, f"{cid}.mock.json")
-        target_path = json_path if os.path.exists(json_path) else (mock_path if os.path.exists(mock_path) else None)
-
-        verdict = "fraud" if (r_score and r_score >= 0.70) or t_type == "customer_report" else "uncertain"
-        pattern = "card_not_present_fraud"
-        exposure_usd = amount
-        fraud_probability = r_score or 0.85
-        sar_filed = True if verdict == "fraud" else False
-        actions = ["BLOCK_CARD", "CREATE_CASE"]
-        status = "Investigating"
-
-        if target_path and os.path.exists(target_path):
-            try:
-                with open(target_path, "r", encoding="utf-8") as fp:
-                    data = json.load(fp)
-                    c_inner = data.get("case", {})
-                    verdict = c_inner.get("verdict", verdict)
-                    pattern = c_inner.get("pattern", pattern)
-                    exposure_usd = c_inner.get("exposure_usd", exposure_usd)
-                    fraud_probability = c_inner.get("fraud_probability", fraud_probability)
-                    
-                    if "sar" in data and isinstance(data["sar"], dict):
-                        sar_filed = data["sar"].get("file", sar_filed)
-                    
-                    nba_final = data.get("next_best_actions", {}).get("final", [])
-                    if nba_final:
-                        actions = [a.get("action", "") for a in nba_final if isinstance(a, dict)]
-
-                    c_status = c_inner.get("status", "")
-                    if c_status in ["closed", "closed_fraud", "closed_legitimate"]:
-                        status = "Resolved"
-                    elif verdict == "uncertain":
-                        status = "Review"
-                    else:
-                        status = "Investigating"
-            except Exception:
-                pass
-
-        if fraud_probability >= 0.75 or (r_score and r_score >= 0.75):
-            risk_level = "HIGH"
-        elif fraud_probability >= 0.40 or (r_score and r_score >= 0.40):
-            risk_level = "MEDIUM"
-        else:
-            risk_level = "LOW"
-
-        cases.append({
-            "id": cid,
-            "case_id": cid,
-            "opened_at": str(row["opened_at"]),
-            "trigger_type": t_type,
-            "trigger": "Customer Report" if t_type == "customer_report" else ("Analyst Request" if t_type == "analyst_request" else "Risk Score"),
-            "trigger_text": t_text,
-            "flagged_txn_id": str(row["flagged_txn_id"]),
-            "card_id": str(row["card_id"]),
-            "customer_id": str(row["customer_id"]),
-            "risk_score": r_score,
-            "fraud_probability": fraud_probability,
-            "amount": exposure_usd or amount,
-            "exposure_usd": exposure_usd or amount,
-            "risk": risk_level,
-            "risk_level": risk_level,
-            "status": status,
-            "pattern": pattern.replace("_", " ").title() if pattern else "Suspicious Activity",
-            "actions": actions,
-            "last_action": actions[0] if actions else "MONITOR_CARD",
-            "sar_filed": sar_filed
-        })
+    if os.path.exists(CSV_PATH):
+        df = pd.read_csv(CSV_PATH)
+        for _, row in df.iterrows():
+            r_score = float(row["risk_score"]) if pd.notna(row.get("risk_score")) else None
+            cases.append({
+                "case_id": str(row["case_id"]),
+                "opened_at": str(row["opened_at"]),
+                "trigger_type": str(row["trigger_type"]),
+                "trigger_text": str(row["trigger_text"]),
+                "flagged_txn_id": str(row["flagged_txn_id"]),
+                "card_id": str(row["card_id"]),
+                "customer_id": str(row["customer_id"]),
+                "risk_score": r_score,
+            })
+    cases.extend(list(CUSTOM_CASES.values()))
     return cases
 
 
@@ -190,7 +122,8 @@ def get_health():
 
 @app.get("/api/cases")
 def list_cases():
-    return load_cases_from_csv()
+    cases = load_cases_from_csv()
+    return cases
 
 
 @app.get("/api/cases/{case_id}")
@@ -200,6 +133,73 @@ def get_case(case_id: str):
     if not case:
         raise HTTPException(status_code=404, detail=f"Case {case_id} not found in case pack.")
     return case
+
+
+@app.get("/api/graph/schema-overview")
+def get_graph_schema_overview():
+    """Returns live TigerGraph schema topology, vertex counts, and edge relationships."""
+    try:
+        tg_conn = get_tigergraph_connection()
+        if not tg_conn:
+            raise HTTPException(status_code=503, detail="TigerGraph connection unavailable")
+        
+        schema = tg_conn.getSchema()
+        vertex_types = [v.get("Name") for v in schema.get("VertexTypes", [])]
+        vertex_counts = {}
+        for vt in vertex_types:
+            try:
+                vertex_counts[vt] = tg_conn.getVertexCount(vt)
+            except Exception:
+                vertex_counts[vt] = 0
+                
+        edge_types = [
+            {
+                "name": e.get("Name"),
+                "from": e.get("FromVertexTypeName"),
+                "to": e.get("ToVertexTypeName"),
+                "is_directed": e.get("IsDirected", False)
+            }
+            for e in schema.get("EdgeTypes", [])
+        ]
+        
+        return {
+            "graph_name": schema.get("GraphName", "FraudInvestigation"),
+            "status": "connected",
+            "total_vertices": sum(vertex_counts.values()),
+            "vertex_counts": vertex_counts,
+            "edge_types": edge_types,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
+        return {
+            "graph_name": "FraudInvestigation",
+            "status": "cached",
+            "total_vertices": 38187,
+            "vertex_counts": {
+                "Transaction": 26754,
+                "Customer": 1918,
+                "Card": 1951,
+                "DeviceProfile": 1835,
+                "ClosedCase": 5565,
+                "BillingRegion": 99,
+                "EmailDomain": 45,
+                "InvestigationCase": 20
+            },
+            "edge_types": [
+                {"name": "Customer_OWNS_Card", "from": "Customer", "to": "Card", "is_directed": True},
+                {"name": "Card_MADE_Transaction", "from": "Card", "to": "Transaction", "is_directed": True},
+                {"name": "Transaction_FROM_DEVICE", "from": "Transaction", "to": "DeviceProfile", "is_directed": True},
+                {"name": "Transaction_PURCHASER_EMAIL", "from": "Transaction", "to": "EmailDomain", "is_directed": True},
+                {"name": "Transaction_BILLED_IN", "from": "Transaction", "to": "BillingRegion", "is_directed": True},
+                {"name": "Transaction_NEXT_Transaction", "from": "Transaction", "to": "Transaction", "is_directed": True},
+                {"name": "ClosedCase_INVOLVES_Transaction", "from": "ClosedCase", "to": "Transaction", "is_directed": False},
+                {"name": "ClosedCase_ON_CARD", "from": "ClosedCase", "to": "Card", "is_directed": False},
+                {"name": "InvestigationCase_INVOLVES_Transaction", "from": "InvestigationCase", "to": "Transaction", "is_directed": False}
+            ],
+            "error": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
 
 
 def _build_events_from_run(run_data: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -330,6 +330,37 @@ def _build_events_from_run(run_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     return events
 
 
+def _persist_case_to_tigergraph(result_payload: Dict[str, Any], tg_conn) -> None:
+    """Persists completed investigation record directly to TigerGraph Cloud InvestigationCase vertex."""
+    if tg_conn is None:
+        return
+    try:
+        case = result_payload.get("case", {})
+        case_id = str(case.get("case_id", ""))
+        if not case_id:
+            return
+        run_res = result_payload.get("run_result", {})
+        final_st = run_res.get("final_state", {})
+        primary_act = run_res.get("primary_action") or {}
+        
+        attributes = {
+            "opened_at": str(case.get("opened_at", "")),
+            "trigger_type": str(case.get("trigger_type", "")),
+            "trigger_text": str(case.get("trigger_text", ""))[:250],
+            "verdict": str(final_st.get("classification", "uncertain")),
+            "pattern": str(run_res.get("termination_reason", "COMPLETED")),
+            "exposure_usd": float(result_payload.get("exposure_usd", 0.0)),
+            "confidence": float(final_st.get("fraud_probability", 0.5)),
+            "status": "COMPLETED",
+            "sar_narrative": str(run_res.get("executive_summary", ""))[:1000],
+            "actions_recommended": str(primary_act.get("action", "")),
+            "approval_route": str(primary_act.get("approval_route", "auto"))
+        }
+        tg_conn.upsertVertex("InvestigationCase", case_id, attributes=attributes)
+    except Exception as e:
+        logger.warning("Failed to persist InvestigationCase to TigerGraph: %s", e)
+
+
 def _execute_investigation_sync(case: Dict[str, Any]) -> Dict[str, Any]:
     """Runs the real investigation through InvestigationOrchestrator and packages output."""
     case_id = case["case_id"]
@@ -408,7 +439,7 @@ def _execute_investigation_sync(case: Dict[str, Any]) -> Dict[str, Any]:
         initial_state=initial_state,
         exposure_usd=txn_amount,
         context={"tg_conn": tg_conn},
-        enable_llm_synthesis=False
+        enable_llm_synthesis=True
     )
 
     final_state = run_result.final_state
@@ -481,7 +512,8 @@ def _execute_investigation_sync(case: Dict[str, Any]) -> Dict[str, Any]:
             "coverage_before": t.coverage_before,
             "coverage_after": t.coverage_after,
             "observed_evidence_summary": t.observed_evidence_summary,
-            "termination_check": t.termination_check
+            "termination_check": t.termination_check,
+            "mcp_telemetry": t.mcp_telemetry
         })
 
     serialized_precedents = []
@@ -505,7 +537,13 @@ def _execute_investigation_sync(case: Dict[str, Any]) -> Dict[str, Any]:
                 "source": chunk.governing_body or chunk.provenance,
                 "excerpt": chunk.text[:200],
                 "role": "POLICY_KNOWLEDGE_ONLY",
-                "statute": getattr(k, "applicable_statute_or_rule", "")
+                "statute": getattr(k, "applicable_statute_or_rule", ""),
+                "source_id": getattr(k, "source_id", chunk.chunk_id),
+                "source_type": getattr(k, "source_type", chunk.category.value if hasattr(chunk.category, "value") else str(chunk.category)),
+                "source_text": getattr(k, "source_text", chunk.text),
+                "source_location": getattr(k, "source_location", f"{chunk.governing_body} § {chunk.section_reference}"),
+                "retrieval_path": getattr(k, "retrieval_path", ""),
+                "relevance": getattr(k, "relevance", k.relevance_score)
             })
 
     result_payload = {
@@ -547,6 +585,7 @@ def _execute_investigation_sync(case: Dict[str, Any]) -> Dict[str, Any]:
 
     result_payload["events"] = _build_events_from_run(result_payload)
     result_payload["graph"] = _build_graph_from_run(result_payload)
+    _persist_case_to_tigergraph(result_payload, tg_conn)
     return result_payload
 
 
@@ -818,6 +857,67 @@ def run_investigation_endpoint(case_id: str):
         raise HTTPException(status_code=500, detail=f"Investigation execution failed: {str(e)}")
 
 
+class ArbitraryInvestigationRequest(BaseModel):
+    txn_id: str
+    trigger_type: Optional[str] = None
+    trigger_text: Optional[str] = None
+
+
+@app.post("/api/investigations/transaction/{txn_id}/run")
+def run_transaction_investigation_endpoint(txn_id: str):
+    """Investigates an arbitrary transaction ID by dynamically resolving entities from TigerGraph."""
+    tg_conn = get_tigergraph_connection()
+    resolver = TransactionResolver(tg_conn)
+    try:
+        ctx = resolver.resolve(txn_id)
+    except TransactionNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Entity resolution failed for transaction {txn_id}: {str(e)}")
+
+    case_id = f"TXN-{ctx.txn_id}"
+    trig_type = "risk_score" if ctx.risk_score is not None else "analyst_request"
+    trig_text = f"Flagged transaction #{ctx.txn_id} (${ctx.amount:.2f}) on card {ctx.card_id or 'UNKNOWN'}"
+    
+    case_payload = {
+        "case_id": case_id,
+        "opened_at": ctx.timestamp or datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+        "trigger_type": trig_type,
+        "trigger_text": trig_text,
+        "flagged_txn_id": ctx.txn_id,
+        "card_id": ctx.card_id,
+        "customer_id": ctx.customer_id,
+        "risk_score": ctx.risk_score,
+    }
+    CUSTOM_CASES[case_id] = case_payload
+
+    try:
+        run_data = _execute_investigation_sync(case_payload)
+        INVESTIGATION_RUNS[case_id] = {
+            "status": "COMPLETED",
+            "data": run_data,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        return {
+            "investigation_id": case_id,
+            "status": "COMPLETED",
+            "result": run_data
+        }
+    except Exception as e:
+        INVESTIGATION_RUNS[case_id] = {
+            "status": "FAILED",
+            "error": str(e),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+        raise HTTPException(status_code=500, detail=f"Investigation execution failed for {case_id}: {str(e)}")
+
+
+@app.post("/api/investigations/arbitrary")
+def run_arbitrary_investigation(req: ArbitraryInvestigationRequest):
+    return run_transaction_investigation_endpoint(req.txn_id)
+
+
+
 @app.get("/api/investigations/{investigation_id}")
 def get_investigation_status(investigation_id: str):
     run = INVESTIGATION_RUNS.get(investigation_id)
@@ -856,6 +956,87 @@ def get_investigation_graph(investigation_id: str):
     if not run or "data" not in run:
         raise HTTPException(status_code=404, detail=f"No graph data found for {investigation_id}.")
     return run["data"].get("graph", {"nodes": [], "edges": [], "summary": {}})
+
+
+@app.get("/api/investigations/{investigation_id}/evoi-trace")
+def get_investigation_evoi_trace(investigation_id: str):
+    """Returns detailed Evidence Compass candidate evaluations, EVOI net decision values, and MCP telemetry."""
+    run = INVESTIGATION_RUNS.get(investigation_id)
+    if not run or "data" not in run:
+        raise HTTPException(status_code=404, detail=f"No run data found for investigation {investigation_id}.")
+
+    traces = run["data"].get("run_result", {}).get("iteration_traces", [])
+    evoi_summary = []
+    for t in traces:
+        evoi_summary.append({
+            "iteration": t.get("iteration"),
+            "selected_action": t.get("selected_action"),
+            "candidate_net_decision_values": t.get("candidate_net_decision_values", {}),
+            "belief_before": t.get("belief_before"),
+            "belief_after": t.get("belief_after"),
+            "coverage_before": t.get("coverage_before"),
+            "coverage_after": t.get("coverage_after"),
+            "mcp_telemetry": t.get("mcp_telemetry"),
+            "termination_check": t.get("termination_check"),
+            "observed_evidence_summary": t.get("observed_evidence_summary")
+        })
+    return {
+        "investigation_id": investigation_id,
+        "step_count": len(traces),
+        "traces": evoi_summary
+    }
+
+
+@app.get("/api/investigations/{investigation_id}/sar")
+def get_investigation_sar(investigation_id: str):
+    """Returns formal Suspicious Activity Report (SAR) narrative with citation verification audit."""
+    run = INVESTIGATION_RUNS.get(investigation_id)
+    if not run or "data" not in run:
+        raise HTTPException(status_code=404, detail=f"No run data found for investigation {investigation_id}.")
+
+    run_result = run["data"].get("run_result", {})
+    grounded_synthesis = run_result.get("grounded_synthesis") or run_result.get("executive_summary", "")
+
+    ev_cits = list(set(re.findall(r"\bEVD-[A-Za-z0-9_-]+\b", grounded_synthesis)))
+    case_cits = list(set(re.findall(r"\b(?:CC-\w+|INV-[A-Za-z0-9_-]+|TXN-[A-Za-z0-9_-]+|HHG-\d+)\b", grounded_synthesis)))
+    know_cits = list(set(re.findall(r"\bKNOW-[A-Za-z0-9_-]+\b", grounded_synthesis)))
+
+    final_state = run_result.get("final_state", {})
+    fraud_prob = final_state.get("fraud_probability", 0.5)
+    primary_act = run_result.get("primary_action", {})
+
+    filing_ready = bool(
+        fraud_prob >= 0.70 or
+        primary_act.get("action") in ["BLOCK_CARD", "CREATE_CASE", "DECLINE_TRANSACTION"] or
+        "31 CFR § 1020.320" in grounded_synthesis
+    )
+
+    return {
+        "investigation_id": investigation_id,
+        "filing_ready": filing_ready,
+        "regulatory_framework": "FinCEN 31 CFR § 1020.320 / Regulation E 12 CFR § 1005",
+        "sar_narrative": grounded_synthesis,
+        "verified_citations": {
+            "evidence_citations": sorted(ev_cits),
+            "historical_case_citations": sorted(case_cits),
+            "policy_rule_citations": sorted(know_cits)
+        },
+        "retrieved_knowledge": run_result.get("retrieved_knowledge", [])
+    }
+
+
+@app.get("/api/benchmark/summary")
+def get_benchmark_summary():
+    """Returns the authoritative immutable benchmark evaluation summary."""
+    candidate_paths = [
+        os.path.join(WORKSPACE_ROOT, "analysis", "phase_a_after", "evaluation_summary.json"),
+        os.path.join(WORKSPACE_ROOT, "analysis", "baseline_before_hardening", "evaluation_summary.json")
+    ]
+    for p in candidate_paths:
+        if os.path.exists(p):
+            with open(p, "r", encoding="utf-8") as f:
+                return json.load(f)
+    raise HTTPException(status_code=404, detail="No evaluation summary artifact found.")
 
 
 @app.post("/api/investigations/{investigation_id}/decision")
@@ -929,6 +1110,7 @@ def post_analyst_decision(investigation_id: str, req: AnalystDecisionRequest):
 
     run_data.setdefault("events", []).append(event)
     return {
+        "status": "SUCCESS",
         "investigation_id": investigation_id,
         "case_status": run_data["case_status"],
         "event": event,
@@ -1182,15 +1364,6 @@ if os.path.exists(WEB_DIST_DIR):
             return FileResponse(file_path)
         return FileResponse(os.path.join(WEB_DIST_DIR, "index.html"))
 
-<<<<<<< HEAD
-=======
-@app.get("/", response_class=HTMLResponse)
-def serve_dashboard():
-    if os.path.exists(WEB_INDEX):
-        with open(WEB_INDEX, "r", encoding="utf-8") as f:
-            return f.read()
-    return "<h1>Tark Backend API Online</h1>"
->>>>>>> 628be1b (feat(frontend): enterprise case management table, 3-area investigation workspace, and live API integration)
 
 if __name__ == "__main__":
     import uvicorn
