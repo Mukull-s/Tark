@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	body {
+		background-color: #f7f5f0;
+		color: #24231f;
+		font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+	}
+
+	/* Custom scrollbars for stream & tables */
+	::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+	::-webkit-scrollbar-track {
+		background: #f1eee7;
+	}
+	::-webkit-scrollbar-thumb {
+		background: #d5d0c5;
+		border-radius: 3px;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background: #9a958b;
+	}
+}
+
+.tabular-nums {
+	font-variant-numeric: tabular-nums;
+}
+
+.font-serif-prose {
+	font-family: "Source Serif 4", Georgia, Cambria, serif;
+}
+
+.font-mono-code {
+	font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+.font-sans-ui {
+	font-family:
+		"IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		sans-serif;
+}
+
+@media (max-width: 1024px) {
+	.investigation-workstation-grid {
+		grid-template-columns: 1fr !important;
+	}
+}
