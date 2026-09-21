@@ -1029,6 +1029,7 @@ def get_investigation_sar(investigation_id: str):
 def get_benchmark_summary():
     """Returns the authoritative immutable benchmark evaluation summary."""
     candidate_paths = [
+        os.path.join(WORKSPACE_ROOT, "analysis", "evaluation_summary.json"),
         os.path.join(WORKSPACE_ROOT, "analysis", "phase_a_after", "evaluation_summary.json"),
         os.path.join(WORKSPACE_ROOT, "analysis", "baseline_before_hardening", "evaluation_summary.json")
     ]
