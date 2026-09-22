@@ -1,0 +1,113 @@
+{
+  "status": "COMPLETED",
+  "benchmark": "Tark-CaseMemory-Ablation",
+  "timestamp": "2026-09-22T18:33:42.892112+00:00",
+  "mode": "writeback_ON (unfrozen ablation store)",
+  "ablation_writeback_file": "analysis/memory_ablation_writebacks.jsonl",
+  "main_benchmark_memory": "FROZEN snapshot at 2016-11-11 23:59:59 (writeback disabled) for reproducibility",
+  "initial_memory_count": 5565,
+  "final_memory_count": 5570,
+  "sequence": [
+    {
+      "sequence": 1,
+      "kind": "seed",
+      "case_id": "HHG-001",
+      "card_id": "C12382-K1",
+      "memory_count_before": 5565,
+      "memory_count_after": 5566,
+      "writeback_added": 1,
+      "retrieved_precedent_ids": [
+        "CC-3587",
+        "CC-1673",
+        "CC-1066"
+      ],
+      "retrieved_precedent_count": 3,
+      "fraud_probability": 0.7058,
+      "evidence_coverage": 0.4,
+      "primary_action": "MONITOR_CARD",
+      "internal_precedents_retrieved": []
+    },
+    {
+      "sequence": 2,
+      "kind": "seed",
+      "case_id": "HHG-002",
+      "card_id": "C11891-K1",
+      "memory_count_before": 5566,
+      "memory_count_after": 5567,
+      "writeback_added": 1,
+      "retrieved_precedent_ids": [
+        "CC-4160",
+        "CC-2985",
+        "CC-2649"
+      ],
+      "retrieved_precedent_count": 3,
+      "fraud_probability": 0.9256,
+      "evidence_coverage": 0.4,
+      "primary_action": "MONITOR_CARD",
+      "internal_precedents_retrieved": []
+    },
+    {
+      "sequence": 3,
+      "kind": "seed",
+      "case_id": "HHG-003",
+      "card_id": "C08623-K2",
+      "memory_count_before": 5567,
+      "memory_count_after": 5568,
+      "writeback_added": 1,
+      "retrieved_precedent_ids": [
+        "CC-4957",
+        "CC-2817",
+        "CC-1589"
+      ],
+      "retrieved_precedent_count": 3,
+      "fraud_probability": 0.9897,
+      "evidence_coverage": 0.5,
+      "primary_action": "BLOCK_CARD",
+      "internal_precedents_retrieved": []
+    },
+    {
+      "sequence": 4,
+      "kind": "followup",
+      "case_id": "HHG-003-FU1",
+      "card_id": "C08623-K2",
+      "memory_count_before": 5568,
+      "memory_count_after": 5569,
+      "writeback_added": 1,
+      "retrieved_precedent_ids": [
+        "HHG-003",
+        "CC-4957",
+        "CC-2817"
+      ],
+      "retrieved_precedent_count": 3,
+      "fraud_probability": 0.9256,
+      "evidence_coverage": 0.4,
+      "primary_action": "MONITOR_CARD",
+      "internal_precedents_retrieved": [
+        "HHG-003"
+      ]
+    },
+    {
+      "sequence": 5,
+      "kind": "followup",
+      "case_id": "HHG-003-FU2",
+      "card_id": "C08623-K2",
+      "memory_count_before": 5569,
+      "memory_count_after": 5570,
+      "writeback_added": 1,
+      "retrieved_precedent_ids": [
+        "HHG-003-FU1",
+        "HHG-003",
+        "CC-1589"
+      ],
+      "retrieved_precedent_count": 3,
+      "fraud_probability": 0.9256,
+      "evidence_coverage": 0.4,
+      "primary_action": "MONITOR_CARD",
+      "internal_precedents_retrieved": [
+        "HHG-003-FU1",
+        "HHG-003"
+      ]
+    }
+  ],
+  "invariant_note": "Case-memory precedents are CONTEXTUAL ONLY (LR=1.0): they never shift the posterior, evidence coverage, or the decision gate. The ablation therefore demonstrates institutional learning as a growing/refreshed precedent set for later same-card cases, not a belief shift."
+}
