@@ -114,11 +114,15 @@ def test_hhg014_autonomous_investigation_execution(authorities):
     device_items = [e for e in res.final_state.evidence_items if e.evidence_type == EvidenceType.SHARED_DEVICE_RING]
     assert len(device_items) >= 1
     assert device_items[0].lr > 10.0
-    # Final NBA must be CREATE_CASE under R6
+    # Final NBA must escalate the large syndicate for L2 human authorization
+    # (R6-syndicate exception): the 50+ account ring requires analyst sign-off
+    # before any SAR filing, rather than an automated CREATE_CASE/FILE_REPORT.
     primary_act = res.final_policy_actions[0]
-    assert primary_act.action == "CREATE_CASE"
+    assert primary_act.action == "ESCALATE_TO_ANALYST"
     assert primary_act.role == ActionRole.PRIMARY
-    assert primary_act.scope == ActionScope.CASE_MANAGEMENT
+    assert primary_act.scope == ActionScope.ESCALATION
+    assert primary_act.approval_route == "L2"
+    assert not any(a.action == "FILE_REPORT" for a in res.final_policy_actions)
 
 # 3. Adversarial Check: Low-risk unalerted transaction with analyst review request
 def test_adversarial_low_risk_analyst_request(authorities):
