@@ -58,3 +58,38 @@ class TigerGraphMCPClient:
 
         logger.info(f"[{self.session_id}][{req_id}] MCP Response <- status={'ERROR' if result.isError else 'OK'} latency={total_latency}ms")
         return result
+
+    def list_tools_jsonrpc(self) -> List[Dict[str, Any]]:
+        """Discovers available tools through the MCP JSON-RPC ``tools/list`` method."""
+        response = self.server.handle_jsonrpc({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
+        return response.get("result", {}).get("tools", [])
+
+    def call_tool_jsonrpc(
+        self,
+        name: str,
+        arguments: Optional[Dict[str, Any]] = None,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """Invokes a tool through the MCP JSON-RPC ``tools/call`` method with telemetry."""
+        req_id = f"mcp-req-{uuid.uuid4().hex[:8]}"
+        start_time = time.perf_counter()
+        response = self.server.handle_jsonrpc({
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "method": "tools/call",
+            "params": {"name": name, "arguments": arguments, "context": context},
+        })
+        total_latency = round((time.perf_counter() - start_time) * 1000, 2)
+        result = response.get("result", {})
+        self.call_history.append({
+            "session_id": self.session_id,
+            "request_id": req_id,
+            "tool_name": name,
+            "arguments": arguments,
+            "is_error": bool(result.get("isError", False)),
+            "duration_ms": total_latency,
+            "structured_status": (result.get("structuredContent") or {}).get("status")
+            if result.get("structuredContent") else None,
+            "transport": "jsonrpc",
+        })
+        return response

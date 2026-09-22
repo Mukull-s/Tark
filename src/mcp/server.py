@@ -19,7 +19,12 @@ from src.graph.scope import GraphScopeStatus
 
 logger = logging.getLogger("tark.mcp.server")
 
-PROTOCOL_VERSION = "2024-11-05"
+# Protocol versions this server understands. The active version is negotiated
+# during `initialize` (client's requested version if supported, else the latest).
+PROTOCOL_VERSION = "2025-06-18"
+SUPPORTED_PROTOCOL_VERSIONS = ("2025-06-18", "2024-11-05")
+SERVER_NAME = "tark-tigergraph-mcp"
+SERVER_VERSION = "1.1.0"
 
 
 class MCPToolDefinition(BaseModel):
@@ -27,6 +32,8 @@ class MCPToolDefinition(BaseModel):
     description: str
     inputSchema: Dict[str, Any]
     action_id: str
+    # MCP behavioural hints (official tigergraph-mcp contract).
+    annotations: Dict[str, Any] = Field(default_factory=dict)
 
 
 class MCPCallToolResult(BaseModel):
@@ -40,11 +47,18 @@ class TigerGraphMCPServer:
     """MCP-compliant Tool Server exposing authorized TigerGraph and External Evidence Tools.
     
     Acts as the strict protocol boundary between cognitive agents and deterministic execution.
+
+    Contract compatibility: this server speaks the same JSON-RPC 2.0 / MCP tool
+    surface as the official ``tigergraph-mcp`` server (`initialize`, `tools/list`,
+    `tools/call`), exposes ``tigergraph__``-prefixed aliases for graph-native tools,
+    attaches MCP ``annotations`` to every tool, and returns the structured
+    ``{success, operation, summary, data, suggestions, metadata}`` envelope.
     """
 
     def __init__(self, dispatcher: Optional[EvidenceToolDispatcher] = None):
         self.dispatcher = dispatcher or EvidenceToolDispatcher()
         self._tools: Dict[str, MCPToolDefinition] = {}
+        self.client_protocol_version: Optional[str] = None
         self._register_schemas()
 
     def _register_schemas(self):
@@ -171,6 +185,25 @@ class TigerGraphMCPServer:
             if target in self._tools:
                 self._tools[alias] = self._tools[target]
 
+        # Attach MCP behavioural annotations (official tigergraph-mcp contract).
+        for t in self._tools.values():
+            if not t.annotations:
+                t.annotations = {
+                    "title": t.name.replace("_", " ").title(),
+                    "readOnlyHint": True,
+                    "destructiveHint": False,
+                    "idempotentHint": True,
+                    "openWorldHint": False,
+                }
+
+        # Register ``tigergraph__``-prefixed aliases matching the official server's
+        # naming convention for graph-native tools, so an agent configured against
+        # tigergraph-mcp can call the equivalent Tark tools without re-plumbing.
+        for t in list(self._tools.values()):
+            prefixed = f"tigergraph__{t.name}"
+            if prefixed not in self._tools:
+                self._tools[prefixed] = t
+
     def list_tools(self) -> List[Dict[str, Any]]:
         """Returns standard MCP tool declarations for LLM agent discovery."""
         unique_tools = {}
@@ -178,9 +211,105 @@ class TigerGraphMCPServer:
             unique_tools[t.name] = {
                 "name": t.name,
                 "description": t.description,
-                "inputSchema": t.inputSchema
+                "inputSchema": t.inputSchema,
+                "annotations": t.annotations,
             }
+        # Derive prefixed aliases from the canonical set.
+        for name, decl in list(unique_tools.items()):
+            prefixed = f"tigergraph__{name}"
+            unique_tools[prefixed] = {**decl, "name": prefixed}
         return list(unique_tools.values())
+
+    # ------------------------------------------------------------------
+    # JSON-RPC (MCP transport) compatibility layer
+    # ------------------------------------------------------------------
+    def list_tools_rpc(self) -> Dict[str, Any]:
+        """JSON-RPC ``tools/list`` result payload (no pagination)."""
+        return {"tools": self.list_tools(), "nextCursor": None}
+
+    def call_tool_rpc(
+        self,
+        name: str,
+        arguments: Optional[Dict[str, Any]] = None,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """JSON-RPC ``tools/call`` result payload.
+
+        Returns the standard MCP content envelope plus the official tigergraph-mcp
+        structured envelope ``{success, operation, summary, data, suggestions, metadata}``.
+        """
+        res = self.call_tool(name=name, arguments=arguments, context=context)
+        structured = res.structured_result or {}
+        operation = structured.get("tool_name") or name
+        success = not res.isError
+        text = res.content[0]["text"] if res.content else ""
+
+        envelope = {
+            "success": success,
+            "operation": operation,
+            "summary": text,
+            "data": structured.get("evidence_item") or structured.get("raw_data"),
+            "suggestions": [],
+            "metadata": {
+                "action_id": structured.get("action_id"),
+                "status": structured.get("status"),
+                "scope_status": structured.get("scope_status"),
+                "duration_ms": structured.get("duration_ms", res.duration_ms),
+            },
+        }
+        if not success:
+            envelope["error"] = text
+            envelope["suggestions"] = ["Verify the tool name and arguments against tools/list."]
+
+        return {
+            "content": res.content,
+            "isError": res.isError,
+            "structuredContent": envelope,
+        }
+
+    def handle_jsonrpc(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        """Handles a single MCP JSON-RPC 2.0 request envelope.
+
+        Supported methods: ``initialize``, ``notifications/initialized``, ``ping``,
+        ``tools/list``, ``tools/call``.
+        """
+        req_id = request.get("id")
+        method = request.get("method")
+        params = request.get("params") or {}
+
+        if method == "initialize":
+            requested = params.get("protocolVersion")
+            self.client_protocol_version = requested
+            negotiated = requested if requested in SUPPORTED_PROTOCOL_VERSIONS else PROTOCOL_VERSION
+            result: Dict[str, Any] = {
+                "protocolVersion": negotiated,
+                "capabilities": {"tools": {"listChanged": False}},
+                "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+                "instructions": (
+                    "Tark fraud-investigation tool server. Tools execute through the "
+                    "authoritative EvidenceToolDispatcher; arbitrary GSQL is rejected."
+                ),
+            }
+        elif method in ("notifications/initialized", "initialized"):
+            return {"jsonrpc": "2.0", "id": req_id, "result": {}}
+        elif method == "ping":
+            result = {}
+        elif method in ("tools/list", "list_tools"):
+            result = self.list_tools_rpc()
+        elif method in ("tools/call", "call_tool"):
+            result = self.call_tool_rpc(
+                name=params.get("name", ""),
+                arguments=params.get("arguments"),
+                context=params.get("context"),
+            )
+        else:
+            return {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "error": {"code": -32601, "message": f"Method not found: {method}"},
+            }
+
+        return {"jsonrpc": "2.0", "id": req_id, "result": result}
 
     def call_tool(
         self,
