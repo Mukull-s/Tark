@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import pytest
 
@@ -53,7 +54,15 @@ def test_schema_conformance():
         has_file_report = any(a["action"] == "FILE_REPORT" for a in nba["final"])
         assert data["sar"]["file"] == has_file_report, f"sar.file must agree with FILE_REPORT action in {f}"
         if data["sar"]["file"]:
-            assert data["sar"]["narrative"] is not None and len(data["sar"]["narrative"]) > 50, f"Missing SAR narrative in {f}"
+            narrative = data["sar"]["narrative"]
+            assert narrative is not None and len(narrative) > 50, f"Missing SAR narrative in {f}"
+            # Grounding contract: every filed narrative must cite at least one
+            # verifiable observed evidence item and at least one policy/knowledge
+            # or historical precedent reference.
+            ev_ids = re.findall(r"\bEVD-[A-Za-z0-9_-]+\b", narrative)
+            assert len(ev_ids) >= 1, f"SAR narrative in {f} cites zero observed evidence ([EVD-...])"
+            know_refs = re.findall(r"\b(?:KNOW|CC|INV)-[A-Za-z0-9_-]+\b", narrative)
+            assert len(know_refs) >= 1, f"SAR narrative in {f} cites no [KNOW-]/[CC-] grounding"
 
     print("\nALL 20 BENCHMARK ANSWER FILES PASSED VALIDATION PERFECTLY!")
 
