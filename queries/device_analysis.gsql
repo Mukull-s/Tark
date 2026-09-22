@@ -1,5 +1,12 @@
 // Query 3: device_analysis
-// Analyzes device novelty and multi-card sharing blast radius
+// Analyzes device novelty and multi-card sharing blast radius.
+//
+// Graph algorithm: 2-hop neighbourhood expansion + set-based connected-component
+// style ring sizing. Starting from the focal transaction, we traverse
+// Transaction -> DeviceProfile -> all co-located Transactions -> their Cards,
+// then count the distinct card vertices reachable through the shared device.
+// The resulting shared-card breadth is the ring-size signal consumed by policy
+// rule R6 (syndicate rings) and the R6-syndicate escalation threshold.
 USE GRAPH FraudInvestigation
 
 CREATE OR REPLACE QUERY device_analysis(STRING t_id) FOR GRAPH FraudInvestigation {
