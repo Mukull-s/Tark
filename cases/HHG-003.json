@@ -7,20 +7,26 @@
     "pattern": "card_not_present_fraud",
     "evidence": [
       {
+        "evidence_id": "EVD-HHG-003-TRIGGER",
         "type": "CUSTOMER_DENIAL",
         "source": "customer_report_trigger",
         "finding": "Cardholder initiated report: 'Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 3530164.'",
         "lr": 18.5,
         "log_lr": 2.918,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       },
       {
+        "evidence_id": "EVD-CED1777C",
         "type": "BEHAVIORAL_BASELINE",
-        "source": "customer_profile",
-        "finding": "Customer baseline: 1140 historical txns, avg $129.36, primary channel in_person",
+        "source": "tigergraph_query:customer_profile",
+        "finding": "Customer baseline: 1140 historical txns, avg $129.36, primary channel: unknown.",
         "lr": 1.0,
         "log_lr": 0.0,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       }
     ],
     "affected_txn_ids": [
@@ -29,12 +35,34 @@
     "connected_card_ids": [],
     "exposure_usd": 49.0,
     "similar_prior_cases": [
-      "CC-0054",
-      "CC-0942",
-      "CC-0740"
+      "CC-4957",
+      "CC-2817",
+      "CC-1589"
     ],
     "written_to_graph": true,
-    "graph_case_id": "INV-HHG-003"
+    "graph_case_id": "INV-HHG-003",
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "evidence_coverage": 0.5,
+    "applicable_dimensions": [
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY",
+      "BEHAVIORAL_BASELINE",
+      "CUSTOMER_DISPUTE"
+    ],
+    "probed_coverage": 1.0,
+    "probed_dimensions": [
+      "BEHAVIORAL_BASELINE",
+      "CUSTOMER_DISPUTE",
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY"
+    ],
+    "informative_families": [
+      "CUSTOMER_DISPUTE"
+    ],
+    "corroborated_fraud": true,
+    "missing_information": [],
+    "prior_rationale": "Inbound cardholder dispute is itself alert-conditioned evidence; ALERT_CONDITIONED prior (P=Fraud 0.8383) is statistically valid."
   },
   "evidence_requests": [],
   "next_best_actions": {
@@ -42,77 +70,105 @@
       {
         "action": "BLOCK_CARD",
         "approval_route": "L1",
-        "reason": "R2: Customer reported/denied transaction."
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
         "action": "CREATE_CASE",
         "approval_route": "auto",
-        "reason": "R2: Internal case created for customer dispute/denial."
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
       }
     ],
     "final": [
       {
         "action": "BLOCK_CARD",
         "approval_route": "L1",
-        "reason": "R2: Customer reported/denied transaction."
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
         "action": "CREATE_CASE",
         "approval_route": "auto",
-        "reason": "R2: Internal case created for customer dispute/denial."
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
       }
     ],
-    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+    "what_changed": "No action change: primary 'BLOCK_CARD' remained stable after 4 step(s) (P(Fraud) 0.9897 -> 0.9897; coverage 0.25 -> 0.50; termination: DECISION_REACHED)."
   },
   "sar": {
     "file": false,
     "narrative": null
   },
-  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "stop_reason": "DECISION_REACHED",
   "tool_calls": [
     {
-      "tool": "customer_profile",
-      "params": {
-        "cust_id": "C08623"
-      }
-    },
-    {
-      "tool": "txn_velocity",
-      "params": {
-        "c_id": "C08623-K2",
-        "target_ts": "2016-12-10 13:01:21",
-        "window_hours": 24
-      }
-    },
-    {
       "tool": "device_analysis",
+      "action_id": "QUERY_DEVICE_ANALYSIS",
       "params": {
-        "t_id": "3530164"
-      }
+        "t_id": "3530164",
+        "c_id": "C08623-K2",
+        "cust_id": "C08623",
+        "txn_addr1": 330.0,
+        "anchor_ts": "2016-12-10 15:01:21",
+        "target_ts": "2016-12-10 15:01:21"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 82.91
     },
     {
       "tool": "card_sequence",
+      "action_id": "QUERY_CARD_SEQUENCE",
       "params": {
         "c_id": "C08623-K2",
-        "anchor_ts": "2016-12-10 13:01:21",
-        "window_hours": 24
-      }
+        "window_hours": 24,
+        "anchor_ts": "2016-12-10 15:01:21",
+        "t_id": "3530164",
+        "cust_id": "C08623",
+        "txn_addr1": 330.0,
+        "target_ts": "2016-12-10 15:01:21"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 82.72
     },
     {
-      "tool": "region_analysis",
+      "tool": "txn_velocity",
+      "action_id": "QUERY_TXN_VELOCITY",
+      "params": {
+        "c_id": "C08623-K2",
+        "window_hours": 24,
+        "target_ts": "2016-12-10 15:01:21",
+        "t_id": "3530164",
+        "cust_id": "C08623",
+        "txn_addr1": 330.0,
+        "anchor_ts": "2016-12-10 15:01:21"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 98.06
+    },
+    {
+      "tool": "customer_profile",
+      "action_id": "QUERY_CUSTOMER_PROFILE",
       "params": {
         "cust_id": "C08623",
-        "txn_addr1": 330.0
-      }
-    },
-    {
-      "tool": "similar_cases",
-      "params": {
-        "target_pattern": "card_not_present_fraud",
-        "c_id": "C08623-K2"
-      }
+        "t_id": "3530164",
+        "c_id": "C08623-K2",
+        "txn_addr1": 330.0,
+        "anchor_ts": "2016-12-10 15:01:21",
+        "target_ts": "2016-12-10 15:01:21"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 91.65
     }
   ],
-  "tokens": 1090,
-  "latency_s": 1.25
+  "tokens": 1450,
+  "latency_s": 10.75
 }

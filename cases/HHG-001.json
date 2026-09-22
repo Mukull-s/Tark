@@ -2,25 +2,31 @@
   "case_id": "HHG-001",
   "case": {
     "status": "closed",
-    "verdict": "confirmed_fraud",
-    "fraud_probability": 0.9256,
+    "verdict": "uncertain",
+    "fraud_probability": 0.7058,
     "pattern": "undocumented",
     "evidence": [
       {
+        "evidence_id": "EVD-HHG-001-TRIGGER",
         "type": "CALIBRATED_RISK_SCORE",
         "source": "bank_detection_model",
-        "finding": "Model risk score 0.61",
+        "finding": "Real-time fraud risk score: 0.61",
         "lr": 2.4,
         "log_lr": 0.875,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       },
       {
+        "evidence_id": "EVD-89468287",
         "type": "BEHAVIORAL_BASELINE",
-        "source": "customer_profile",
-        "finding": "Customer baseline: 422 historical txns, avg $115.60, primary channel in_person",
+        "source": "tigergraph_query:customer_profile",
+        "finding": "Customer baseline: 422 historical txns, avg $115.60, primary channel: unknown.",
         "lr": 1.0,
         "log_lr": 0.0,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       }
     ],
     "affected_txn_ids": [
@@ -29,108 +35,190 @@
     "connected_card_ids": [],
     "exposure_usd": 77.07,
     "similar_prior_cases": [
-      "CC-3748",
-      "CC-2649",
-      "CC-4086"
+      "CC-3587",
+      "CC-1673",
+      "CC-1066"
     ],
     "written_to_graph": true,
-    "graph_case_id": "INV-HHG-001"
+    "graph_case_id": "INV-HHG-001",
+    "decision_gate_passed": false,
+    "decision_state": "INSUFFICIENT_EVIDENCE",
+    "evidence_coverage": 0.4,
+    "applicable_dimensions": [
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY",
+      "BEHAVIORAL_BASELINE",
+      "CUSTOMER_DISPUTE",
+      "MODEL_SCORE"
+    ],
+    "probed_coverage": 0.8,
+    "probed_dimensions": [
+      "BEHAVIORAL_BASELINE",
+      "DEVICE_INFRASTRUCTURE",
+      "MODEL_SCORE",
+      "TRANSACTION_VELOCITY"
+    ],
+    "informative_families": [
+      "MODEL_SCORE"
+    ],
+    "corroborated_fraud": false,
+    "missing_information": [
+      {
+        "missing_id": "MIS-9F6370",
+        "dimension": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "entity": "3514030",
+        "reason": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "impact_severity": "MEDIUM",
+        "actionable_query": null
+      }
+    ],
+    "prior_rationale": "Model risk score 0.61 is below the alert threshold (0.65); UNIFORM prior (P=Fraud 0.50) prevents auto-fraud of thin low-confidence alerts."
   },
   "evidence_requests": [
     {
       "type": "VERIFY_WITH_CUSTOMER",
-      "prompt": "Did you authorize this transaction?",
       "status": "UNAVAILABLE",
-      "response": "Customer verification challenge timed out; no out-of-band response received via SMS/Email gateway.",
-      "provenance": "external_gateway_timeout"
+      "response": "Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+      "provenance": "External communication gateway (simulate_customer_reply)",
+      "zero_belief_shift": true
     }
   ],
   "next_best_actions": {
     "initial": [
       {
-        "action": "CREATE_CASE",
+        "action": "MONITOR_CARD",
         "approval_route": "auto",
-        "reason": "R9: Coordinated anomalous activity fitting no standard typology."
+        "reason": "R9-thin: High posterior on an undocumented pattern without a passed decision gate (corroboration required). Punitive blocking withheld; monitor and corroborate before escalation.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
-        "action": "FILE_REPORT",
-        "approval_route": "L2",
-        "reason": "R9: Regulatory report for novel/undocumented fraud scheme."
-      },
-      {
-        "action": "ESCALATE_TO_ANALYST",
+        "action": "VERIFY_WITH_CUSTOMER",
         "approval_route": "auto",
-        "reason": "R9: Hand off novel pattern to senior fraud analyst."
+        "reason": "R9-thin: Request cardholder confirmation to corroborate an undocumented pattern.",
+        "role": "SECONDARY",
+        "scope": "CUSTOMER"
       }
     ],
     "final": [
       {
-        "action": "CREATE_CASE",
+        "action": "MONITOR_CARD",
         "approval_route": "auto",
-        "reason": "R9: Coordinated anomalous activity fitting no standard typology."
+        "reason": "R9-thin: High posterior on an undocumented pattern without a passed decision gate (corroboration required). Punitive blocking withheld; monitor and corroborate before escalation.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
-        "action": "FILE_REPORT",
-        "approval_route": "L2",
-        "reason": "R9: Regulatory report for novel/undocumented fraud scheme."
-      },
-      {
-        "action": "ESCALATE_TO_ANALYST",
+        "action": "VERIFY_WITH_CUSTOMER",
         "approval_route": "auto",
-        "reason": "R9: Hand off novel pattern to senior fraud analyst."
+        "reason": "R9-thin: Request cardholder confirmation to corroborate an undocumented pattern.",
+        "role": "SECONDARY",
+        "scope": "CUSTOMER"
       }
     ],
-    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+    "what_changed": "No action change: primary 'MONITOR_CARD' remained stable after 5 step(s) (P(Fraud) 0.7058 -> 0.7058; coverage 0.20 -> 0.40; termination: MAX_STEPS_REACHED)."
   },
   "sar": {
-    "file": true,
-    "narrative": "### SUSPICIOUS ACTIVITY REPORT (SAR) NARRATIVE\n**1. SUMMARY OF SUSPICIOUS ACTIVITY:**\nDuring internal fraud monitoring, anomalous activity exceeding regulatory thresholds was identified. Multiple unauthorized authorizations were flagged and escalated for formal investigation.\n\n**2. IDENTITY & ACCOUNT INFORMATION:**\nThe transaction activity involves cardholder account records identified in case record.\n\n**3. METHOD OF OPERATION:**\nThe observed modus operandi aligns with coordinated card-not-present exploitation and identity manipulation. Technical indicators confirm high-velocity unauthorized access.\n\n**4. LAW ENFORCEMENT ACTIONABLE DETAILS:**\nAssociated device identifiers, IP indicators, and transaction records have been secured in the graph database for regulatory audit and law enforcement referral.\n\n**5. DISPOSITION & MITIGATION:**\nThe compromised card has been permanently blocked, relevant connected entities placed under elevated monitoring, and this suspicious activity filing completed under policy rule R2/R6."
+    "file": false,
+    "narrative": null
   },
-  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "stop_reason": "MAX_STEPS_REACHED",
   "tool_calls": [
     {
-      "tool": "customer_profile",
-      "params": {
-        "cust_id": "C12382"
-      }
-    },
-    {
-      "tool": "txn_velocity",
-      "params": {
-        "c_id": "C12382-K1",
-        "target_ts": "2016-12-04 19:55:28",
-        "window_hours": 24
-      }
-    },
-    {
       "tool": "device_analysis",
+      "action_id": "QUERY_DEVICE_ANALYSIS",
       "params": {
-        "t_id": "3514030"
-      }
+        "t_id": "3514030",
+        "c_id": "C12382-K1",
+        "cust_id": "C12382",
+        "txn_addr1": 444.0,
+        "anchor_ts": "2016-12-05 01:55:28",
+        "target_ts": "2016-12-05 01:55:28"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 83.54
     },
     {
       "tool": "card_sequence",
+      "action_id": "QUERY_CARD_SEQUENCE",
       "params": {
         "c_id": "C12382-K1",
-        "anchor_ts": "2016-12-04 19:55:28",
-        "window_hours": 24
-      }
+        "window_hours": 24,
+        "anchor_ts": "2016-12-05 01:55:28",
+        "t_id": "3514030",
+        "cust_id": "C12382",
+        "txn_addr1": 444.0,
+        "target_ts": "2016-12-05 01:55:28"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 107.19
+    },
+    {
+      "tool": "txn_velocity",
+      "action_id": "QUERY_TXN_VELOCITY",
+      "params": {
+        "c_id": "C12382-K1",
+        "window_hours": 24,
+        "target_ts": "2016-12-05 01:55:28",
+        "t_id": "3514030",
+        "cust_id": "C12382",
+        "txn_addr1": 444.0,
+        "anchor_ts": "2016-12-05 01:55:28"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 71.48
+    },
+    {
+      "tool": "customer_profile",
+      "action_id": "QUERY_CUSTOMER_PROFILE",
+      "params": {
+        "cust_id": "C12382",
+        "t_id": "3514030",
+        "c_id": "C12382-K1",
+        "txn_addr1": 444.0,
+        "anchor_ts": "2016-12-05 01:55:28",
+        "target_ts": "2016-12-05 01:55:28"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 81.77
     },
     {
       "tool": "region_analysis",
+      "action_id": "QUERY_REGION_ANALYSIS",
       "params": {
         "cust_id": "C12382",
-        "txn_addr1": 444.0
-      }
+        "txn_addr1": 444.0,
+        "t_id": "3514030",
+        "c_id": "C12382-K1",
+        "anchor_ts": "2016-12-05 01:55:28",
+        "target_ts": "2016-12-05 01:55:28"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 72.24
     },
     {
-      "tool": "similar_cases",
+      "tool": "simulate_customer_reply",
+      "action_id": "VERIFY_WITH_CUSTOMER",
       "params": {
-        "target_pattern": "undocumented",
-        "c_id": "C12382-K1"
-      }
+        "prompt": "Did you authorize this transaction?",
+        "t_id": "3514030",
+        "c_id": "C12382-K1",
+        "cust_id": "C12382",
+        "txn_addr1": 444.0,
+        "anchor_ts": "2016-12-05 01:55:28",
+        "target_ts": "2016-12-05 01:55:28"
+      },
+      "status": "UNAVAILABLE",
+      "scope_status": "NO_MATCH",
+      "duration_ms": 0.44,
+      "phase": "POST_LOOP_EXTERNAL_RESOLUTION"
     }
   ],
-  "tokens": 1090,
-  "latency_s": 6.72
+  "tokens": 1690,
+  "latency_s": 11.66
 }

@@ -2,25 +2,31 @@
   "case_id": "HHG-002",
   "case": {
     "status": "closed",
-    "verdict": "confirmed_fraud",
+    "verdict": "uncertain",
     "fraud_probability": 0.9256,
     "pattern": "undocumented",
     "evidence": [
       {
+        "evidence_id": "EVD-HHG-002-TRIGGER",
         "type": "CALIBRATED_RISK_SCORE",
         "source": "bank_detection_model",
-        "finding": "Model risk score 0.79",
+        "finding": "Real-time fraud risk score: 0.79",
         "lr": 2.4,
         "log_lr": 0.875,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       },
       {
+        "evidence_id": "EVD-85E4DFE8",
         "type": "BEHAVIORAL_BASELINE",
-        "source": "customer_profile",
-        "finding": "Customer baseline: 44 historical txns, avg $47.46, primary channel online",
+        "source": "tigergraph_query:customer_profile",
+        "finding": "Customer baseline: 44 historical txns, avg $47.46, primary channel: unknown.",
         "lr": 1.0,
         "log_lr": 0.0,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       }
     ],
     "affected_txn_ids": [
@@ -29,108 +35,185 @@
     "connected_card_ids": [],
     "exposure_usd": 292.36,
     "similar_prior_cases": [
-      "CC-4124",
-      "CC-3841",
-      "CC-3907"
+      "CC-4160",
+      "CC-2985",
+      "CC-2649"
     ],
     "written_to_graph": true,
-    "graph_case_id": "INV-HHG-002"
+    "graph_case_id": "INV-HHG-002",
+    "decision_gate_passed": false,
+    "decision_state": "INSUFFICIENT_EVIDENCE",
+    "evidence_coverage": 0.4,
+    "applicable_dimensions": [
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY",
+      "BEHAVIORAL_BASELINE",
+      "CUSTOMER_DISPUTE",
+      "MODEL_SCORE"
+    ],
+    "probed_coverage": 0.8,
+    "probed_dimensions": [
+      "BEHAVIORAL_BASELINE",
+      "DEVICE_INFRASTRUCTURE",
+      "MODEL_SCORE",
+      "TRANSACTION_VELOCITY"
+    ],
+    "informative_families": [
+      "MODEL_SCORE"
+    ],
+    "corroborated_fraud": false,
+    "missing_information": [
+      {
+        "missing_id": "MIS-2B8B85",
+        "dimension": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "entity": "3478782",
+        "reason": "CUSTOMER_COMMUNICATION_UNAVAILABLE",
+        "impact_severity": "MEDIUM",
+        "actionable_query": null
+      }
+    ],
+    "prior_rationale": "Model risk score 0.79 exceeds the alert threshold (0.65); ALERT_CONDITIONED prior is statistically valid."
   },
   "evidence_requests": [
     {
       "type": "VERIFY_WITH_CUSTOMER",
-      "prompt": "Did you authorize this transaction?",
       "status": "UNAVAILABLE",
-      "response": "Customer verification challenge timed out; no out-of-band response received via SMS/Email gateway.",
-      "provenance": "external_gateway_timeout"
+      "response": "Customer communication tool simulate_customer_reply completed without cardholder response (UNAVAILABLE/TIMEOUT).",
+      "provenance": "External communication gateway (simulate_customer_reply)",
+      "zero_belief_shift": true
     }
   ],
   "next_best_actions": {
     "initial": [
       {
-        "action": "CREATE_CASE",
+        "action": "MONITOR_CARD",
         "approval_route": "auto",
-        "reason": "R9: Coordinated anomalous activity fitting no standard typology."
+        "reason": "R9-thin: High posterior on an undocumented pattern without a passed decision gate (corroboration required). Punitive blocking withheld; monitor and corroborate before escalation.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
-        "action": "FILE_REPORT",
-        "approval_route": "L2",
-        "reason": "R9: Regulatory report for novel/undocumented fraud scheme."
-      },
-      {
-        "action": "ESCALATE_TO_ANALYST",
+        "action": "VERIFY_WITH_CUSTOMER",
         "approval_route": "auto",
-        "reason": "R9: Hand off novel pattern to senior fraud analyst."
+        "reason": "R9-thin: Request cardholder confirmation to corroborate an undocumented pattern.",
+        "role": "SECONDARY",
+        "scope": "CUSTOMER"
       }
     ],
     "final": [
       {
-        "action": "CREATE_CASE",
+        "action": "MONITOR_CARD",
         "approval_route": "auto",
-        "reason": "R9: Coordinated anomalous activity fitting no standard typology."
+        "reason": "R9-thin: High posterior on an undocumented pattern without a passed decision gate (corroboration required). Punitive blocking withheld; monitor and corroborate before escalation.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
-        "action": "FILE_REPORT",
-        "approval_route": "L2",
-        "reason": "R9: Regulatory report for novel/undocumented fraud scheme."
-      },
-      {
-        "action": "ESCALATE_TO_ANALYST",
+        "action": "VERIFY_WITH_CUSTOMER",
         "approval_route": "auto",
-        "reason": "R9: Hand off novel pattern to senior fraud analyst."
+        "reason": "R9-thin: Request cardholder confirmation to corroborate an undocumented pattern.",
+        "role": "SECONDARY",
+        "scope": "CUSTOMER"
       }
     ],
-    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+    "what_changed": "No action change: primary 'MONITOR_CARD' remained stable after 5 step(s) (P(Fraud) 0.9256 -> 0.9256; coverage 0.20 -> 0.40; termination: MAX_STEPS_REACHED)."
   },
   "sar": {
-    "file": true,
-    "narrative": "### SUSPICIOUS ACTIVITY REPORT (SAR) NARRATIVE\n**1. SUMMARY OF SUSPICIOUS ACTIVITY:**\nDuring internal fraud monitoring, anomalous activity exceeding regulatory thresholds was identified. Multiple unauthorized authorizations were flagged and escalated for formal investigation.\n\n**2. IDENTITY & ACCOUNT INFORMATION:**\nThe transaction activity involves cardholder account records identified in case record.\n\n**3. METHOD OF OPERATION:**\nThe observed modus operandi aligns with coordinated card-not-present exploitation and identity manipulation. Technical indicators confirm high-velocity unauthorized access.\n\n**4. LAW ENFORCEMENT ACTIONABLE DETAILS:**\nAssociated device identifiers, IP indicators, and transaction records have been secured in the graph database for regulatory audit and law enforcement referral.\n\n**5. DISPOSITION & MITIGATION:**\nThe compromised card has been permanently blocked, relevant connected entities placed under elevated monitoring, and this suspicious activity filing completed under policy rule R2/R6."
+    "file": false,
+    "narrative": null
   },
-  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "stop_reason": "MAX_STEPS_REACHED",
   "tool_calls": [
     {
-      "tool": "customer_profile",
-      "params": {
-        "cust_id": "C11891"
-      }
-    },
-    {
-      "tool": "txn_velocity",
-      "params": {
-        "c_id": "C11891-K1",
-        "target_ts": "2016-11-22 17:27:07",
-        "window_hours": 24
-      }
-    },
-    {
       "tool": "device_analysis",
+      "action_id": "QUERY_DEVICE_ANALYSIS",
       "params": {
-        "t_id": "3478782"
-      }
+        "t_id": "3478782",
+        "c_id": "C11891-K1",
+        "cust_id": "C11891",
+        "anchor_ts": "2016-11-22 23:27:07",
+        "target_ts": "2016-11-22 23:27:07"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 96.96
     },
     {
       "tool": "card_sequence",
+      "action_id": "QUERY_CARD_SEQUENCE",
       "params": {
         "c_id": "C11891-K1",
-        "anchor_ts": "2016-11-22 17:27:07",
-        "window_hours": 24
-      }
+        "window_hours": 24,
+        "anchor_ts": "2016-11-22 23:27:07",
+        "t_id": "3478782",
+        "cust_id": "C11891",
+        "target_ts": "2016-11-22 23:27:07"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 72.88
+    },
+    {
+      "tool": "txn_velocity",
+      "action_id": "QUERY_TXN_VELOCITY",
+      "params": {
+        "c_id": "C11891-K1",
+        "window_hours": 24,
+        "target_ts": "2016-11-22 23:27:07",
+        "t_id": "3478782",
+        "cust_id": "C11891",
+        "anchor_ts": "2016-11-22 23:27:07"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 90.45
+    },
+    {
+      "tool": "customer_profile",
+      "action_id": "QUERY_CUSTOMER_PROFILE",
+      "params": {
+        "cust_id": "C11891",
+        "t_id": "3478782",
+        "c_id": "C11891-K1",
+        "anchor_ts": "2016-11-22 23:27:07",
+        "target_ts": "2016-11-22 23:27:07"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 99.56
     },
     {
       "tool": "region_analysis",
+      "action_id": "QUERY_REGION_ANALYSIS",
       "params": {
         "cust_id": "C11891",
-        "txn_addr1": 0.0
-      }
+        "txn_addr1": 0.0,
+        "t_id": "3478782",
+        "c_id": "C11891-K1",
+        "anchor_ts": "2016-11-22 23:27:07",
+        "target_ts": "2016-11-22 23:27:07"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 82.67
     },
     {
-      "tool": "similar_cases",
+      "tool": "simulate_customer_reply",
+      "action_id": "VERIFY_WITH_CUSTOMER",
       "params": {
-        "target_pattern": "undocumented",
-        "c_id": "C11891-K1"
-      }
+        "prompt": "Did you authorize this transaction?",
+        "t_id": "3478782",
+        "c_id": "C11891-K1",
+        "cust_id": "C11891",
+        "anchor_ts": "2016-11-22 23:27:07",
+        "target_ts": "2016-11-22 23:27:07"
+      },
+      "status": "UNAVAILABLE",
+      "scope_status": "NO_MATCH",
+      "duration_ms": 0.44,
+      "phase": "POST_LOOP_EXTERNAL_RESOLUTION"
     }
   ],
-  "tokens": 1090,
-  "latency_s": 5.81
+  "tokens": 1690,
+  "latency_s": 10.91
 }
