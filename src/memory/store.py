@@ -10,6 +10,11 @@ from src.memory.models import CaseMemoryRecord, MemoryProvenanceType
 
 logger = logging.getLogger(__name__)
 
+# Sentinel distinguishing "argument not supplied" (use the default path) from an
+# explicit ``None`` (disable that path entirely). Passing ``None`` must fully
+# disable loading AND writing so frozen evaluation memory cannot be contaminated.
+_UNSET = object()
+
 
 class CaseMemoryStore:
     """Thread-safe storage and indexing engine for historical fraud investigations.
@@ -26,8 +31,8 @@ class CaseMemoryStore:
 
     def __init__(
         self,
-        csv_path: Optional[str] = None,
-        writeback_path: Optional[str] = None,
+        csv_path: Optional[str] = _UNSET,
+        writeback_path: Optional[str] = _UNSET,
         is_frozen: bool = False,
         effective_timestamp: Optional[str] = None
     ):
@@ -39,10 +44,14 @@ class CaseMemoryStore:
         self.is_frozen = is_frozen
         self.effective_timestamp = effective_timestamp
         
-        # Default data paths
+        # Default data paths. An explicit ``None`` disables the corresponding source.
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-        self.csv_path = csv_path if csv_path is not None else os.path.join(base_dir, "closed_cases_history.csv")
-        self.writeback_path = writeback_path if writeback_path is not None else os.path.join(base_dir, "cases", "memory_writebacks.jsonl")
+        self.csv_path = (
+            os.path.join(base_dir, "closed_cases_history.csv") if csv_path is _UNSET else csv_path
+        )
+        self.writeback_path = (
+            os.path.join(base_dir, "cases", "memory_writebacks.jsonl") if writeback_path is _UNSET else writeback_path
+        )
 
         # Load initial historical data
         if self.csv_path and os.path.exists(self.csv_path):
