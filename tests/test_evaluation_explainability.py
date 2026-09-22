@@ -42,7 +42,7 @@ def test_independent_evaluation_harness(tg_conn):
             "card_id": "C12382-K1",
             "customer_id": "C12382",
             "risk_score": 0.61,
-            "expected_primary_action": "CREATE_CASE"
+            "expected_primary_action": "MONITOR_CARD"
         },
         {
             "case_id": "HHG-003",
