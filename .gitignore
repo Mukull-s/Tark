@@ -39,3 +39,15 @@ Thumbs.db
 *.pdf
 !docs/reference/*.pdf
 scratch/
+
+# Internal Plans & Planning Artifacts
+docs/FIX_PLAN_FULL_SCORE.md
+docs/scoreplus.md
+*plan*.md
+
+# Intermediate Run Outputs & Caches
+analysis/_*
+analysis/*_writebacks.jsonl
+analysis/raw_results.json
+analysis/gds_vector_probe.json
+
