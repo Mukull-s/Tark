@@ -191,3 +191,12 @@ export async function fetchBenchmarkSummary(): Promise<any> {
 	return res.json();
 }
 
+export async function fetchGraphSchemaOverview(): Promise<any> {
+	const res = await fetch(`${API_BASE}/graph/schema-overview`);
+	if (!res.ok) {
+		throw new Error(`Failed to load graph schema overview (${res.status})`);
+	}
+	return res.json();
+}
+
+
