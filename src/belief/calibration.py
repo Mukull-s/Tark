@@ -28,7 +28,23 @@ class LikelihoodRatioMetadata(BaseModel):
     reliability: float = 1.0
     family_ceiling_log_lr: float = 5.0   # Maximum cumulative log-LR allowed from this family
 
-# Prior Probability Profiles
+# ---------------------------------------------------------------------------
+# Trigger-conditioned prior resolution
+# ---------------------------------------------------------------------------
+# The ALERT_CONDITIONED prior (P(Fraud)=0.8383) is an *alert-conditioned*
+# quantity: it is valid only for cases that arrived through an inbound
+# cardholder dispute (which is itself strong evidence). Applying it
+# indiscriminately to thin, low-risk model alerts produced systematic
+# over-classification of fraud (auto-fraud of uninformative cases).
+#
+# We therefore resolve the prior explicitly from the trigger channel:
+#   * customer_report  -> ALERT_CONDITIONED (inbound dispute, strong signal)
+#   * analyst_request  -> UNIFORM           (human referral, no statistical prior)
+#   * risk_score <0.65 -> UNIFORM           (below-threshold model alert)
+#   * risk_score >=0.65-> ALERT_CONDITIONED (confirmed high-risk alert)
+#   * unknown          -> UNIFORM           (maximum-entropy default)
+#
+# The prior is intentionally NOT derived from case-specific identifiers.
 class PriorProfile(str, Enum):
     ALERT_CONDITIONED = "ALERT_CONDITIONED"         # P(Fraud | Model Alert or Inbound Dispute) ~ 0.8383
     UNCONDITIONED_POPULATION = "UNCONDITIONED_POP"  # P(Fraud | General Transaction Stream) ~ 0.005
@@ -167,6 +183,76 @@ SCORE_CALIBRATION_BINS = [
     {"range": (0.6, 0.8), "lr": 2.4,  "log_lr": 0.875,  "classification": CalibrationClassification.EMPIRICAL},
     {"range": (0.8, 1.0), "lr": 6.8,  "log_lr": 1.917,  "classification": CalibrationClassification.EMPIRICAL}
 ]
+
+# Risk-score threshold separating below-threshold model alerts (uniform prior)
+# from confirmed high-risk alerts (alert-conditioned prior).
+RISK_SCORE_PRIOR_THRESHOLD = 0.65
+
+# Trigger channels that are themselves statistically informative evidence
+# independent of any graph evidence.
+CUSTOMER_REPORT_TRIGGERS = {"customer_report", "inbound_dispute", "cardholder_report"}
+ANALYST_REQUEST_TRIGGERS = {"analyst_request", "analyst_referral", "manual_review"}
+
+
+def resolve_trigger_prior(
+    trigger_type: Optional[str],
+    risk_score: Optional[float] = None
+) -> Dict[str, Any]:
+    """Resolves the defensible prior profile for a trigger channel.
+
+    Returns a dictionary with:
+      - ``prior_profile``: PriorProfile enum
+      - ``prior_p``: explicit probability override (or None to use the profile)
+      - ``rationale``: human-readable justification retained for audit traces
+    """
+    tt = (trigger_type or "").strip().lower()
+
+    if tt in CUSTOMER_REPORT_TRIGGERS:
+        return {
+            "prior_profile": PriorProfile.ALERT_CONDITIONED,
+            "prior_p": None,
+            "rationale": (
+                "Inbound cardholder dispute is itself alert-conditioned evidence; "
+                "ALERT_CONDITIONED prior (P=Fraud 0.8383) is statistically valid."
+            )
+        }
+
+    if tt in ANALYST_REQUEST_TRIGGERS:
+        return {
+            "prior_profile": PriorProfile.UNIFORM_NON_INFORMATIVE,
+            "prior_p": None,
+            "rationale": (
+                "Analyst referral carries no calibrated statistical prior; "
+                "UNIFORM maximum-entropy prior (P=Fraud 0.50) is applied."
+            )
+        }
+
+    if risk_score is not None:
+        if risk_score < RISK_SCORE_PRIOR_THRESHOLD:
+            return {
+                "prior_profile": PriorProfile.UNIFORM_NON_INFORMATIVE,
+                "prior_p": None,
+                "rationale": (
+                    f"Model risk score {risk_score:.2f} is below the alert threshold "
+                    f"({RISK_SCORE_PRIOR_THRESHOLD}); UNIFORM prior (P=Fraud 0.50) prevents "
+                    "auto-fraud of thin low-confidence alerts."
+                )
+            }
+        return {
+            "prior_profile": PriorProfile.ALERT_CONDITIONED,
+            "prior_p": None,
+            "rationale": (
+                f"Model risk score {risk_score:.2f} exceeds the alert threshold "
+                f"({RISK_SCORE_PRIOR_THRESHOLD}); ALERT_CONDITIONED prior is statistically valid."
+            )
+        }
+
+    return {
+        "prior_profile": PriorProfile.UNIFORM_NON_INFORMATIVE,
+        "prior_p": None,
+        "rationale": "Unknown trigger channel; UNIFORM maximum-entropy prior (P=Fraud 0.50) applied."
+    }
+
 
 def get_calibrated_lr(evidence_type: str) -> Optional[LikelihoodRatioMetadata]:
     """Retrieves calibrated metadata for an evidence type."""
