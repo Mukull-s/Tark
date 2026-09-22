@@ -3,137 +3,146 @@
   "case": {
     "status": "closed",
     "verdict": "confirmed_fraud",
-    "fraud_probability": 0.9998,
+    "fraud_probability": 0.9997,
     "pattern": "card_testing",
     "evidence": [
       {
+        "evidence_id": "EVD-HHG-011-TRIGGER",
         "type": "CUSTOMER_DENIAL",
         "source": "customer_report_trigger",
         "finding": "Cardholder initiated report: 'Customer C11923 message: 'I never made this $131.30 purchase. Please check my card.' Refers to 3583368.'",
         "lr": 18.5,
         "log_lr": 2.918,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       },
       {
-        "type": "BEHAVIORAL_BASELINE",
-        "source": "customer_profile",
-        "finding": "Customer baseline: 10361 historical txns, avg $39.45, primary channel online",
-        "lr": 1.0,
-        "log_lr": 0.0,
-        "exculpatory": false
-      },
-      {
-        "type": "BEHAVIORAL_BASELINE",
-        "source": "txn_velocity",
-        "finding": "High 24h velocity: 27 transactions totaling $1046.71",
-        "lr": 2.5,
-        "log_lr": 0.916,
-        "exculpatory": false
-      },
-      {
+        "evidence_id": "EVD-B6F9533A",
         "type": "CARD_TESTING_SEQUENCE",
-        "source": "card_sequence",
-        "finding": "Card testing sequence: 3 micro-authorizations (<$5) in 24h prior (txns: ['3582624', '3582142', '3582175'])",
+        "source": "tigergraph_query:card_sequence",
+        "finding": "Card testing sequence observed: 3 micro-authorizations totaling $0.00.",
         "lr": 34.3,
         "log_lr": 3.535,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [
+          "3582624",
+          "3582142",
+          "3582175"
+        ],
+        "supporting_entities": []
       }
     ],
     "affected_txn_ids": [
-      "3582175",
-      "3582142",
       "3583368",
-      "3582624"
+      "3582624",
+      "3582142",
+      "3582175"
     ],
-    "connected_card_ids": [
-      "C11923-K2"
-    ],
+    "connected_card_ids": [],
     "exposure_usd": 131.3,
     "similar_prior_cases": [
-      "CC-5187",
-      "CC-0290",
-      "CC-4058"
+      "CC-3039",
+      "CC-3206",
+      "CC-0290"
     ],
     "written_to_graph": true,
-    "graph_case_id": "INV-HHG-011"
+    "graph_case_id": "INV-HHG-011",
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "evidence_coverage": 0.5,
+    "applicable_dimensions": [
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY",
+      "BEHAVIORAL_BASELINE",
+      "CUSTOMER_DISPUTE"
+    ],
+    "probed_coverage": 0.75,
+    "probed_dimensions": [
+      "CUSTOMER_DISPUTE",
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY"
+    ],
+    "informative_families": [
+      "CUSTOMER_DISPUTE",
+      "TRANSACTION_VELOCITY"
+    ],
+    "corroborated_fraud": true,
+    "missing_information": [],
+    "prior_rationale": "Inbound cardholder dispute is itself alert-conditioned evidence; ALERT_CONDITIONED prior (P=Fraud 0.8383) is statistically valid."
   },
   "evidence_requests": [],
   "next_best_actions": {
     "initial": [
       {
-        "action": "DECLINE_TRANSACTION",
-        "approval_route": "L1",
-        "reason": "R5: Card testing sequence detected (micro-authorizations followed by purchase)."
-      },
-      {
         "action": "BLOCK_CARD",
         "approval_route": "L1",
-        "reason": "R5: Card testing sequence cleared a charge over $100."
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
+        "action": "CREATE_CASE",
+        "approval_route": "auto",
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
       }
     ],
     "final": [
       {
         "action": "DECLINE_TRANSACTION",
         "approval_route": "L1",
-        "reason": "R5: Card testing sequence detected (micro-authorizations followed by purchase)."
+        "reason": "R5: Card testing sequence detected (micro-authorizations followed by purchase).",
+        "role": "PRIMARY",
+        "scope": "TRANSACTION"
       },
       {
         "action": "BLOCK_CARD",
         "approval_route": "L1",
-        "reason": "R5: Card testing sequence cleared a charge over $100."
+        "reason": "R5: Card testing sequence cleared a charge over $100.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
       }
     ],
-    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+    "what_changed": "Primary action shifted from BLOCK_CARD to DECLINE_TRANSACTION after 2 Evidence Compass step(s) (P(Fraud) 0.9897 -> 0.9997; coverage 0.25 -> 0.50; prior: Inbound cardholder dispute is itself alert-conditioned evidence; ALERT_CONDITIONED prior (P=Fraud 0.8383) is statistically valid.)."
   },
   "sar": {
     "file": false,
     "narrative": null
   },
-  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "stop_reason": "DECISION_REACHED",
   "tool_calls": [
     {
-      "tool": "customer_profile",
-      "params": {
-        "cust_id": "C11923"
-      }
-    },
-    {
-      "tool": "txn_velocity",
-      "params": {
-        "c_id": "C11923-K2",
-        "target_ts": "2016-12-29 03:27:44",
-        "window_hours": 24
-      }
-    },
-    {
       "tool": "device_analysis",
+      "action_id": "QUERY_DEVICE_ANALYSIS",
       "params": {
-        "t_id": "3583368"
-      }
+        "t_id": "3583368",
+        "c_id": "C11923-K2",
+        "cust_id": "C11923",
+        "anchor_ts": "2016-12-29 06:27:44",
+        "target_ts": "2016-12-29 06:27:44"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 74.31
     },
     {
       "tool": "card_sequence",
+      "action_id": "QUERY_CARD_SEQUENCE",
       "params": {
         "c_id": "C11923-K2",
-        "anchor_ts": "2016-12-29 03:27:44",
-        "window_hours": 24
-      }
-    },
-    {
-      "tool": "region_analysis",
-      "params": {
+        "window_hours": 24,
+        "anchor_ts": "2016-12-29 06:27:44",
+        "t_id": "3583368",
         "cust_id": "C11923",
-        "txn_addr1": 0.0
-      }
-    },
-    {
-      "tool": "similar_cases",
-      "params": {
-        "target_pattern": "card_testing",
-        "c_id": "C11923-K2"
-      }
+        "target_ts": "2016-12-29 06:27:44"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 79.7
     }
   ],
-  "tokens": 1330,
-  "latency_s": 0.65
+  "tokens": 1210,
+  "latency_s": 9.53
 }
