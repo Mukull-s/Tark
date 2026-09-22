@@ -221,3 +221,24 @@ export interface ControlledPivotPayload {
 	analyst_id?: string;
 	reason?: string;
 }
+
+export interface InvestigationHistoryItem {
+	investigation_id: string;
+	case_id: string;
+	flagged_txn_id: string;
+	card_id: string;
+	customer_id: string;
+	trigger_type: string;
+	timestamp: string;
+	status: string;
+	verdict: string;
+	fraud_probability: number;
+	prior_probability: number;
+	primary_action: string;
+	approval_route: string;
+	exposure_usd: number;
+	decision_gate_passed: boolean;
+	evidence_count: number;
+	sar_mandated: boolean;
+}
+

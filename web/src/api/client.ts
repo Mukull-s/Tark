@@ -3,6 +3,7 @@ import type {
 	GraphView,
 	HealthStatus,
 	InvestigationEventView,
+	InvestigationHistoryItem,
 	InvestigationResultPayload,
 	InvestigationStatusResponse,
 } from "./types";
@@ -167,6 +168,14 @@ export async function triggerControlledPivot(
 		throw new Error(
 			errorData.detail || `Controlled pivot failed (${res.status})`,
 		);
+	}
+	return res.json();
+}
+
+export async function fetchInvestigationHistory(): Promise<InvestigationHistoryItem[]> {
+	const res = await fetch(`${API_BASE}/investigations/history`);
+	if (!res.ok) {
+		throw new Error(`Failed to load investigation history (${res.status})`);
 	}
 	return res.json();
 }

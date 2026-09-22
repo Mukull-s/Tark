@@ -918,6 +918,78 @@ def run_arbitrary_investigation(req: ArbitraryInvestigationRequest):
 
 
 
+@app.get("/api/investigations/history")
+def get_investigations_history():
+    """Returns chronological audit log of all investigated cases and session lookups."""
+    history = []
+    # 1. Collect live session runs from INVESTIGATION_RUNS
+    for inv_id, run in INVESTIGATION_RUNS.items():
+        if "data" in run:
+            run_data = run["data"]
+            case = run_data.get("case", {})
+            run_result = run_data.get("run_result", {})
+            final_state = run_result.get("final_state", {})
+            primary_action = run_result.get("primary_action", {})
+            
+            history.append({
+                "investigation_id": inv_id,
+                "case_id": case.get("case_id", inv_id),
+                "flagged_txn_id": str(case.get("flagged_txn_id", "N/A")),
+                "card_id": str(case.get("card_id", "N/A")),
+                "customer_id": str(case.get("customer_id", "N/A")),
+                "trigger_type": str(case.get("trigger_type", "risk_score")),
+                "timestamp": run.get("updated_at") or case.get("opened_at") or datetime.now(timezone.utc).isoformat(),
+                "status": run.get("status", "COMPLETED"),
+                "verdict": final_state.get("verdict", "confirmed_fraud"),
+                "fraud_probability": float(final_state.get("fraud_probability", 0.5)),
+                "prior_probability": float(run_data.get("initial_state", {}).get("fraud_probability", 0.5)),
+                "primary_action": str(primary_action.get("action", "MONITOR_CARD")),
+                "approval_route": str(primary_action.get("approval_route", "L1")),
+                "exposure_usd": float(run_data.get("exposure_usd", 0.0)),
+                "decision_gate_passed": bool(final_state.get("decision_gate_passed", False)),
+                "evidence_count": len(run_data.get("events", [])),
+                "sar_mandated": bool(any(a.get("action") == "FILE_REPORT" for a in run_result.get("all_actions", [])) or final_state.get("fraud_probability", 0) >= 0.70)
+            })
+
+    # 2. If no active session runs exist yet, seed with available benchmark results from cases/
+    if not history:
+        cases_dir = os.path.join(WORKSPACE_ROOT, "cases")
+        if os.path.exists(cases_dir):
+            for f in sorted(os.listdir(cases_dir)):
+                if f.endswith(".json") and f.startswith("HHG-"):
+                    try:
+                        with open(os.path.join(cases_dir, f), "r", encoding="utf-8") as fp:
+                            cd = json.load(fp)
+                            c = cd.get("case", {})
+                            fa = cd.get("next_best_actions", {}).get("final", [])
+                            first_act = fa[0] if fa else {}
+                            card_id = c.get("connected_card_ids", ["N/A"])[0] if c.get("connected_card_ids") else "N/A"
+                            cust_id = "C" + card_id.split("-")[0].replace("C", "") if card_id != "N/A" else "N/A"
+                            history.append({
+                                "investigation_id": cd.get("case_id"),
+                                "case_id": cd.get("case_id"),
+                                "flagged_txn_id": str(c.get("affected_txn_ids", ["N/A"])[0] if c.get("affected_txn_ids") else "N/A"),
+                                "card_id": str(card_id),
+                                "customer_id": str(cust_id),
+                                "trigger_type": "risk_score",
+                                "timestamp": "2016-11-20 12:00:00",
+                                "status": "COMPLETED",
+                                "verdict": str(c.get("verdict", "confirmed_fraud")),
+                                "fraud_probability": float(c.get("fraud_probability", 0.99)),
+                                "prior_probability": 0.5,
+                                "primary_action": str(first_act.get("action", "CREATE_CASE")),
+                                "approval_route": str(first_act.get("approval_route", "auto")),
+                                "exposure_usd": float(c.get("exposure_usd", 100.0)),
+                                "decision_gate_passed": True,
+                                "evidence_count": len(c.get("evidence", [])),
+                                "sar_mandated": bool(cd.get("sar", {}).get("file", False))
+                            })
+                    except Exception:
+                        pass
+
+    return history
+
+
 @app.get("/api/investigations/{investigation_id}")
 def get_investigation_status(investigation_id: str):
     run = INVESTIGATION_RUNS.get(investigation_id)
