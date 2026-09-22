@@ -140,6 +140,21 @@ def get_health():
     }
 
 
+@app.get("/health", include_in_schema=False)
+def get_health_alias():
+    return get_health()
+
+
+@app.get("/cases", include_in_schema=False)
+def list_cases_alias():
+    return list_cases()
+
+
+@app.get("/cases/{case_id}", include_in_schema=False)
+def get_case_alias(case_id: str):
+    return get_case(case_id)
+
+
 @app.get("/api/cases")
 def list_cases():
     cases = load_cases_from_csv()
@@ -185,6 +200,8 @@ def get_graph_schema_overview():
         return {
             "graph_name": schema.get("GraphName", "FraudInvestigation"),
             "status": "connected",
+            "data_source": "LIVE_GRAPH",
+            "is_cached": False,
             "total_vertices": sum(vertex_counts.values()),
             "vertex_counts": vertex_counts,
             "edge_types": edge_types,
@@ -194,6 +211,12 @@ def get_graph_schema_overview():
         return {
             "graph_name": "FraudInvestigation",
             "status": "cached",
+            "data_source": "CACHED_FALLBACK",
+            "is_cached": True,
+            "notice": (
+                "Live TigerGraph schema topology unavailable; showing last-known cached vertex/edge "
+                "counts. These figures are illustrative of the ingested dataset and may be stale."
+            ),
             "total_vertices": 38187,
             "vertex_counts": {
                 "Transaction": 26754,
@@ -518,6 +541,8 @@ def _execute_investigation_sync(case: Dict[str, Any]) -> Dict[str, Any]:
             "log_lr": round(item.log_lr, 4),
             "is_exculpatory": item.is_exculpatory,
             "observed_at": getattr(item, "timestamp", None) or getattr(item, "observed_at", ""),
+            "supporting_transaction_ids": list(item.supporting_transaction_ids or []),
+            "supporting_entities": list(item.supporting_entities or []),
             "details": item.details
         })
 
@@ -527,6 +552,7 @@ def _execute_investigation_sync(case: Dict[str, Any]) -> Dict[str, Any]:
             "iteration": t.iteration,
             "selected_action": t.selected_action,
             "candidate_net_decision_values": t.candidate_net_decision_values,
+            "candidate_decision_metrics": t.candidate_decision_metrics,
             "belief_before": t.belief_before,
             "belief_after": t.belief_after,
             "coverage_before": t.coverage_before,
@@ -609,8 +635,25 @@ def _execute_investigation_sync(case: Dict[str, Any]) -> Dict[str, Any]:
     return result_payload
 
 
+# Node-id prefixes used for *visual reconstruction* of related entities when a
+# GSQL finding reports an aggregate count (e.g. "device shared across 52 cards")
+# without returning the full list of concrete vertex ids. These nodes are
+# representative, not actual graph vertices, and are labelled as such in the UI.
+_RECONSTRUCTED_ID_PREFIXES = ("CARD_RING_", "TXN_MICRO_", "TXN_VEL_", "DEV_RING_")
+
+
+def _is_reconstructed_id(node_id: Any) -> bool:
+    """True when a node id denotes a reconstructed (non-graph) representative entity."""
+    return str(node_id).startswith(_RECONSTRUCTED_ID_PREFIXES)
+
+
 def _build_graph_from_run(run_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Transforms raw TigerGraph investigation evidence into an interactive GraphView."""
+    """Transforms raw TigerGraph investigation evidence into an interactive GraphView.
+
+    Nodes/edges whose ids are synthesized representatives (see
+    ``_RECONSTRUCTED_ID_PREFIXES``) are explicitly flagged ``is_reconstructed`` so
+    the frontend never presents them as actual queried graph vertices.
+    """
     case = run_data.get("case", {})
     case_id = case.get("case_id", "CASE")
     flagged_txn_id = str(case.get("flagged_txn_id", "TXN"))
@@ -629,6 +672,7 @@ def _build_graph_from_run(run_data: Dict[str, Any]) -> Dict[str, Any]:
         "label": f"Txn #{flagged_txn_id}",
         "subLabel": f"${amount:,.2f}",
         "isFocal": True,
+        "is_reconstructed": False,
         "metadata": {
             "amount": amount,
             "timestamp": case.get("opened_at"),
@@ -645,6 +689,7 @@ def _build_graph_from_run(run_data: Dict[str, Any]) -> Dict[str, Any]:
         "label": f"Card {card_id[-4:] if len(card_id) >= 4 else card_id}",
         "subLabel": card_id,
         "isFocal": False,
+        "is_reconstructed": False,
         "metadata": {"card_id": card_id, "customer_id": customer_id},
         "relevance": "inculpatory"
     }
@@ -691,6 +736,19 @@ def _build_graph_from_run(run_data: Dict[str, Any]) -> Dict[str, Any]:
         ev_type = ev.get("evidence_type")
         val = ev.get("value") or {}
         details = ev.get("details") or {}
+
+        # Non-informative evidence must not produce graph entities: a NO_MATCH
+        # means the pattern was ruled out, so rendering representative
+        # micro-auth / burst nodes would misrepresent the finding. Query failures
+        # and out-of-scope reads carry no topology either.
+        raw_value = ev.get("value")
+        scope_status = details.get("scope_status")
+        if (
+            str(raw_value) in ("NO_MATCH", "GRAPH_QUERY_FAILURE", "DATA_OUT_OF_SCOPE")
+            or scope_status in ("NO_MATCH", "GRAPH_QUERY_FAILURE", "DATA_OUT_OF_SCOPE")
+        ):
+            continue
+
         lr = ev.get("lr", 1.0)
         is_exculpatory = ev.get("is_exculpatory", False)
 
@@ -722,8 +780,10 @@ def _build_graph_from_run(run_data: Dict[str, Any]) -> Dict[str, Any]:
                 "is_exculpatory": is_exculpatory
             })
 
-            # Supporting connected cards in ring (up to 4 visual connected card nodes)
-            supporting_cards = details.get("connected_cards") or []
+            # Supporting connected cards in ring (up to 4 visual connected card nodes).
+            # Prefer concrete card ids returned by the graph; only fall back to
+            # representative CARD_RING_* nodes when the finding is an aggregate.
+            supporting_cards = details.get("connected_cards") or ev.get("supporting_entities") or []
             if not supporting_cards and shared_count > 1:
                 supporting_cards = [f"CARD_RING_{i+1}" for i in range(min(4, shared_count - 1))]
 
@@ -753,7 +813,12 @@ def _build_graph_from_run(run_data: Dict[str, Any]) -> Dict[str, Any]:
 
         # Card Testing Sequence
         elif ev_type == "CARD_TESTING_SEQUENCE":
-            seq_txns = details.get("supporting_transactions") or details.get("sequence_txns") or ["TXN_MICRO_1", "TXN_MICRO_2", "TXN_MICRO_3"]
+            seq_txns = (
+                details.get("supporting_transactions")
+                or details.get("sequence_txns")
+                or ev.get("supporting_transaction_ids")
+                or ["TXN_MICRO_1", "TXN_MICRO_2", "TXN_MICRO_3"]
+            )
             for idx, s_txn in enumerate(seq_txns[:3]):
                 s_txn_str = str(s_txn)
                 if s_txn_str != flagged_txn_id:
@@ -780,7 +845,11 @@ def _build_graph_from_run(run_data: Dict[str, Any]) -> Dict[str, Any]:
 
         # High Velocity
         elif ev_type == "HIGH_VELOCITY":
-            vel_txns = details.get("burst_txns") or ["TXN_VEL_1", "TXN_VEL_2"]
+            vel_txns = (
+                details.get("burst_txns")
+                or ev.get("supporting_transaction_ids")
+                or ["TXN_VEL_1", "TXN_VEL_2"]
+            )
             for idx, v_txn in enumerate(vel_txns[:2]):
                 v_txn_str = str(v_txn)
                 if v_txn_str != flagged_txn_id:
@@ -818,6 +887,32 @@ def _build_graph_from_run(run_data: Dict[str, Any]) -> Dict[str, Any]:
                 "is_exculpatory": is_exculpatory
             })
 
+    # Final pass: explicitly flag reconstructed (representative) nodes and edges.
+    # Synthesized ids are never painted as actual queried graph vertices.
+    for node in nodes_dict.values():
+        node["is_reconstructed"] = bool(node.get("is_reconstructed")) or _is_reconstructed_id(node.get("id"))
+        if node["is_reconstructed"]:
+            node.setdefault("metadata", {})
+            node["metadata"]["reconstruction_basis"] = "representative_node_from_aggregate_evidence"
+
+    for edge in edges_list:
+        if "is_reconstructed" not in edge:
+            edge["is_reconstructed"] = (
+                _is_reconstructed_id(edge.get("source")) or _is_reconstructed_id(edge.get("target"))
+            )
+
+    reconstructed_node_ids = [n["id"] for n in nodes_dict.values() if n.get("is_reconstructed")]
+    reconstructed_edge_count = sum(1 for e in edges_list if e.get("is_reconstructed"))
+
+    notice = None
+    if reconstructed_node_ids:
+        notice = (
+            "Related entities reconstructed from investigation evidence: "
+            f"{len(reconstructed_node_ids)} representative node(s) derived from aggregate GSQL "
+            "findings (e.g. 'device shared across N cards') rather than returned as explicit graph "
+            "vertex ids. They illustrate the reported topology and are not individually queried vertices."
+        )
+
     return {
         "investigation_id": case_id,
         "focal_entity": flagged_txn_id,
@@ -826,7 +921,13 @@ def _build_graph_from_run(run_data: Dict[str, Any]) -> Dict[str, Any]:
         "summary": {
             "node_count": len(nodes_dict),
             "edge_count": len(edges_list),
-            "evidence_edge_count": sum(1 for e in edges_list if e.get("evidence_id") is not None)
+            "evidence_edge_count": sum(1 for e in edges_list if e.get("evidence_id") is not None),
+            "live_node_count": len(nodes_dict) - len(reconstructed_node_ids),
+            "reconstructed_node_count": len(reconstructed_node_ids),
+            "reconstructed_node_ids": reconstructed_node_ids,
+            "reconstructed_edge_count": reconstructed_edge_count,
+            "has_reconstructed_nodes": bool(reconstructed_node_ids),
+            "reconstruction_notice": notice,
         }
     }
 
@@ -1064,6 +1165,7 @@ def get_investigation_evoi_trace(investigation_id: str):
             "iteration": t.get("iteration"),
             "selected_action": t.get("selected_action"),
             "candidate_net_decision_values": t.get("candidate_net_decision_values", {}),
+            "candidate_decision_metrics": t.get("candidate_decision_metrics", {}),
             "belief_before": t.get("belief_before"),
             "belief_after": t.get("belief_after"),
             "coverage_before": t.get("coverage_before"),
@@ -1399,6 +1501,8 @@ def post_controlled_pivot(investigation_id: str, req: ControlledPivotRequest):
             "log_lr": round(item.log_lr, 4),
             "is_exculpatory": item.is_exculpatory,
             "observed_at": getattr(item, "timestamp", None) or getattr(item, "observed_at", ""),
+            "supporting_transaction_ids": list(item.supporting_transaction_ids or []),
+            "supporting_entities": list(item.supporting_entities or []),
             "details": item.details
         })
 
@@ -1456,6 +1560,17 @@ if os.path.exists(WEB_DIST_DIR):
         if os.path.exists(file_path) and not os.path.isdir(file_path):
             return FileResponse(file_path)
         return FileResponse(os.path.join(WEB_DIST_DIR, "index.html"))
+else:
+    @app.get("/", include_in_schema=False)
+    def api_root():
+        return {
+            "name": "Tark — Agentic Fraud Investigation API",
+            "status": "operational",
+            "health": "/api/health",
+            "cases": "/api/cases",
+            "benchmark_summary": "/api/benchmark/summary",
+            "docs": "/docs"
+        }
 
 
 if __name__ == "__main__":
