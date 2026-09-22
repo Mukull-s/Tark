@@ -164,7 +164,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
 									? `$${c.exposure_usd.toFixed(2)}`
 									: c.amount != null
 										? `$${c.amount.toFixed(2)}`
-										: parseAmount(c.trigger_text, c.case_id);
+										: parseAmount(c.trigger_text);
 							const trigger = formatTriggerType(c.trigger_type);
 							return (
 								<div
