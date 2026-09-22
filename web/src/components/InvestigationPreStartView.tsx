@@ -38,7 +38,12 @@ export const InvestigationPreStartView: React.FC<
 		useState<InvestigationResultPayload | null>(null);
 	const [activeTab, setActiveTab] = useState<InvestigationTab>("activity");
 
-	const amount = parseAmount(caseItem.trigger_text);
+	const amount =
+		caseItem.exposure_usd != null
+			? `$${caseItem.exposure_usd.toFixed(2)}`
+			: caseItem.amount != null
+				? `$${caseItem.amount.toFixed(2)}`
+				: parseAmount(caseItem.trigger_text, caseItem.case_id);
 	const triggerLabel = formatTriggerType(caseItem.trigger_type);
 
 	const handleStartInvestigation = async () => {

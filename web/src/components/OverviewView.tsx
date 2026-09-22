@@ -159,7 +159,12 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
 
 					<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
 						{cases.slice(0, 5).map((c) => {
-							const amount = parseAmount(c.trigger_text);
+							const amount =
+								c.exposure_usd != null
+									? `$${c.exposure_usd.toFixed(2)}`
+									: c.amount != null
+										? `$${c.amount.toFixed(2)}`
+										: parseAmount(c.trigger_text, c.case_id);
 							const trigger = formatTriggerType(c.trigger_type);
 							return (
 								<div

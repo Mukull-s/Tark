@@ -87,15 +87,35 @@ def load_cases_from_csv() -> List[Dict[str, Any]]:
         df = pd.read_csv(CSV_PATH)
         for _, row in df.iterrows():
             r_score = float(row["risk_score"]) if pd.notna(row.get("risk_score")) else None
+            trig_text = str(row["trigger_text"])
+            flagged_txn = str(row.get("flagged_txn_id", ""))
+            amt = None
+            match = re.search(r'\$([0-9,]+(?:\.[0-9]{2})?)', trig_text)
+            if match:
+                amt = float(match.group(1).replace(',', ''))
+            elif flagged_txn:
+                try:
+                    tg_conn = get_tigergraph_connection()
+                    if tg_conn:
+                        v = tg_conn.getVerticesById("Transaction", flagged_txn)
+                        if v and len(v) > 0:
+                            v_amt = float(v[0].get("attributes", {}).get("amount", 0.0))
+                            if v_amt > 0:
+                                amt = v_amt
+                except Exception:
+                    pass
+
             cases.append({
                 "case_id": str(row["case_id"]),
                 "opened_at": str(row["opened_at"]),
                 "trigger_type": str(row["trigger_type"]),
-                "trigger_text": str(row["trigger_text"]),
+                "trigger_text": trig_text,
                 "flagged_txn_id": str(row["flagged_txn_id"]),
                 "card_id": str(row["card_id"]),
                 "customer_id": str(row["customer_id"]),
                 "risk_score": r_score,
+                "amount": amt,
+                "exposure_usd": amt,
             })
     cases.extend(list(CUSTOM_CASES.values()))
     return cases

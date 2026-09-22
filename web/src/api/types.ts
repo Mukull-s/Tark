@@ -7,6 +7,8 @@ export interface CaseMetadata {
 	card_id: string;
 	customer_id: string;
 	risk_score: number | null;
+	amount?: number | null;
+	exposure_usd?: number | null;
 	status?: string;
 }
 
