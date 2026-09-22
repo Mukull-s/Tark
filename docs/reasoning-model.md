@@ -195,3 +195,28 @@ Every decision step, including the decision gate evaluation, is logged:
   "rationale": "Decision Gate: Passed=False. State=INSUFFICIENT_EVIDENCE. Blocks=['Evidence coverage (0.20) is below minimum threshold (0.40). Corroborating investigative dimensions required.']. Rationale: I have evidence of suspicious behavior, but insufficient evidence to make a fraud determination (evidence coverage: 0.20 < 0.40, epistemic uncertainty: 0.80)."
 }
 ```
+
+---
+
+## Appendix A — Trigger-Conditioned Prior Resolution (v3.1)
+
+Prior selection is now an explicit, auditable function of the trigger channel rather than a
+single global default (`src/belief/calibration.py::resolve_trigger_prior`):
+
+- `customer_report` → `ALERT_CONDITIONED` (0.8383): the inbound dispute is itself evidence.
+- `analyst_request` → `UNIFORM` (0.50): no calibrated statistical prior.
+- `risk_score < 0.65` → `UNIFORM` (0.50): below-threshold alert, maximum-entropy baseline.
+- `risk_score >= 0.65` → `ALERT_CONDITIONED` (0.8383): confirmed high-risk alert.
+
+The rationale string is retained in the `InvestigationState.belief_state` audit trail and in
+each benchmark answer (`case.prior_rationale`).
+
+## Appendix B — Corroboration Gate (v3.1)
+
+After the coverage, epistemic, and probability-band gates, a positive fraud determination
+($P \ge 0.70$) additionally requires corroboration: a conclusive cardholder dispute, or
+$\ge 2$ informative evidence families, or at least one non-model informative family. This
+ensures a single uncorroborated dimension (e.g. the model risk score) can never produce an
+automated `confirmed_fraud` disposition. Non-corroborated cases remain
+`INSUFFICIENT_EVIDENCE` with a monitoring / verification posture.
+
