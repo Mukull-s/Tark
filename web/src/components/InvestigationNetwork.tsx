@@ -226,6 +226,16 @@ export const InvestigationNetwork: React.FC<InvestigationNetworkProps> = ({
 		sharedCardsCount - renderedRingCardsCount,
 	);
 
+	// Reconstructed representative entities (not directly queried graph vertices).
+	const reconstructedNodes = graph.nodes.filter((n) => n.is_reconstructed);
+	const hasReconstructedNodes =
+		graph.summary?.has_reconstructed_nodes ?? reconstructedNodes.length > 0;
+	const reconstructionNotice =
+		graph.summary?.reconstruction_notice ??
+		(hasReconstructedNodes
+			? "Related entities reconstructed from investigation evidence."
+			: null);
+
 	return (
 		<div
 			style={{
@@ -319,6 +329,33 @@ export const InvestigationNetwork: React.FC<InvestigationNetworkProps> = ({
 					</button>
 				</div>
 			</div>
+
+			{/* Reconstructed-entity disclosure */}
+			{hasReconstructedNodes && (
+				<div
+					data-testid="reconstructed-nodes-notice"
+					style={{
+						backgroundColor: "#fffbeb",
+						border: "1px solid #fde68a",
+						borderRadius: "6px",
+						padding: "10px 14px",
+						fontSize: "12px",
+						color: "#92400e",
+						lineHeight: 1.5,
+						display: "flex",
+						gap: "8px",
+						alignItems: "flex-start",
+					}}
+				>
+					<span aria-hidden="true">&#9432;</span>
+					<span>
+						<strong>Related entities reconstructed from investigation evidence.</strong>{" "}
+						{reconstructionNotice}{" "}
+						({reconstructedNodes.length} of {graph.nodes.length} node
+						{graph.nodes.length === 1 ? "" : "s"} shown are representative.)
+					</span>
+				</div>
+			)}
 
 			{/* SVG Graph Canvas Container */}
 			<div
@@ -632,6 +669,23 @@ export const InvestigationNetwork: React.FC<InvestigationNetworkProps> = ({
 								>
 									{selectedNode.label || selectedNode.id}
 								</span>
+								{selectedNode.is_reconstructed && (
+									<span
+										title="Representative entity reconstructed from aggregate investigation evidence; not a directly queried graph vertex."
+										style={{
+											fontSize: "10px",
+											fontWeight: 700,
+											textTransform: "uppercase",
+											padding: "2px 6px",
+											borderRadius: "3px",
+											backgroundColor: "#fffbeb",
+											color: "#b45309",
+											border: "1px solid #fde68a",
+										}}
+									>
+										Reconstructed
+									</span>
+								)}
 							</div>
 							<p
 								style={{
