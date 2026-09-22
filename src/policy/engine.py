@@ -18,6 +18,13 @@ class ActionScope(str, Enum):
     CUSTOMER = "CUSTOMER"                # Customer interaction (VERIFY, WARN)
     ESCALATION = "ESCALATION"            # Escalation to analyst
 
+
+# A shared-device ring spanning at least this many distinct card accounts is a
+# large-scale syndicate. Per the R6-syndicate exception, the scale of the
+# multi-account graph corroboration (not a single evidence family) requires
+# Level-2 human authorization before any SAR filing.
+SYNDICATE_CARD_THRESHOLD = 10
+
 class ActionRecommendation(BaseModel):
     action: str
     approval_route: str
@@ -29,6 +36,27 @@ class PolicyEngine:
     def determine_block_card_route(self, exposure_usd: float) -> str:
         """Rule 2: L1 if <= 2500, L2 if > 2500."""
         return "L1" if exposure_usd <= 2500.0 else "L2"
+
+    @staticmethod
+    def _max_syndicate_card_count(ledger: EvidenceLedger) -> int:
+        """Largest observed SHARED_DEVICE_RING breadth (distinct connected cards)."""
+        max_count = 0
+        for item in ledger.items:
+            if item.evidence_type != EvidenceType.SHARED_DEVICE_RING:
+                continue
+            if str(item.value) == "NO_MATCH":
+                continue
+            candidates = []
+            if isinstance(item.value, dict):
+                candidates.append(item.value.get("shared_card_count"))
+            if item.details:
+                candidates.append(item.details.get("shared_count"))
+                candidates.append(item.details.get("shared_card_count"))
+            candidates.append(len(item.supporting_entities or []))
+            for c in candidates:
+                if isinstance(c, (int, float)):
+                    max_count = max(max_count, int(c))
+        return max_count
 
     @staticmethod
     def get_primary_action(actions: List[ActionRecommendation]) -> Optional[ActionRecommendation]:
@@ -96,6 +124,7 @@ class PolicyEngine:
         
         pattern = case_context.get("pattern") or case_context.get("secondary_typology") or ""
         is_undocumented = (pattern == "undocumented")
+        coverage = case_context.get("evidence_coverage")
         
         informative_items = [
             item for item in ledger.items
@@ -202,6 +231,40 @@ class PolicyEngine:
 
         # Rule R6: Shared origin across multiple cards
         if is_shared_ring:
+            ring_size = self._max_syndicate_card_count(ledger)
+            gate_explicitly_locked = case_context.get("decision_gate_passed") is False
+
+            # R6-syndicate exception: a ring spanning >= SYNDICATE_CARD_THRESHOLD
+            # independent accounts is escalated for Level-2 human authorization
+            # before any SAR filing. The scale of the multi-account graph
+            # corroboration is the justification; automatic SAR filing is deferred.
+            if ring_size >= SYNDICATE_CARD_THRESHOLD and gate_explicitly_locked:
+                actions.append(ActionRecommendation(
+                    action="ESCALATE_TO_ANALYST",
+                    approval_route="L2",
+                    reason=(
+                        f"R6-syndicate: device shared across {ring_size} independent card accounts. "
+                        "Mandatory Level-2 human authorization required before SAR filing."
+                    ),
+                    role=ActionRole.PRIMARY,
+                    scope=ActionScope.ESCALATION
+                ))
+                actions.append(ActionRecommendation(
+                    action="CREATE_CASE",
+                    approval_route="auto",
+                    reason="R6-syndicate: internal syndicate case opened with graph-corroborated evidence.",
+                    role=ActionRole.CONSEQUENTIAL,
+                    scope=ActionScope.CASE_MANAGEMENT
+                ))
+                actions.append(ActionRecommendation(
+                    action="MONITOR_CONNECTED_CARDS",
+                    approval_route="auto",
+                    reason=f"R6-syndicate: place all {ring_size} connected cards under elevated monitoring.",
+                    role=ActionRole.CONSEQUENTIAL,
+                    scope=ActionScope.CARD_ACCOUNT
+                ))
+                return actions
+
             actions.append(ActionRecommendation(
                 action="CREATE_CASE",
                 approval_route="auto",
@@ -225,8 +288,12 @@ class PolicyEngine:
             ))
             return actions
 
-        # Rule R9: Undocumented pattern with evidence of abuse
-        if is_undocumented and fraud_probability >= 0.70:
+        # Rule R9: Undocumented pattern with corroborated, high-confidence evidence of abuse
+        # Governance hardening: an undocumented typology only escalates to a full
+        # case + regulatory report when the posterior is very high (>= 0.85) AND the
+        # investigation has material coverage (>= 0.40, aligned with the decision gate).
+        # Thin/uncorroborated undocumented patterns receive a non-punitive MONITOR / VERIFY posture.
+        if is_undocumented and fraud_probability >= 0.85 and (coverage is None or coverage >= 0.40) and case_context.get("decision_gate_passed") is not False:
             actions.append(ActionRecommendation(
                 action="CREATE_CASE",
                 approval_route="auto",
@@ -247,6 +314,33 @@ class PolicyEngine:
                 reason="R9: Hand off novel pattern to senior fraud analyst.",
                 role=ActionRole.CONSEQUENTIAL,
                 scope=ActionScope.ESCALATION
+            ))
+            return actions
+
+        # Rule R9-thin: Undocumented pattern without corroboration / material coverage.
+        if is_undocumented and fraud_probability >= 0.70 and (
+            case_context.get("decision_gate_passed") is False
+            or (coverage is not None and coverage < 0.40)
+        ):
+            gate_locked = case_context.get("decision_gate_passed") is False
+            actions.append(ActionRecommendation(
+                action="MONITOR_CARD",
+                approval_route="auto",
+                reason=(
+                    "R9-thin: High posterior on an undocumented pattern without "
+                    + ("a passed decision gate (corroboration required)." if gate_locked
+                       else f"material coverage (coverage={coverage:.2f} < 0.40).")
+                    + " Punitive blocking withheld; monitor and corroborate before escalation."
+                ),
+                role=ActionRole.PRIMARY,
+                scope=ActionScope.CARD_ACCOUNT
+            ))
+            actions.append(ActionRecommendation(
+                action="VERIFY_WITH_CUSTOMER",
+                approval_route="auto",
+                reason="R9-thin: Request cardholder confirmation to corroborate an undocumented pattern.",
+                role=ActionRole.SECONDARY,
+                scope=ActionScope.CUSTOMER
             ))
             return actions
 
@@ -288,6 +382,30 @@ class PolicyEngine:
 
         # General High Confidence Fraud (>= 0.70)
         if fraud_probability >= 0.70:
+            # Gate-aware governance: when the decision gate is explicitly locked
+            # (e.g. uncorroborated evidence), terminal punitive blocking is
+            # inadmissible. Evidence-specific containment rules (R2/R5/R6) above
+            # remain authoritative; the generic fallback degrades to MONITOR/VERIFY.
+            if case_context.get("decision_gate_passed") is False and not customer_denied:
+                actions.append(ActionRecommendation(
+                    action="MONITOR_CARD",
+                    approval_route="auto",
+                    reason=(
+                        f"High posterior ({fraud_probability:.2f}) but decision gate is LOCKED; "
+                        "punitive blocking withheld pending corroboration."
+                    ),
+                    role=ActionRole.PRIMARY,
+                    scope=ActionScope.CARD_ACCOUNT
+                ))
+                actions.append(ActionRecommendation(
+                    action="VERIFY_WITH_CUSTOMER",
+                    approval_route="auto",
+                    reason="Corroborate the unresolved high-posterior signal via cardholder verification.",
+                    role=ActionRole.SECONDARY,
+                    scope=ActionScope.CUSTOMER
+                ))
+                return actions
+
             actions.append(ActionRecommendation(
                 action="BLOCK_CARD",
                 approval_route=self.determine_block_card_route(exposure_usd),
