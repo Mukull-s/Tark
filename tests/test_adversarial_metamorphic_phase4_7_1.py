@@ -466,9 +466,9 @@ def test_metamorphic_f2_similar_legitimate_case_zero_belief_shift(base_engines):
 
 def test_metamorphic_f3_active_case_self_match_exclusion(base_engines):
     """Active investigation cannot retrieve itself from memory."""
-    store = CaseMemoryStore()
+    store = CaseMemoryStore(writeback_path=None)
     rec = CaseMemoryRecord(case_id="F3-SELF", customer_id="U1", card_id="C1", closed_at="2026-01-01 00:00:00", historical_outcome="confirmed_fraud", pattern="card_testing", exposure_usd=100.0)
-    store.add_case(rec)
+    store.add_case(rec, persist=False)
     retriever = SimilarCaseRetriever(store)
     state = create_synthetic_state("F3-SELF", card_id="C1", customer_id="U1")
     matches = retriever.retrieve_similar_cases(state=state, top_k=5)
@@ -476,9 +476,9 @@ def test_metamorphic_f3_active_case_self_match_exclusion(base_engines):
 
 def test_metamorphic_f4_future_dated_case_temporal_exclusion(base_engines):
     """Cases closed after the active investigation timestamp are excluded."""
-    store = CaseMemoryStore()
+    store = CaseMemoryStore(writeback_path=None)
     rec_future = CaseMemoryRecord(case_id="F4-FUT", customer_id="U1", card_id="C1", closed_at="2026-12-31 00:00:00", historical_outcome="confirmed_fraud", pattern="card_testing", exposure_usd=100.0)
-    store.add_case(rec_future)
+    store.add_case(rec_future, persist=False)
     retriever = SimilarCaseRetriever(store)
     state = create_synthetic_state("F4-ACTIVE", card_id="C1", customer_id="U1")
     matches = retriever.retrieve_similar_cases(state=state, effective_timestamp="2026-06-01 00:00:00")
