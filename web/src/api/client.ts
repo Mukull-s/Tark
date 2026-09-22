@@ -182,3 +182,12 @@ export async function fetchInvestigationHistory(): Promise<InvestigationHistoryI
 	}
 	return res.json();
 }
+
+export async function fetchBenchmarkSummary(): Promise<any> {
+	const res = await fetch(`${API_BASE}/benchmark/summary`);
+	if (!res.ok) {
+		throw new Error(`Failed to load benchmark summary (${res.status})`);
+	}
+	return res.json();
+}
+

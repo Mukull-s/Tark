@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { CaseMetadata } from "../api/types";
+import { fetchBenchmarkSummary } from "../api/client";
 
 interface BenchmarkViewProps {
 	cases: CaseMetadata[];
@@ -79,11 +80,7 @@ export const BenchmarkView: React.FC<BenchmarkViewProps> = ({
 	useEffect(() => {
 		let isMounted = true;
 		setLoading(true);
-		fetch("/api/benchmark/summary")
-			.then((res) => {
-				if (!res.ok) throw new Error("Network error");
-				return res.json();
-			})
+		fetchBenchmarkSummary()
 			.then((data) => {
 				if (isMounted && data && data.total_cases) {
 					setSummary(data);
