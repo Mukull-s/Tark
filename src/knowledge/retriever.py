@@ -5,6 +5,7 @@ from src.evidence.types import EvidenceType
 from src.policy.engine import ActionRecommendation
 from src.knowledge.models import KnowledgeChunk, RetrievedKnowledgeItem
 from src.knowledge.store import InvestigationKnowledgeBase
+from src.knowledge.vector_index import get_default_vector_index
 
 
 class PolicyGraphRAGRetriever:
@@ -262,6 +263,48 @@ class PolicyGraphRAGRetriever:
                     applicable_statute_or_rule="12 CFR §§ 1005.6, 1005.11",
                     retrieval_path="CustomerReport / Denial -> Regulation:12 CFR §§ 1005.6, 1005.11"
                 )
+
+        # 4. Hop: Vector-similarity retrieval over the knowledge corpus (GraphRAG).
+        # Every policy/typology/statute chunk is embedded and retrieved by cosine
+        # similarity to a case query built from observed evidence and disposition.
+        # This is the vector storage + retrieval path for grounding; results are
+        # merged (deduplicated by chunk_id) with the deterministic mapping above.
+        try:
+            vector_index = get_default_vector_index(self.kb)
+            query_terms = sorted(t.value for t in evidence_types)
+            query_terms += sorted(action_names)
+            query_terms.append(state.secondary_typology or "")
+            query_terms.append(state.trigger.get("trigger_type", ""))
+            query = " ".join(term for term in query_terms if term)
+            vector_hits = vector_index.search(query, top_k=6)
+
+            for chunk_id, similarity in vector_hits:
+                if chunk_id in retrieved:
+                    # Augment the deterministic mapping's provenance with the
+                    # vector-similarity path so the grounding trace is explicit.
+                    item = retrieved[chunk_id]
+                    if "VectorIndex" not in (item.retrieval_path or ""):
+                        prefix = (item.retrieval_path + " | ") if item.retrieval_path else ""
+                        item.retrieval_path = (
+                            f"{prefix}VectorIndex -> CosineSimilarity -> {chunk_id} ({similarity:.3f})"
+                        )
+                    continue
+                chunk = self.kb.get_chunk(chunk_id)
+                if not chunk:
+                    continue
+                retrieved[chunk_id] = RetrievedKnowledgeItem(
+                    chunk=chunk,
+                    relevance_score=round(max(0.0, min(0.95, float(similarity))), 4),
+                    match_rationale=(
+                        f"Vector-similarity retrieval: chunk embedding is cosine-similar "
+                        f"({similarity:.3f}) to the active investigation query "
+                        f"[{query[:160]}]."
+                    ),
+                    applicable_statute_or_rule=("Rule " + chunk.applicable_rules[0]) if chunk.applicable_rules else chunk.section_reference,
+                    retrieval_path=f"VectorIndex -> CosineSimilarity -> {chunk_id}"
+                )
+        except Exception:
+            pass
 
         # Sort by relevance descending
         items = list(retrieved.values())
