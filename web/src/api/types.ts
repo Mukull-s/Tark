@@ -33,10 +33,21 @@ export interface EvidenceItemView {
 	details?: Record<string, any>;
 }
 
+export interface CandidateDecisionMetrics {
+	baseline_loss: number;
+	expected_posterior_loss: number;
+	expected_decision_value: number;
+	net_decision_value: number;
+	operational_burden_cost?: number;
+	gate_unlock_prob: number;
+	flip_prob: number;
+}
+
 export interface IterationTraceView {
 	iteration: number;
 	selected_action: string;
 	candidate_net_decision_values?: Record<string, number>;
+	candidate_decision_metrics?: Record<string, CandidateDecisionMetrics>;
 	belief_before:
 		| number
 		| {
@@ -122,6 +133,8 @@ export interface GraphNode {
 	label: string;
 	subLabel?: string;
 	isFocal?: boolean;
+	/** True when this is a representative node reconstructed from aggregate evidence, not a queried vertex. */
+	is_reconstructed?: boolean;
 	metadata: Record<string, any>;
 	relevance: "focal" | "inculpatory" | "exculpatory" | "neutral";
 }
@@ -135,6 +148,8 @@ export interface GraphEdge {
 	evidence_family?: string;
 	lr?: number;
 	is_exculpatory?: boolean;
+	/** True when an endpoint is a reconstructed representative node. */
+	is_reconstructed?: boolean;
 	highlighted?: boolean;
 }
 
@@ -147,6 +162,12 @@ export interface GraphView {
 		node_count: number;
 		edge_count: number;
 		evidence_edge_count: number;
+		live_node_count?: number;
+		reconstructed_node_count?: number;
+		reconstructed_node_ids?: string[];
+		reconstructed_edge_count?: number;
+		has_reconstructed_nodes?: boolean;
+		reconstruction_notice?: string | null;
 	};
 }
 
