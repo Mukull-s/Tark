@@ -3,142 +3,201 @@
   "case": {
     "status": "closed",
     "verdict": "confirmed_fraud",
-    "fraud_probability": 0.9824,
+    "fraud_probability": 0.9888,
     "pattern": "undocumented",
     "evidence": [
       {
+        "evidence_id": "EVD-HHG-007-TRIGGER",
         "type": "CALIBRATED_RISK_SCORE",
         "source": "bank_detection_model",
-        "finding": "Model risk score 0.87",
+        "finding": "Real-time fraud risk score: 0.87",
         "lr": 6.8,
         "log_lr": 1.917,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       },
       {
-        "type": "BEHAVIORAL_BASELINE",
-        "source": "customer_profile",
-        "finding": "Customer baseline: 2792 historical txns, avg $123.85, primary channel in_person",
-        "lr": 1.0,
-        "log_lr": 0.0,
-        "exculpatory": false
-      },
-      {
-        "type": "BEHAVIORAL_BASELINE",
-        "source": "txn_velocity",
-        "finding": "High 24h velocity: 17 transactions totaling $8530.80",
+        "evidence_id": "EVD-57BADA31",
+        "type": "HIGH_VELOCITY",
+        "source": "tigergraph_query:txn_velocity",
+        "finding": "High transaction velocity: 18 transactions totaling $8653.93 within 24h.",
         "lr": 2.5,
         "log_lr": 0.916,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [
+          "3512716",
+          "3514145",
+          "3515001",
+          "3513664",
+          "3513073",
+          "3514948",
+          "3514137",
+          "3514278",
+          "3515193",
+          "3515045",
+          "3514092",
+          "3513495",
+          "3513351",
+          "3514335",
+          "3513079",
+          "3512690",
+          "3514573",
+          "3513366"
+        ],
+        "supporting_entities": []
       }
     ],
     "affected_txn_ids": [
-      "3514948"
+      "3514948",
+      "3512716",
+      "3514145",
+      "3515001",
+      "3513664",
+      "3513073",
+      "3514137",
+      "3514278",
+      "3515193",
+      "3515045",
+      "3514092",
+      "3513495",
+      "3513351",
+      "3514335",
+      "3513079",
+      "3512690",
+      "3514573",
+      "3513366"
     ],
     "connected_card_ids": [],
     "exposure_usd": 111.92,
     "similar_prior_cases": [
-      "CC-3748",
-      "CC-3841",
-      "CC-2971"
+      "CC-0104",
+      "CC-3136",
+      "CC-4597"
     ],
     "written_to_graph": true,
-    "graph_case_id": "INV-HHG-007"
+    "graph_case_id": "INV-HHG-007",
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "evidence_coverage": 0.4,
+    "applicable_dimensions": [
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY",
+      "BEHAVIORAL_BASELINE",
+      "CUSTOMER_DISPUTE",
+      "MODEL_SCORE"
+    ],
+    "probed_coverage": 0.6,
+    "probed_dimensions": [
+      "DEVICE_INFRASTRUCTURE",
+      "MODEL_SCORE",
+      "TRANSACTION_VELOCITY"
+    ],
+    "informative_families": [
+      "MODEL_SCORE",
+      "TRANSACTION_VELOCITY"
+    ],
+    "corroborated_fraud": true,
+    "missing_information": [],
+    "prior_rationale": "Model risk score 0.87 exceeds the alert threshold (0.65); ALERT_CONDITIONED prior is statistically valid."
   },
-  "evidence_requests": [
-    {
-      "type": "VERIFY_WITH_CUSTOMER",
-      "prompt": "Did you authorize this transaction?",
-      "status": "UNAVAILABLE",
-      "response": "Customer verification challenge timed out; no out-of-band response received via SMS/Email gateway.",
-      "provenance": "external_gateway_timeout"
-    }
-  ],
+  "evidence_requests": [],
   "next_best_actions": {
     "initial": [
       {
-        "action": "CREATE_CASE",
+        "action": "MONITOR_CARD",
         "approval_route": "auto",
-        "reason": "R9: Coordinated anomalous activity fitting no standard typology."
+        "reason": "R9-thin: High posterior on an undocumented pattern without a passed decision gate (corroboration required). Punitive blocking withheld; monitor and corroborate before escalation.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
-        "action": "FILE_REPORT",
-        "approval_route": "L2",
-        "reason": "R9: Regulatory report for novel/undocumented fraud scheme."
-      },
-      {
-        "action": "ESCALATE_TO_ANALYST",
+        "action": "VERIFY_WITH_CUSTOMER",
         "approval_route": "auto",
-        "reason": "R9: Hand off novel pattern to senior fraud analyst."
+        "reason": "R9-thin: Request cardholder confirmation to corroborate an undocumented pattern.",
+        "role": "SECONDARY",
+        "scope": "CUSTOMER"
       }
     ],
     "final": [
       {
         "action": "CREATE_CASE",
         "approval_route": "auto",
-        "reason": "R9: Coordinated anomalous activity fitting no standard typology."
+        "reason": "R9: Coordinated anomalous activity fitting no standard typology.",
+        "role": "PRIMARY",
+        "scope": "CASE_MANAGEMENT"
       },
       {
         "action": "FILE_REPORT",
         "approval_route": "L2",
-        "reason": "R9: Regulatory report for novel/undocumented fraud scheme."
+        "reason": "R9: Regulatory report for novel/undocumented fraud scheme.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
       },
       {
         "action": "ESCALATE_TO_ANALYST",
         "approval_route": "auto",
-        "reason": "R9: Hand off novel pattern to senior fraud analyst."
+        "reason": "R9: Hand off novel pattern to senior fraud analyst.",
+        "role": "CONSEQUENTIAL",
+        "scope": "ESCALATION"
       }
     ],
-    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+    "what_changed": "Primary action shifted from MONITOR_CARD to CREATE_CASE after 3 Evidence Compass step(s) (P(Fraud) 0.9724 -> 0.9888; coverage 0.20 -> 0.40; prior: Model risk score 0.87 exceeds the alert threshold (0.65); ALERT_CONDITIONED prior is statistically valid.)."
   },
   "sar": {
     "file": true,
-    "narrative": "### SUSPICIOUS ACTIVITY REPORT (SAR) NARRATIVE\n**1. SUMMARY OF SUSPICIOUS ACTIVITY:**\nDuring internal fraud monitoring, anomalous activity exceeding regulatory thresholds was identified. Multiple unauthorized authorizations were flagged and escalated for formal investigation.\n\n**2. IDENTITY & ACCOUNT INFORMATION:**\nThe transaction activity involves cardholder account records identified in case record.\n\n**3. METHOD OF OPERATION:**\nThe observed modus operandi aligns with coordinated card-not-present exploitation and identity manipulation. Technical indicators confirm high-velocity unauthorized access.\n\n**4. LAW ENFORCEMENT ACTIONABLE DETAILS:**\nAssociated device identifiers, IP indicators, and transaction records have been secured in the graph database for regulatory audit and law enforcement referral.\n\n**5. DISPOSITION & MITIGATION:**\nThe compromised card has been permanently blocked, relevant connected entities placed under elevated monitoring, and this suspicious activity filing completed under policy rule R2/R6."
+    "narrative": "### 1. Executive Summary\n- **Investigation Identifier:** `HHG-007`\n- **Target Entities:** Card `C09933-K2` | Customer `C09933` | Flagged Txn `3514948`\n- **Financial Exposure:** $111.92\n- **Belief Shift:** P(Fraud) shifted from 0.8383 to 0.9888.\n- **Decision Gate Status:** PASSED (DECIDED).\n- **Evidence Coverage:** 40% of core investigative dimensions observed.\n- **Primary Disposition:** CREATE_CASE, FILE_REPORT, ESCALATE_TO_ANALYST\n\n### 2. Graph Evidence Analysis\nEmpirical evidence observed via deterministic GSQL query executions on the TigerGraph cluster:\n- **[EVD-HHG-007-TRIGGER]** `CALIBRATED_RISK_SCORE` (LR: 6.80, SUPPORTS): Real-time fraud risk score: 0.87 (Provenance: `Graph GSQL Execution`).\n- **[EVD-5D6C9724]** `SHARED_DEVICE_RING` (LR: 1.00, NEUTRAL): Device  shows clean single-card profile; no multi-card ring observed. (Provenance: `TigerGraph GSQL device_analysis`).\n- **[EVD-4AF1D76A]** `CARD_TESTING_SEQUENCE` (LR: 1.00, NEUTRAL): No micro-authorization card testing sequence observed within 24h window. (Provenance: `TigerGraph GSQL card_sequence`).\n- **[EVD-57BADA31]** `HIGH_VELOCITY` (LR: 2.50, SUPPORTS): High transaction velocity: 18 transactions totaling $8653.93 within 24h. (Provenance: `TigerGraph GSQL txn_velocity`).\n\n### 3. Historical Precedent Analysis\nContextual memory precedents retrieved from historical closed investigations (non-evidential, LR=1.0):\n- **[CC-0104]** Outcome: `CONFIRMED_FRAUD` (Similarity: 0.62) | Typology: `out_of_region_use` | Actions: `CREATE_CASE, BLOCK_CARD`. Precedent Case CC-0104 (CONFIRMED_FRAUD): Shares [Identical card ID (C09933-K2); Identical customer ID (C09933); Comparable dollar exposure ($92.02 vs $111.92, proximity 82%)]. Historical disposition resulted in [CREATE_CASE, BLOCK_CARD]. Role: Contextual precedent only (LR=1.0, non-evidential).\n- **[CC-3136]** Outcome: `CONFIRMED_FRAUD` (Similarity: 0.60) | Typology: `account_takeover` | Actions: `CREATE_CASE, BLOCK_CARD`. Precedent Case CC-3136 (CONFIRMED_FRAUD): Shares [Identical card ID (C09933-K2); Identical customer ID (C09933); Comparable dollar exposure ($73.99 vs $111.92, proximity 66%)]. Historical disposition resulted in [CREATE_CASE, BLOCK_CARD]. Role: Contextual precedent only (LR=1.0, non-evidential).\n- **[CC-4597]** Outcome: `CONFIRMED_FRAUD` (Similarity: 0.59) | Typology: `account_takeover` | Actions: `CREATE_CASE, BLOCK_CARD`. Precedent Case CC-4597 (CONFIRMED_FRAUD): Shares [Identical card ID (C09933-K2); Identical customer ID (C09933); Comparable dollar exposure ($68.91 vs $111.92, proximity 62%)]. Historical disposition resulted in [CREATE_CASE, BLOCK_CARD]. Role: Contextual precedent only (LR=1.0, non-evidential).\n\n### 4. Policy & Regulatory Compliance\nAuthoritative bank policies and statutory regulations governing this disposition:\n- **[KNOW-POLICY-R5]** `Rule R5: Card Testing and Micro-Authorization Sequences` (Policy Manual \u00a7 4.5 (Rule R5), Bank Risk Governance): \"Upon detection of a rapid sequence of low-value micro-authorizations followed by a high-value purchase attempt (CARD_TESTING_SEQUENCE), DECLINE_TRANSACTION must be executed immediately under Level 1 (L1) review. If exposure exceeds $100, the card must be blocked (BLOCK_CARD). If exposure is <= $100, step-up multi-factor authentication (STEP_UP_AUTH) is mandated.\" (Application Rationale: Card testing sequence requires mandatory transaction decline under L1 authorization review.) _(Retrieval Path: `GraphEvidence -> CARD_TESTING_SEQUENCE -> Policy:Rule R5 | VectorIndex -> CosineSimilarity -> KNOW-POLICY-R5 (0.215)`)_\n- **[KNOW-POLICY-R6]** `Rule R6: Shared Origin and Syndicate Device Rings` (Policy Manual \u00a7 4.6 (Rule R6), Bank Risk Governance): \"When graph traversal reveals shared device infrastructure (SHARED_DEVICE_RING) or IP/proxy masking linking multiple unrelated card accounts, CREATE_CASE is required, all connected cards must be placed under MONITOR_CONNECTED_CARDS, and a syndicate fraud report (FILE_REPORT) must be routed to Level 2 (L2) AML/Fraud compliance. R6-syndicate exception: when the ring spans 10 or more independent card accounts, the scale of the multi-account graph corroboration mandates Level-2 human authorization (ESCALATE_TO_ANALYST) BEFORE any SAR filing; automatic FILE_REPORT is deferred until that authorization is granted.\" (Application Rationale: Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.) _(Retrieval Path: `GraphEvidence -> SHARED_DEVICE_RING -> Policy:Rule R6 | VectorIndex -> CosineSimilarity -> KNOW-POLICY-R6 (0.266)`)_\n- **[KNOW-REG-FINCEN-SAR]** `Regulatory Statute: FinCEN Suspicious Activity Report (SAR) Requirements` (31 CFR \u00a7 1020.320, Financial Crimes Enforcement Network (FinCEN)): \"Under 31 CFR \u00a7 1020.320(a)(2), covered financial institutions must file a Suspicious Activity Report (SAR) within 30 calendar days of initial detection for any transaction involving $5,000 or more where a suspect is identified ($25,000 or more for unidentified suspects, or any amount for insider abuse) if the bank knows, suspects, or has reason to suspect illicit funds, regulatory evasion, or lack of lawful purpose. In accordance with Bank Risk Governance, Tark enforces a heightened internal compliance threshold requiring Level 2 (L2) SAR filing review (FILE_REPORT) at exposure >= $1,000 or upon detection of multi-card syndicate infrastructure (Rules R2, R6, R10).\" (Application Rationale: Exposure ($111.92) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.) _(Retrieval Path: `PolicyAction / ExposureThreshold -> Regulation:31 CFR \u00a7 1020.320`)_\n- **[KNOW-TYPO-CARDTESTING]** `Fraud Typology: Card Testing / BIN Attacks` (Typology Catalog \u00a7 2.1, FATF / Card Network Security): \"Card testing involves automated scripts testing stolen card credentials against merchant portals with nominal authorization amounts ($0.01 - $2.00) to confirm card validity before executing large fraudulent purchases. Key graph indicators: high transaction velocity within 60 minutes, rapid merchant cycling, and micro-authorization sequences.\" (Application Rationale: Observed CARD_TESTING_SEQUENCE or HIGH_VELOCITY in graph evidence directly matches card testing attack typology.) _(Retrieval Path: `GraphEvidence -> CARD_TESTING_SEQUENCE -> Typology:CardTesting | VectorIndex -> CosineSimilarity -> KNOW-TYPO-CARDTESTING (0.183)`)_\n- **[KNOW-TYPO-SHARED-DEVICE]** `Fraud Typology: Shared Device & Syndicate Mule Rings` (Typology Catalog \u00a7 2.4, FinCEN / Interpol Cybercrime): \"Organized fraud syndicates utilize shared device infrastructure (emulators, rooted mobile devices, proxy services) to operate dozens of compromised or synthetic cardholder accounts from a single hardware footprint. Key graph indicators: device vertex connected to > 5 distinct card accounts, anonymous proxy flags, and cross-account velocity.\" (Application Rationale: Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.) _(Retrieval Path: `GraphEvidence -> SHARED_DEVICE_RING -> Typology:DeviceSyndicate | VectorIndex -> CosineSimilarity -> KNOW-TYPO-SHARED-DEVICE (0.227)`)_\n- **[KNOW-POLICY-R9]** `Rule R9: Undocumented Pattern with Clear Evidence of Abuse` (Policy Manual \u00a7 4.9 (Rule R9), Bank Risk Governance): \"If activity exhibits high assessed fraud probability (P(Fraud) >= 0.70) but does not fit standard defined typologies, CREATE_CASE is mandated, the card is blocked (BLOCK_CARD), and a special investigation report (FILE_REPORT) is routed to L2 for pattern classification. Approval route: L2.\" (Application Rationale: High assessed fraud probability on undocumented pattern requires case creation and L2 reporting under Rule R9.) _(Retrieval Path: `GraphEvidence -> HighBeliefUndocumented -> Policy:Rule R9 | VectorIndex -> CosineSimilarity -> KNOW-POLICY-R9 (0.320)`)_\n- **[KNOW-POLICY-R10]** `Rule R10: General Disposition Thresholds and Governance` (Policy Manual \u00a7 4.10 (Rule R10), Bank Risk Governance): \"Final automated dispositions are governed strictly by calibrated posteriors: P(Fraud) >= 0.70 requires BLOCK_CARD and CREATE_CASE (with FILE_REPORT if exposure >= $1,000); P(Fraud) <= 0.30 warrants ALLOW_TRANSACTION and CLOSE_NO_FRAUD; intermediate values require MONITOR_CARD and VERIFY_WITH_CUSTOMER.\" (Application Rationale: General bank disposition thresholds and calibrated belief gating governance.) _(Retrieval Path: `BeliefState -> CalibratedGate -> Policy:Rule R10 | VectorIndex -> CosineSimilarity -> KNOW-POLICY-R10 (0.203)`)_\n\n### 5. Uncertainty & Conflict Assessment\n- **Epistemic Uncertainty:** 0.60 (Satisfied).\n- **Aleatoric Conflict:** 0.00 (Coherent evidence).\n- **Coverage Gate:** UNLOCKED (Coverage >= 40%).\n\n### 6. Investigation Trajectory & EVOI Rationale\nThe autonomous investigation proceeded under pure Evidence Compass authority. Evidence acquisition ceased because terminal conditions were met: decision gate unlocked with positive net decision value exhausted.\n\n### 7. Final Operational Disposition & Remediation\nMandated operational actions approved by the Policy Engine under banking risk governance:\n- **`CREATE_CASE`** (Approval Route: `auto`): R9: Coordinated anomalous activity fitting no standard typology.\n- **`FILE_REPORT`** (Approval Route: `L2`): R9: Regulatory report for novel/undocumented fraud scheme.\n- **`ESCALATE_TO_ANALYST`** (Approval Route: `auto`): R9: Hand off novel pattern to senior fraud analyst."
   },
-  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "stop_reason": "DECISION_REACHED",
   "tool_calls": [
     {
-      "tool": "customer_profile",
-      "params": {
-        "cust_id": "C09933"
-      }
-    },
-    {
-      "tool": "txn_velocity",
-      "params": {
-        "c_id": "C09933-K2",
-        "target_ts": "2016-12-05 00:46:14",
-        "window_hours": 24
-      }
-    },
-    {
       "tool": "device_analysis",
+      "action_id": "QUERY_DEVICE_ANALYSIS",
       "params": {
-        "t_id": "3514948"
-      }
+        "t_id": "3514948",
+        "c_id": "C09933-K2",
+        "cust_id": "C09933",
+        "txn_addr1": 264.0,
+        "anchor_ts": "2016-12-05 03:46:14",
+        "target_ts": "2016-12-05 03:46:14"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 83.85
     },
     {
       "tool": "card_sequence",
+      "action_id": "QUERY_CARD_SEQUENCE",
       "params": {
         "c_id": "C09933-K2",
-        "anchor_ts": "2016-12-05 00:46:14",
-        "window_hours": 24
-      }
-    },
-    {
-      "tool": "region_analysis",
-      "params": {
+        "window_hours": 24,
+        "anchor_ts": "2016-12-05 03:46:14",
+        "t_id": "3514948",
         "cust_id": "C09933",
-        "txn_addr1": 264.0
-      }
+        "txn_addr1": 264.0,
+        "target_ts": "2016-12-05 03:46:14"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 78.69
     },
     {
-      "tool": "similar_cases",
+      "tool": "txn_velocity",
+      "action_id": "QUERY_TXN_VELOCITY",
       "params": {
-        "target_pattern": "undocumented",
-        "c_id": "C09933-K2"
-      }
+        "c_id": "C09933-K2",
+        "window_hours": 24,
+        "target_ts": "2016-12-05 03:46:14",
+        "t_id": "3514948",
+        "cust_id": "C09933",
+        "txn_addr1": 264.0,
+        "anchor_ts": "2016-12-05 03:46:14"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 84.79
     }
   ],
-  "tokens": 1210,
-  "latency_s": 5.33
+  "tokens": 1330,
+  "latency_s": 8.76
 }
