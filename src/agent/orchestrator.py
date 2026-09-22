@@ -51,6 +51,7 @@ class InvestigationIterationTrace(BaseModel):
     # Evidence Compass evaluation
     admissible_candidate_actions: List[str]
     candidate_net_decision_values: Dict[str, float]
+    candidate_decision_metrics: Optional[Dict[str, Dict[str, float]]] = None
     selected_action: str
     selection_rationale: str
     
@@ -219,6 +220,22 @@ class InvestigationOrchestrator:
                 admissible_ids = [c.action_id for c in unexecuted_candidates]
                 net_vals = {c.action_id: round(c.net_decision_value, 4) for c in unexecuted_candidates}
 
+                # Full decision-theoretic metrics for explainability (EVOI, loss, flip/unlock).
+                decision_metrics: Dict[str, Dict[str, float]] = {}
+                for c in compass_rec.ranked_candidates:
+                    flip_prob = sum(
+                        o.expected_probability for o in c.possible_outcomes if o.action_flipped
+                    )
+                    decision_metrics[c.action_id] = {
+                        "baseline_loss": round(c.baseline_expected_loss, 2),
+                        "expected_posterior_loss": round(c.expected_posterior_loss, 2),
+                        "expected_decision_value": round(c.expected_decision_value, 2),
+                        "net_decision_value": round(c.net_decision_value, 2),
+                        "operational_burden_cost": round(c.operational_burden_cost, 2),
+                        "gate_unlock_prob": round(c.gate_unlock_probability, 4),
+                        "flip_prob": round(flip_prob, 4),
+                    }
+
                 # Agent-facing protocol boundary: Record MCP execution request
                 tool_name = getattr(chosen_candidate, "tool_name", chosen_candidate.action_id)
                 self.mcp_client.call_tool(
@@ -252,12 +269,16 @@ class InvestigationOrchestrator:
 
                 # Evaluate current policy action
                 verdict_label = "fraud" if belief_after >= 0.70 else ("legitimate" if belief_after <= 0.30 else "uncertain")
+                step_ctx = dict(context or {})
+                step_ctx["evidence_coverage"] = updated_state.uncertainty.evidence_coverage
+                step_ctx["decision_gate_passed"] = updated_state.decision_gate_passed
+                step_ctx["corroborated_fraud"] = updated_state.belief_state.get("corroborated_fraud", False)
                 policy_acts = self.policy_engine.evaluate(
                     fraud_probability=belief_after,
                     verdict=verdict_label,
                     exposure_usd=exposure_usd,
                     ledger=EvidenceLedger(items=updated_state.evidence_items),
-                    case_context=context or {}
+                    case_context=step_ctx
                 )
                 primary_act = policy_acts[0].action if policy_acts else "MONITOR_CARD"
 
@@ -305,6 +326,7 @@ class InvestigationOrchestrator:
                     gate_passed_before=gate_passed_before,
                     admissible_candidate_actions=admissible_ids,
                     candidate_net_decision_values=net_vals,
+                    candidate_decision_metrics=decision_metrics,
                     selected_action=chosen_candidate.action_id,
                     selection_rationale=getattr(chosen_candidate, "rationale", ""),
                     dispatcher_execution_trace=exec_trace,
@@ -343,6 +365,9 @@ class InvestigationOrchestrator:
         case_ctx.update(current_state.trigger)
         if ("pattern" not in case_ctx or not case_ctx["pattern"]) and current_state.secondary_typology:
             case_ctx["pattern"] = current_state.secondary_typology
+        case_ctx["evidence_coverage"] = current_state.uncertainty.evidence_coverage
+        case_ctx["decision_gate_passed"] = current_state.decision_gate_passed
+        case_ctx["corroborated_fraud"] = current_state.belief_state.get("corroborated_fraud", False)
 
         final_policy_actions = self.policy_engine.evaluate(
             fraud_probability=current_state.belief_state.get("fraud_probability", 0.5),
