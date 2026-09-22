@@ -29,10 +29,10 @@ from src.belief.state import (
     InvestigationState
 )
 
-# Minimum evidence coverage threshold for automated final decision (2 out of 5 core dimensions)
+# Minimum evidence coverage threshold for automated final decision (applicable dimensions ratio)
 MIN_DECISION_COVERAGE = 0.40
 
-# Core investigative dimensions
+# Core investigative dimensions (canonical superset across all trigger channels)
 CORE_INVESTIGATIVE_FAMILIES = [
     EvidenceFamily.DEVICE_INFRASTRUCTURE,
     EvidenceFamily.TRANSACTION_VELOCITY,
@@ -40,6 +40,57 @@ CORE_INVESTIGATIVE_FAMILIES = [
     EvidenceFamily.CUSTOMER_DISPUTE,
     EvidenceFamily.MODEL_SCORE
 ]
+
+# ---------------------------------------------------------------------------
+# Per-trigger applicable investigative checklist
+# ---------------------------------------------------------------------------
+# The coverage denominator is NOT a fixed 5. It is the set of dimensions that are
+# actually resolvable and decision-relevant for the trigger channel that opened
+# the case:
+#   * risk_score        -> all core dimensions incl. model score + customer dispute
+#   * customer_report   -> dispute is already established, so the applicable set is
+#                          device / velocity / baseline / dispute (4)
+#   * analyst_request   -> human referral with no model score or dispute; the
+#                          applicable corroboration set is device / velocity /
+#                          baseline (3)
+# Unknown/missing trigger types fall back to the canonical superset of 5 to
+# preserve backward compatibility.
+TRIGGER_APPLICABLE_FAMILIES: Dict[str, List[EvidenceFamily]] = {
+    "risk_score": [
+        EvidenceFamily.DEVICE_INFRASTRUCTURE,
+        EvidenceFamily.TRANSACTION_VELOCITY,
+        EvidenceFamily.BEHAVIORAL_BASELINE,
+        EvidenceFamily.CUSTOMER_DISPUTE,
+        EvidenceFamily.MODEL_SCORE,
+    ],
+    "customer_report": [
+        EvidenceFamily.DEVICE_INFRASTRUCTURE,
+        EvidenceFamily.TRANSACTION_VELOCITY,
+        EvidenceFamily.BEHAVIORAL_BASELINE,
+        EvidenceFamily.CUSTOMER_DISPUTE,
+    ],
+    "analyst_request": [
+        EvidenceFamily.DEVICE_INFRASTRUCTURE,
+        EvidenceFamily.TRANSACTION_VELOCITY,
+        EvidenceFamily.BEHAVIORAL_BASELINE,
+    ],
+}
+
+TRIGGER_TYPE_ALIASES = {
+    "inbound_dispute": "customer_report",
+    "cardholder_report": "customer_report",
+    "analyst_referral": "analyst_request",
+    "manual_review": "analyst_request",
+    "in_flight_auth": "risk_score",
+    "realtime_checkout": "risk_score",
+}
+
+
+def resolve_applicable_families(trigger_type: Optional[str]) -> List[EvidenceFamily]:
+    """Resolves the per-trigger applicable investigative dimension checklist."""
+    key = (trigger_type or "").strip().lower()
+    key = TRIGGER_TYPE_ALIASES.get(key, key)
+    return list(TRIGGER_APPLICABLE_FAMILIES.get(key, CORE_INVESTIGATIVE_FAMILIES))
 
 class BeliefEngine:
     """Tark Phase 3.1 Belief & Uncertainty Reasoning Engine.
@@ -176,7 +227,9 @@ class BeliefEngine:
         
         missing_information: List[MissingInfoItem] = []
         dimensions_observed: Set[EvidenceFamily] = set()
+        probed_families: Set[EvidenceFamily] = set()
         unavailable_dimensions: Set[str] = set()
+        informative_families: Set[EvidenceFamily] = set()
         out_of_scope_count = 0
         has_conclusive_dispute = False
 
@@ -248,6 +301,30 @@ class BeliefEngine:
             if is_no_match:
                 # Required Change 4: Absence of an observed fraud pattern is NOT automatically exculpatory.
                 # Default to neutral baseline (LR=1.0, log-LR=0.0) unless explicitly justified.
+                #
+                # A graph query that executed and returned no match is a *probed*
+                # dimension: the investigation has resolved that dimension (ruling
+                # out that fraud pattern) even though the finding is belief-neutral.
+                # Probed dimensions reduce epistemic uncertainty without inflating
+                # likelihood ratios or evidence coverage.
+                if (item.source or "").startswith("tigergraph_query:"):
+                    probed_family, _ = self.resolve_evidence_family(item)
+                    probed_families.add(probed_family)
+                #
+                # Customer-communication unavailability is surfaced as explicit missing information:
+                # the evidence is genuinely unobserved (not exonerating), so it must keep the gate
+                # conservative while contributing zero log-odds.
+                if item.evidence_type == EvidenceType.CUSTOMER_COMMUNICATION_UNAVAILABLE:
+                    missing_information.append(MissingInfoItem(
+                        missing_id=f"MIS-{uuid.uuid4().hex[:6].upper()}",
+                        dimension=EvidenceType.CUSTOMER_COMMUNICATION_UNAVAILABLE.value,
+                        entity=item.target_entity or target_entities.get("customer_id") or "CARDHOLDER",
+                        reason="CUSTOMER_COMMUNICATION_UNAVAILABLE",
+                        impact_severity="MEDIUM",
+                        actionable_query=item.graph_query
+                    ))
+                    unavailable_dimensions.add(EvidenceType.CUSTOMER_COMMUNICATION_UNAVAILABLE.value)
+
                 reasoning_history.append(ReasoningStep(
                     step=step_idx,
                     event="NO_MATCH_NEUTRAL_RECORDED",
@@ -314,6 +391,11 @@ class BeliefEngine:
             family_counts[family] = current_family_count + 1
             family_cumulative_log_lr[family] = current_family_log_lr + effective_log_lr
 
+            # Track families that contributed a non-zero evidentiary shift.
+            # These are the "informative" dimensions used by the corroboration contract.
+            if abs(effective_log_lr) > 1e-9:
+                informative_families.add(family)
+
             # Contradiction tracking
             if effective_log_lr > 0:
                 inculpatory_ids.append(item.evidence_id)
@@ -365,12 +447,29 @@ class BeliefEngine:
             ))
 
         # 5. Compute Evidence Coverage & Multi-Dimensional Uncertainty
-        # Core investigative dimensions: DEVICE_INFRASTRUCTURE, TRANSACTION_VELOCITY, BEHAVIORAL_BASELINE, CUSTOMER_DISPUTE, MODEL_SCORE
-        coverage_dict = {fam.value: (fam in dimensions_observed) for fam in CORE_INVESTIGATIVE_FAMILIES}
-        observed_dim_names = [fam.value for fam in CORE_INVESTIGATIVE_FAMILIES if fam in dimensions_observed]
-        missing_dim_names = [fam.value for fam in CORE_INVESTIGATIVE_FAMILIES if fam not in dimensions_observed]
+        # Coverage denominator is trigger-specific: the set of dimensions that are
+        # resolvable and decision-relevant for the trigger channel that opened the
+        # case (see TRIGGER_APPLICABLE_FAMILIES). This prevents a fixed /5 from
+        # masking real differences between trigger channels.
+        applicable_families = resolve_applicable_families(trigger.get("trigger_type"))
+        applicable_set = set(applicable_families)
+        observed_applicable = [fam for fam in applicable_families if fam in dimensions_observed]
+        coverage_dict = {fam.value: (fam in dimensions_observed) for fam in applicable_families}
+        observed_dim_names = [fam.value for fam in observed_applicable]
+        missing_dim_names = [fam.value for fam in applicable_families if fam not in dimensions_observed]
         
-        evidence_coverage = round(len(observed_dim_names) / len(CORE_INVESTIGATIVE_FAMILIES), 4)
+        coverage_denominator = len(applicable_families) or 1
+        evidence_coverage = round(len(observed_applicable) / coverage_denominator, 4)
+        
+        # Probed coverage: applicable dimensions actually investigated (informative
+        # finding OR a graph query executed with no match). Ruling a dimension out
+        # is tracked explicitly for explainability, but MUST NOT reduce the
+        # epistemic gate or inflate coverage: absence of an observed pattern is not
+        # proof, and using it to unlock a gate would contradict the NO_MATCH
+        # neutrality contract.
+        probed_core = (dimensions_observed | probed_families) & applicable_set
+        probed_dim_names = sorted(fam.value for fam in probed_core)
+        probed_coverage = round(len(probed_core) / coverage_denominator, 4)
         
         epistemic_uncertainty = round(max(0.0, min(1.0, (1.0 - evidence_coverage) + 0.1 * out_of_scope_count)), 4)
         aleatoric_uncertainty = conflict_magnitude
@@ -402,6 +501,9 @@ class BeliefEngine:
             confidence_score=confidence_score,
             data_coverage=coverage_dict,
             observed_dimensions=observed_dim_names,
+            applicable_dimensions=[fam.value for fam in applicable_families],
+            probed_dimensions=probed_dim_names,
+            probed_coverage=probed_coverage,
             missing_dimensions=missing_dim_names,
             unavailable_dimensions=list(unavailable_dimensions),
             uncertainty_reasons=uncertainty_reasons
@@ -416,6 +518,17 @@ class BeliefEngine:
         # 7. Deterministic Decision Gating Contract (Required Changes 2 & 3)
         decision_gate_blocks: List[str] = []
         approval_requirements: List[str] = []
+
+        # Corroboration contract for positive fraud determinations.
+        # A high posterior driven by a single informative family (e.g. the
+        # model risk score or a single graph signal alone) is not sufficient for
+        # an automated confirmed_fraud decision. Require either a conclusive
+        # cardholder dispute or corroboration across >=2 informative families.
+        # This prevents a single overconfident signal from auto-frauding a case.
+        corroborated_fraud = bool(
+            has_conclusive_dispute
+            or len(informative_families) >= 2
+        )
         
         # Gate Rule 1: Aleatoric Conflict Gate
         if aleatoric_uncertainty >= 0.40:
@@ -459,7 +572,22 @@ class BeliefEngine:
             )
             decision_state = DecisionState.INSUFFICIENT_EVIDENCE
             decision_rationale = f"Posterior probability ({fraud_prob:.4f}) is indeterminate."
-        # Gate Rule 5: Admissible Decision
+        # Gate Rule 5: Corroboration Gate for positive fraud determinations
+        elif fraud_prob >= 0.70 and not corroborated_fraud:
+            decision_gate_passed = False
+            informative_names = ", ".join(sorted(f.value for f in informative_families)) or "none"
+            decision_gate_blocks.append(
+                "Positive fraud determination is not corroborated: evidence draws on a single "
+                f"informative dimension ({informative_names}) with aggregate inculpatory log-LR "
+                f"{total_positive_log_lr:.2f}. At least two informative evidence families or a "
+                "conclusive cardholder dispute are required before an automated confirmed_fraud disposition."
+            )
+            decision_state = DecisionState.INSUFFICIENT_EVIDENCE
+            decision_rationale = (
+                "High posterior is driven by a single uncorroborated evidence dimension; "
+                "automated confirmed_fraud determination withheld pending corroboration (MONITOR / VERIFY posture)."
+            )
+        # Gate Rule 6: Admissible Decision
         else:
             decision_gate_passed = True
             decision_state = DecisionState.DECIDED
@@ -522,7 +650,10 @@ class BeliefEngine:
                 "posterior_log_odds": round(current_log_odds, 4),
                 "fraud_probability": fraud_prob,
                 "net_log_lr": round(current_log_odds - initial_log_odds, 4),
-                "evidence_count": len(ledger.items)
+                "evidence_count": len(ledger.items),
+                "informative_families": sorted(f.value for f in informative_families),
+                "corroborated_fraud": corroborated_fraud,
+                "positive_log_lr": round(total_positive_log_lr, 4)
             },
             uncertainty=uncertainty_state,
             contradictions=contradictions,
@@ -572,7 +703,9 @@ class BeliefEngine:
             "uncertainty": state.uncertainty.model_dump(),
             "contradictions": [c.model_dump() for c in state.contradictions],
             "decision_state": state.decision_state.value,
-            "decision_gate_passed": state.decision_gate_passed
+            "decision_gate_passed": state.decision_gate_passed,
+            "informative_families": state.belief_state.get("informative_families", []),
+            "corroborated_fraud": state.belief_state.get("corroborated_fraud", False)
         }
 
     def hypothetical_update(self, ledger: EvidenceLedger, test_item: EvidenceItem, prior_p: Optional[float] = None) -> float:
