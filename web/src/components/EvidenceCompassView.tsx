@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { InvestigationResultPayload, IterationTraceView } from "../api/types";
+import type { InvestigationResultPayload, IterationTraceView, CandidateDecisionMetrics } from "../api/types";
 import { TechnicalDetails } from "./TechnicalDetails";
 
 interface EvidenceCompassViewProps {
@@ -43,33 +43,12 @@ const ACTION_REGISTRY: Record<string, ActionMetadata> = {
 		cost: 1.0,
 		description: "Verifies whether transaction billing region matches customer historical profile and card-present travel patterns.",
 	},
-	QUERY_MERCHANT_RISK: {
-		title: "Merchant & MCC Risk Profiling",
-		tool: "merchant_risk",
+	QUERY_CUSTOMER_PROFILE: {
+		title: "Customer Behavioral Baseline",
+		tool: "customer_profile",
 		protocol: "TigerGraph MCP",
 		cost: 1.0,
-		description: "Evaluates historical fraud incidence, chargeback rates, and terminal risk tier of the merchant counterparty.",
-	},
-	QUERY_HISTORICAL_DISPUTES: {
-		title: "Historical Dispute & Chargeback History",
-		tool: "dispute_history",
-		protocol: "TigerGraph MCP",
-		cost: 1.0,
-		description: "Queries customer profile for previous friendly fraud claims or confirmed unauthorized charge reports.",
-	},
-	QUERY_BILLING_DISTANCE: {
-		title: "Geo-Billing Distance Calculation",
-		tool: "billing_distance",
-		protocol: "TigerGraph MCP",
-		cost: 1.0,
-		description: "Measures spatial distance between transaction POS terminal coordinates and cardholder billing region.",
-	},
-	QUERY_CROSS_CUSTOMER_DEVICE: {
-		title: "Cross-Customer Device Association",
-		tool: "cross_customer_device",
-		protocol: "TigerGraph MCP",
-		cost: 1.0,
-		description: "Identifies whether the device has been associated with distinct customer profiles or synthetic identities.",
+		description: "Completes the customer's historical spending baseline (volume, average amount, channel mix) to resolve coverage.",
 	},
 	VERIFY_WITH_CUSTOMER: {
 		title: "Out-of-Band Customer SMS/Email Challenge",
@@ -114,7 +93,7 @@ function getActionMeta(actionId: string): ActionMetadata {
 	return {
 		title: actionId.replace(/_/g, " "),
 		tool: actionId.toLowerCase(),
-		protocol: "TigerGraph MCP",
+		protocol: "Deterministic Core",
 		cost: 1.0,
 		description: `Evaluates ${actionId.replace(/_/g, " ").toLowerCase()} on the active entity graph.`,
 	};
@@ -169,11 +148,12 @@ export const EvidenceCompassView: React.FC<EvidenceCompassViewProps> = ({ result
 	// Build candidate list for the active step
 	const candidateEntries: Array<{
 		actionId: string;
-		netEvoi: number;
+		netEvoi: number | null;
 		isExecuted: boolean;
 		meta: ActionMetadata;
 		status: "SELECTED_AND_EXECUTED" | "DECLINED_NEGATIVE_EVOI" | "DECLINED_SUBOPTIMAL";
 		rationale: string;
+		metrics?: CandidateDecisionMetrics;
 	}> = [];
 
 	if (activeTrace) {
@@ -213,13 +193,16 @@ export const EvidenceCompassView: React.FC<EvidenceCompassViewProps> = ({ result
 					meta,
 					status,
 					rationale,
+					metrics: activeTrace.candidate_decision_metrics?.[actionId],
 				});
 			}
 		} else {
 			const meta = getActionMeta(activeTrace.selected_action);
 			candidateEntries.push({
 				actionId: activeTrace.selected_action,
-				netEvoi: 0.35,
+				// No planner Net Decision Value was recorded for this legacy/empty
+				// trace; report it as unknown rather than fabricating a number.
+				netEvoi: null,
 				isExecuted: true,
 				meta,
 				status: "SELECTED_AND_EXECUTED",
@@ -234,6 +217,24 @@ export const EvidenceCompassView: React.FC<EvidenceCompassViewProps> = ({ result
 	const coverageBefore = activeTrace?.coverage_before ?? 0;
 	const coverageAfter = activeTrace?.coverage_after ?? 0;
 	const parsedObservation = parseEvidenceSummary(activeTrace?.observed_evidence_summary);
+
+	// Selected (highest-value) candidate for the active step, plus its real
+	// decision-theoretic numbers. Prefer the executed candidate; fall back to the
+	// top-ranked one when no execution marker is available.
+	const selectedCandidate =
+		candidateEntries.find((c) => c.isExecuted) ||
+		(candidateEntries.length > 0
+			? [...candidateEntries].sort((a, b) => (b.netEvoi ?? -Infinity) - (a.netEvoi ?? -Infinity))[0]
+			: undefined);
+
+	const netDecisionValue = selectedCandidate?.netEvoi ?? selectedCandidate?.metrics?.net_decision_value;
+	const expectedInformationGain = selectedCandidate?.metrics?.expected_decision_value;
+	// Normalized Shannon entropy of the current belief (max 1 bit at p = 0.5).
+	const currentUncertainty =
+		beliefBefore <= 0 || beliefBefore >= 1
+			? 0
+			: -(beliefBefore * Math.log2(beliefBefore) + (1 - beliefBefore) * Math.log2(1 - beliefBefore));
+	const fmtUsd = (v: number | undefined) => (v === undefined ? "—" : `$${v.toFixed(2)}`);
 
 	return (
 		<div
@@ -333,7 +334,7 @@ export const EvidenceCompassView: React.FC<EvidenceCompassViewProps> = ({ result
 								letterSpacing: "0.05em",
 							}}
 						>
-							Next Investigation Step
+							Highest-Value Investigation Step
 						</span>
 						<span
 							style={{
@@ -349,42 +350,69 @@ export const EvidenceCompassView: React.FC<EvidenceCompassViewProps> = ({ result
 						</span>
 					</div>
 
-					<div style={{ fontSize: "17px", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.01em" }}>
-						{getActionMeta(activeTrace.selected_action).title}
+					<div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "10px" }}>
+						<div style={{ fontSize: "17px", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.01em" }}>
+							{getActionMeta(activeTrace.selected_action).title}
+						</div>
+						<div
+							style={{
+								display: "flex",
+								alignItems: "baseline",
+								gap: "6px",
+								backgroundColor: "#ffedd5",
+								border: "1px solid #fed7aa",
+								borderRadius: "6px",
+								padding: "4px 10px",
+							}}
+						>
+							<span style={{ fontSize: "10.5px", fontWeight: 700, color: "#9a3412", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+								Net Decision Value
+							</span>
+							<span
+								style={{
+									fontSize: "16px",
+									fontWeight: 800,
+									fontFamily: "ui-monospace, monospace",
+									color: netDecisionValue !== undefined && netDecisionValue > 0 ? "#15803d" : "#9a3412",
+								}}
+							>
+								{netDecisionValue === undefined ? "—" : `${netDecisionValue > 0 ? "+" : ""}${netDecisionValue.toFixed(2)}`}
+							</span>
+						</div>
 					</div>
 
 					<div
 						style={{
 							display: "grid",
-							gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-							gap: "14px",
-							paddingTop: "4px",
+							gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+							gap: "12px",
+							paddingTop: "8px",
 							borderTop: "1px solid #ffedd5",
 						}}
 					>
 						<div>
-							<div style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
-								Why this step was selected
+							<div style={{ fontSize: "10.5px", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
+								Expected Information Gain (EDV)
 							</div>
-							<div style={{ fontSize: "13px", color: "#334155", marginTop: "3px", lineHeight: "1.4" }}>
-								Highest expected information value. Traverses graph relationships to resolve pivotal fraud uncertainty.
-							</div>
-						</div>
-
-						<div>
-							<div style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
-								Expected Benefit
-							</div>
-							<div style={{ fontSize: "13px", fontWeight: 700, color: "#15803d", marginTop: "3px" }}>
-								High (Optimal decision-threshold shift)
+							<div style={{ fontSize: "14px", fontWeight: 700, fontFamily: "ui-monospace, monospace", color: "#0f172a", marginTop: "3px" }}>
+								{fmtUsd(expectedInformationGain)}
 							</div>
 						</div>
 
 						<div>
-							<div style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
+							<div style={{ fontSize: "10.5px", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
+								Current Uncertainty
+							</div>
+							<div style={{ fontSize: "14px", fontWeight: 700, fontFamily: "ui-monospace, monospace", color: "#0f172a", marginTop: "3px" }}>
+								{currentUncertainty.toFixed(3)} bits
+							</div>
+						</div>
+
+						<div>
+							<div style={{ fontSize: "10.5px", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
 								Alternatives Evaluated
 							</div>
-							<div style={{ fontSize: "12.5px", color: "#64748b", marginTop: "3px", lineHeight: "1.4" }}>
+							<div style={{ fontSize: "12px", color: "#64748b", marginTop: "3px", lineHeight: "1.4" }}>
 								{candidateEntries
 									.filter((c) => !c.isExecuted)
 									.slice(0, 3)
@@ -392,6 +420,10 @@ export const EvidenceCompassView: React.FC<EvidenceCompassViewProps> = ({ result
 									.join(" · ") || "None remaining"}
 							</div>
 						</div>
+					</div>
+
+					<div style={{ fontSize: "11.5px", color: "#64748b", lineHeight: 1.5 }}>
+						Selected because it maximises <strong>Net Decision Value</strong>, the highest-value evidence acquisition available at this step. Decision value is zero unless the action can flip the next-best-action or unlock the decision gate.
 					</div>
 				</div>
 			)}
@@ -775,7 +807,7 @@ export const EvidenceCompassView: React.FC<EvidenceCompassViewProps> = ({ result
 				<div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
 					{candidateEntries.map((cand, idx) => {
 						const isExecuted = cand.isExecuted;
-						const isNegative = cand.netEvoi <= 0;
+						const isNegative = (cand.netEvoi ?? 0) <= 0;
 
 						return (
 							<div
@@ -895,8 +927,10 @@ export const EvidenceCompassView: React.FC<EvidenceCompassViewProps> = ({ result
 												}`,
 											}}
 										>
-											Net EVOI: {cand.netEvoi > 0 ? "+" : ""}
-											{cand.netEvoi.toFixed(4)}
+											Net EVOI:{" "}
+											{cand.netEvoi === null
+												? "—"
+												: `${cand.netEvoi > 0 ? "+" : ""}${cand.netEvoi.toFixed(4)}`}
 										</span>
 									</div>
 								</div>
@@ -927,6 +961,38 @@ export const EvidenceCompassView: React.FC<EvidenceCompassViewProps> = ({ result
 								>
 									<strong>Planner Disposition:</strong> {cand.rationale}
 								</div>
+
+								{cand.metrics && (
+									<div
+										style={{
+											display: "grid",
+											gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+											gap: "8px",
+											backgroundColor: "#f8fafc",
+											border: "1px solid #e2e8f0",
+											borderRadius: "4px",
+											padding: "8px 10px",
+										}}
+									>
+										{[
+											{ label: "Baseline Loss", value: `$${cand.metrics.baseline_loss.toFixed(2)}`, hint: "Operational loss of the current admissible action." },
+											{ label: "E[Posterior Loss]", value: `$${cand.metrics.expected_posterior_loss.toFixed(2)}`, hint: "Expected loss after observing this evidence." },
+											{ label: "EDV", value: `+$${cand.metrics.expected_decision_value.toFixed(2)}`, hint: "Baseline loss − expected posterior loss." },
+											{ label: "Net Decision Value", value: `${cand.metrics.net_decision_value > 0 ? "+" : ""}$${cand.metrics.net_decision_value.toFixed(2)}`, hint: "EDV − operational burden cost." },
+											{ label: "Gate Unlock Prob", value: `${(cand.metrics.gate_unlock_prob * 100).toFixed(1)}%`, hint: "P(decision gate unlocks | acquire this evidence)." },
+											{ label: "Action Flip Prob", value: `${(cand.metrics.flip_prob * 100).toFixed(1)}%`, hint: "P(next-best-action changes | acquire this evidence)." },
+										].map((m) => (
+											<div key={m.label} title={m.hint}>
+												<div style={{ fontSize: "10px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.02em" }}>
+													{m.label}
+												</div>
+												<div style={{ fontSize: "12.5px", fontWeight: 700, fontFamily: "ui-monospace, monospace", color: "#0f172a", marginTop: "2px" }}>
+													{m.value}
+												</div>
+											</div>
+										))}
+									</div>
+								)}
 							</div>
 						);
 					})}
