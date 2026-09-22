@@ -4,6 +4,7 @@ import type { HealthStatus } from "../api/types";
 export type NavigationPage =
 	| "overview"
 	| "investigations"
+	| "history"
 	| "benchmark"
 	| "policy"
 	| "graph_explorer";
@@ -36,6 +37,11 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
 			label: "Cases",
 			icon: "▤",
 			badge: caseCount,
+		},
+		{
+			id: "history" as NavigationPage,
+			label: "History",
+			icon: "◷",
 		},
 		{ id: "benchmark" as NavigationPage, label: "Benchmark", icon: "▦" },
 		{ id: "policy" as NavigationPage, label: "Policy & Patterns", icon: "▥" },

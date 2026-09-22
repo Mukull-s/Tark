@@ -9,6 +9,7 @@ import type {
 import { BenchmarkView } from "./components/BenchmarkView";
 import { GlobalGraphExplorer } from "./components/GlobalGraphExplorer";
 import { Header } from "./components/Header";
+import { InvestigationHistoryView } from "./components/InvestigationHistoryView";
 import { InvestigationPreStartView } from "./components/InvestigationPreStartView";
 import { InvestigationQueue } from "./components/InvestigationQueue";
 import { NewInvestigationModal } from "./components/NewInvestigationModal";
@@ -198,6 +199,14 @@ export const App: React.FC = () => {
 								/>
 							)}
 						</>
+					)}
+
+					{/* Investigation History & Session Audit Log */}
+					{activePage === "history" && (
+						<InvestigationHistoryView
+							onSelectCase={handleSelectCase}
+							onOpenNewInvestigation={handleOpenNewInvestigation}
+						/>
 					)}
 
 					{/* Benchmark Scoreboard */}
