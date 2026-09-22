@@ -100,13 +100,16 @@ class InvestigationKnowledgeBase:
             category=KnowledgeCategory.POLICY_RULE,
             text="When graph traversal reveals shared device infrastructure (SHARED_DEVICE_RING) or IP/proxy masking linking multiple "
                  "unrelated card accounts, CREATE_CASE is required, all connected cards must be placed under MONITOR_CONNECTED_CARDS, "
-                 "and a syndicate fraud report (FILE_REPORT) must be routed to Level 2 (L2) AML/Fraud compliance.",
+                 "and a syndicate fraud report (FILE_REPORT) must be routed to Level 2 (L2) AML/Fraud compliance. "
+                 "R6-syndicate exception: when the ring spans 10 or more independent card accounts, the scale of the multi-account "
+                 "graph corroboration mandates Level-2 human authorization (ESCALATE_TO_ANALYST) BEFORE any SAR filing; automatic "
+                 "FILE_REPORT is deferred until that authorization is granted.",
             applicable_rules=["R6"],
             applicable_typologies=["shared_device", "fraud_ring", "syndicate"],
             governing_body="Bank Risk Governance",
             section_reference="Policy Manual § 4.6 (Rule R6)",
-            version="2026.1",
-            provenance="Risk Policy Manual v4.2"
+            version="2026.2",
+            provenance="Risk Policy Manual v4.3"
         ))
 
         self._add(KnowledgeChunk(
