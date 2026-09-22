@@ -14,6 +14,8 @@ class LLMClient:
         self.api_key = os.getenv("MERGE_GATEWAY_API_KEY") or os.getenv("MERGE_API_KEY") or os.getenv("DEEPSEEK_API_KEY")
         self.base_url = os.getenv("LLM_BASE_URL", "https://api-gateway.merge.dev/v1")
         self.model = os.getenv("LLM_MODEL", "deepseek/deepseek-v4-flash")
+        # Observability: callers/UI can distinguish live synthesis from fallback.
+        self.last_call_status = "NOT_CALLED"
 
     def generate(self, system_prompt: str, user_prompt: str, temperature: float = 0.1, max_tokens: int = 1500) -> str:
         headers = {
@@ -36,23 +38,16 @@ class LLMClient:
             choice = data["choices"][0]["message"]
             content = choice.get("content")
             if content and len(content.strip()) > 0:
+                self.last_call_status = "LIVE"
                 return content.strip()
         except Exception as e:
-            logger.warning("LLM API warning (%s); generating regulatory fallback narrative.", e)
+            logger.warning("LLM API warning (%s); LLM synthesis unavailable.", e)
 
-        # Fallback FinCEN template for SAR narrative
-        return f"""### SUSPICIOUS ACTIVITY REPORT (SAR) NARRATIVE
-**1. SUMMARY OF SUSPICIOUS ACTIVITY:**
-During internal fraud monitoring, anomalous activity exceeding regulatory thresholds was identified. Multiple unauthorized authorizations were flagged and escalated for formal investigation.
-
-**2. IDENTITY & ACCOUNT INFORMATION:**
-The transaction activity involves cardholder account records identified in case record.
-
-**3. METHOD OF OPERATION:**
-The observed modus operandi aligns with coordinated card-not-present exploitation and identity manipulation. Technical indicators confirm high-velocity unauthorized access.
-
-**4. LAW ENFORCEMENT ACTIONABLE DETAILS:**
-Associated device identifiers, IP indicators, and transaction records have been secured in the graph database for regulatory audit and law enforcement referral.
-
-**5. DISPOSITION & MITIGATION:**
-The compromised card has been permanently blocked, relevant connected entities placed under elevated monitoring, and this suspicious activity filing completed under policy rule R2/R6."""
+        # Honest, non-fabricating fallback. This text intentionally makes NO claims
+        # about the case: it is a short marker so callers fall back to their
+        # deterministic, grounded narrative rather than an ungrounded template.
+        self.last_call_status = "FALLBACK_DETERMINISTIC"
+        return (
+            "LLM synthesis unavailable; a deterministic, evidence-grounded narrative is used "
+            "instead of an unverified generated template."
+        )
