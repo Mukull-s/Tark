@@ -319,7 +319,36 @@ class EvidenceCompass:
                 ]
             })
 
-        # 5. VERIFY_WITH_CUSTOMER (External Out-of-band communication)
+        # 5. customer_profile (Behavioral Baseline Completion)
+        # Acquiring the customer's historical baseline completes the
+        # BEHAVIORAL_BASELINE core dimension. Even though the baseline is
+        # belief-neutral (LR=1.0), observing it materially reduces epistemic
+        # uncertainty and can unlock the material-coverage decision gate, which
+        # is genuine decision-relevant value under the EVOI calculus.
+        if EvidenceType.BEHAVIORAL_BASELINE not in executed_types and "BEHAVIORAL_BASELINE" not in out_of_scope_dimensions:
+            candidates.append({
+                "action_id": "QUERY_CUSTOMER_PROFILE",
+                "action_type": EvidenceActionType.GSQL_QUERY,
+                "tool_name": "customer_profile",
+                "parameters": {"cust_id": customer_id},
+                "family": EvidenceFamily.BEHAVIORAL_BASELINE,
+                "operational_burden_cost": 1.0,
+                "outcomes": [
+                    {
+                        "outcome_label": "CUSTOMER_BASELINE",
+                        "evidence_type": EvidenceType.BEHAVIORAL_BASELINE,
+                        "source": "customer_profile",
+                        "finding": "Historical cardholder spending baseline retrieved.",
+                        "lr": 1.0,
+                        "log_lr": 0.0,
+                        "tpr": 0.98,
+                        "fpr": 0.98,
+                        "is_exculpatory": False
+                    }
+                ]
+            })
+
+        # 6. VERIFY_WITH_CUSTOMER (External Out-of-band communication)
         # Skip only if customer has already directly confirmed or reported
         has_direct_dispute = any(
             e.evidence_type in [EvidenceType.CUSTOMER_CONFIRMATION, EvidenceType.CUSTOMER_DENIAL]
