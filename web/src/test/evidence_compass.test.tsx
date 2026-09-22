@@ -37,6 +37,17 @@ const mockResultWithTraces: InvestigationResultPayload = {
 					QUERY_TXN_VELOCITY: -0.0512,
 					VERIFY_WITH_CUSTOMER: -0.125,
 				},
+				candidate_decision_metrics: {
+					QUERY_CARD_SEQUENCE: {
+						baseline_loss: 46.2,
+						expected_posterior_loss: 30.5,
+						expected_decision_value: 15.7,
+						net_decision_value: 14.7,
+						operational_burden_cost: 1.0,
+						gate_unlock_prob: 0.2,
+						flip_prob: 0.1,
+					},
+				},
 				belief_before: 0.88,
 				belief_after: 0.985,
 				coverage_before: 0.17,
@@ -121,6 +132,33 @@ describe("EvidenceCompassView", () => {
 		// Check telemetry
 		expect(screen.getByText(/185ms/i)).toBeDefined();
 		expect(screen.getAllByText(/card_sequence/i).length).toBeGreaterThanOrEqual(1);
+	});
+
+	it("hero surfaces the actual EVOI numbers (net decision value, EDV, uncertainty)", () => {
+		render(<EvidenceCompassView result={mockResultWithTraces} />);
+
+		// Real Net Decision Value from the planner trace (not a qualitative 'High').
+		expect(screen.getByText(/Highest-Value Investigation Step/i)).toBeDefined();
+		expect(screen.getAllByText(/Net Decision Value/i).length).toBeGreaterThanOrEqual(1);
+		expect(screen.getByText("+0.41")).toBeDefined();
+
+		// Underlying decision-theoretic quantities that the planner actually emits.
+		expect(screen.getByText(/Expected Information Gain \(EDV\)/i)).toBeDefined();
+		expect(screen.getByText("$15.70")).toBeDefined();
+		expect(screen.getAllByText(/Current Uncertainty/i).length).toBeGreaterThanOrEqual(1);
+
+		// No fabricated investigation-cost metric is displayed.
+		expect(screen.queryByText(/Investigation Cost/i)).not.toBeInTheDocument();
+	});
+
+	it("registry only advertises tools the backend can actually dispatch", () => {
+		render(<EvidenceCompassView result={mockResultWithTraces} />);
+
+		// Undeployed tools must never be presented as available investigation options.
+		expect(screen.queryByText(/Merchant Risk Profiling/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Historical Dispute Records/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Geo-Billing Distance/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Cross-Customer Device/i)).not.toBeInTheDocument();
 	});
 
 	it("switches iteration steps when clicking step buttons", () => {
