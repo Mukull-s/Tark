@@ -303,4 +303,38 @@ describe("Phase UI-05 — Investigation Network / Evidence Graph", () => {
 			),
 		).toBeInTheDocument();
 	});
+
+	it("discloses reconstructed representative entities instead of presenting them as queried vertices", () => {
+		const baseGraph = mockResultWithGraph.graph!;
+		const reconstructedResult: InvestigationResultPayload = {
+			...mockResultWithGraph,
+			graph: {
+				...baseGraph,
+				nodes: baseGraph.nodes.map((n) =>
+					n.id.startsWith("CARD_RING_") ? { ...n, is_reconstructed: true } : { ...n, is_reconstructed: false },
+				),
+				summary: {
+					...baseGraph.summary,
+					live_node_count: 4,
+					reconstructed_node_count: 4,
+					reconstructed_node_ids: ["CARD_RING_1", "CARD_RING_2", "CARD_RING_3", "CARD_RING_4"],
+					has_reconstructed_nodes: true,
+					reconstruction_notice:
+						"Related entities reconstructed from investigation evidence: 4 representative node(s).",
+				},
+			},
+		};
+
+		render(<InvestigationNetwork result={reconstructedResult} />);
+
+		// Disclosure banner is shown, and explicitly describes the reconstruction.
+		const notice = screen.getByTestId("reconstructed-nodes-notice");
+		expect(notice).toBeInTheDocument();
+		expect(notice.textContent).toMatch(/Related entities reconstructed from investigation evidence/i);
+		expect(notice.textContent).toMatch(/4 of 8 nodes/i);
+
+		// Selecting a reconstructed node shows the per-node badge.
+		fireEvent.click(screen.getByText("Card NG_1"));
+		expect(screen.getByText("Reconstructed")).toBeInTheDocument();
+	});
 });
