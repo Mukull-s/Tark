@@ -58,8 +58,24 @@ export const InvestigationQueue: React.FC<InvestigationQueueProps> = ({
 
 	// Pre-investigation case status mapping
 	const getCaseStatus = (
-		_c: CaseMetadata,
+		c: CaseMetadata,
 	): { label: string; bg: string; text: string; border: string } => {
+		if (c.risk_score !== null && c.risk_score !== undefined && c.risk_score >= 0.75) {
+			return {
+				label: "HIGH RISK",
+				bg: "#fff7ed",
+				text: "#c2410c",
+				border: "#fed7aa",
+			};
+		}
+		if (c.trigger_type === "customer_report") {
+			return {
+				label: "DISPUTED",
+				bg: "#faf5ff",
+				text: "#7e22ce",
+				border: "#e9d5ff",
+			};
+		}
 		return {
 			label: "READY",
 			bg: "#f1f5f9",
@@ -68,14 +84,25 @@ export const InvestigationQueue: React.FC<InvestigationQueueProps> = ({
 		};
 	};
 
+	const tabCounts = useMemo(() => {
+		const needsReviewCount = cases.filter(
+			(c) => (c.risk_score !== null && c.risk_score !== undefined && c.risk_score >= 0.75) || c.trigger_type === "customer_report"
+		).length;
+		return {
+			all: cases.length,
+			needs_review: needsReviewCount,
+			investigating: 0,
+			resolved: 0,
+		};
+	}, [cases]);
+
 	const filteredCases = useMemo(() => {
 		return cases.filter((item) => {
 			// Tab filter
-			if (
-				activeTab === "needs_review" ||
-				activeTab === "investigating" ||
-				activeTab === "resolved"
-			) {
+			if (activeTab === "needs_review") {
+				const isNeedsReview = (item.risk_score !== null && item.risk_score !== undefined && item.risk_score >= 0.75) || item.trigger_type === "customer_report";
+				if (!isNeedsReview) return false;
+			} else if (activeTab === "investigating" || activeTab === "resolved") {
 				return false;
 			}
 
@@ -168,10 +195,10 @@ export const InvestigationQueue: React.FC<InvestigationQueueProps> = ({
 				<div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
 					{(
 						[
-							{ id: "all", label: "All", count: cases.length },
-							{ id: "needs_review", label: "Needs Review", count: 0 },
-							{ id: "investigating", label: "Investigating", count: 0 },
-							{ id: "resolved", label: "Resolved", count: 0 },
+							{ id: "all", label: "All", count: tabCounts.all },
+							{ id: "needs_review", label: "Needs Review", count: tabCounts.needs_review },
+							{ id: "investigating", label: "Investigating", count: tabCounts.investigating },
+							{ id: "resolved", label: "Resolved", count: tabCounts.resolved },
 						] as const
 					).map((tab) => {
 						const isActive = activeTab === tab.id;

@@ -93,10 +93,10 @@ export const InvestigationNetwork: React.FC<InvestigationNetworkProps> = ({
 		if (focal) {
 			resultPositions.push({
 				...focal,
-				x: 360,
-				y: 150,
-				width: 170,
-				height: 54,
+				x: 390,
+				y: 145,
+				width: 180,
+				height: 58,
 			});
 			placedIds.add(focal.id);
 		}
@@ -105,10 +105,10 @@ export const InvestigationNetwork: React.FC<InvestigationNetworkProps> = ({
 		if (mainCard) {
 			resultPositions.push({
 				...mainCard,
-				x: 140,
-				y: 150,
-				width: 140,
-				height: 50,
+				x: 130,
+				y: 145,
+				width: 155,
+				height: 54,
 			});
 			placedIds.add(mainCard.id);
 		}
@@ -117,68 +117,68 @@ export const InvestigationNetwork: React.FC<InvestigationNetworkProps> = ({
 		if (customer) {
 			resultPositions.push({
 				...customer,
-				x: 140,
-				y: 40,
-				width: 140,
-				height: 50,
+				x: 130,
+				y: 35,
+				width: 155,
+				height: 54,
 			});
 			placedIds.add(customer.id);
 		}
 
-		// 4. Device (Right of Focal or Below Focal)
+		// 4. Device (Right of Focal)
 		if (device) {
 			resultPositions.push({
 				...device,
-				x: 590,
-				y: 150,
-				width: 160,
-				height: 54,
+				x: 670,
+				y: 145,
+				width: 175,
+				height: 58,
 			});
 			placedIds.add(device.id);
 		}
 
-		// 5. Ring Cards (Discovered under Device)
+		// 5. Ring Cards (Discovered under Device with ample spacing)
 		if (ringCards.length > 0) {
-			const startX = 460;
-			const spacingX = 105;
+			const startX = 540;
+			const spacingX = 135;
 			ringCards.forEach((rc, i) => {
 				resultPositions.push({
 					...rc,
 					x: startX + i * spacingX,
-					y: 290,
-					width: 95,
-					height: 44,
+					y: 300,
+					width: 125,
+					height: 52,
 				});
 				placedIds.add(rc.id);
 			});
 		}
 
-		// 6. Micro-auth sequences (Below Main Card)
+		// 6. Micro-auth sequences (Below Main Card with ample spacing)
 		if (microAuths.length > 0) {
-			const startX = 60;
-			const spacingX = 110;
+			const startX = 30;
+			const spacingX = 135;
 			microAuths.forEach((ma, i) => {
 				resultPositions.push({
 					...ma,
 					x: startX + i * spacingX,
-					y: 290,
-					width: 100,
-					height: 44,
+					y: 300,
+					width: 125,
+					height: 52,
 				});
 				placedIds.add(ma.id);
 			});
 		}
 
-		// 7. Velocity transactions (Below Micro-auths or Left)
+		// 7. Velocity transactions (Below Micro-auths with clear vertical separation)
 		if (velocityTxns.length > 0) {
 			velocityTxns.forEach((vt, i) => {
 				if (!placedIds.has(vt.id)) {
 					resultPositions.push({
 						...vt,
-						x: 60 + i * 110,
-						y: 360,
-						width: 100,
-						height: 44,
+						x: 30 + i * 135,
+						y: 390,
+						width: 125,
+						height: 52,
 					});
 					placedIds.add(vt.id);
 				}
@@ -191,10 +191,10 @@ export const InvestigationNetwork: React.FC<InvestigationNetworkProps> = ({
 			if (!placedIds.has(n.id)) {
 				resultPositions.push({
 					...n,
-					x: 700,
-					y: 50 + remainingIndex * 65,
-					width: 120,
-					height: 48,
+					x: 770,
+					y: 35 + remainingIndex * 68,
+					width: 145,
+					height: 52,
 				});
 				placedIds.add(n.id);
 				remainingIndex++;
@@ -331,11 +331,11 @@ export const InvestigationNetwork: React.FC<InvestigationNetworkProps> = ({
 				}}
 			>
 				<svg
-					viewBox="0 0 860 420"
+					viewBox="0 0 960 480"
 					style={{
 						width: "100%",
 						height: "auto",
-						maxHeight: "440px",
+						maxHeight: "460px",
 						display: "block",
 						transform: `scale(${zoomLevel})`,
 						transformOrigin: "center center",
@@ -466,6 +466,7 @@ export const InvestigationNetwork: React.FC<InvestigationNetworkProps> = ({
 									style={{ cursor: "pointer" }}
 									filter="url(#node-shadow)"
 								>
+									<title>{`${node.type}: ${node.label || node.id}${node.subLabel ? ` (${node.subLabel})` : ''}`}</title>
 									{/* Card Background */}
 									<rect
 										width={node.width}
@@ -528,7 +529,7 @@ export const InvestigationNetwork: React.FC<InvestigationNetworkProps> = ({
 									<text
 										x="10"
 										y="32"
-										fontSize="12"
+										fontSize="11.5"
 										fontWeight="700"
 										fill="#0f172a"
 									>

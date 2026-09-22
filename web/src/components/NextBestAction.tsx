@@ -5,10 +5,6 @@ import type {
 } from "../api/types";
 import { TechnicalDetails } from "./TechnicalDetails";
 
-interface NextBestActionProps {
-	result: InvestigationResultPayload;
-}
-
 export const formatActionName = (action: string): string => {
 	return action.replace(/_/g, " ").toUpperCase();
 };
@@ -19,9 +15,12 @@ export const formatScopeName = (scope: string): string => {
 
 export const cleanReasonText = (reason: string): string => {
 	if (!reason) return "";
-	// Clean internal rule codes like "R5: " or "R2: " if present for human reading
 	return reason.replace(/^R\d+:\s*/i, "");
 };
+
+interface NextBestActionProps {
+	result: InvestigationResultPayload;
+}
 
 export const NextBestAction: React.FC<NextBestActionProps> = ({ result }) => {
 	const finalState = result.run_result?.final_state;
