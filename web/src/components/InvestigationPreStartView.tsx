@@ -43,7 +43,7 @@ export const InvestigationPreStartView: React.FC<
 			? `$${caseItem.exposure_usd.toFixed(2)}`
 			: caseItem.amount != null
 				? `$${caseItem.amount.toFixed(2)}`
-				: parseAmount(caseItem.trigger_text, caseItem.case_id);
+				: parseAmount(caseItem.trigger_text);
 	const triggerLabel = formatTriggerType(caseItem.trigger_type);
 
 	const handleStartInvestigation = async () => {
