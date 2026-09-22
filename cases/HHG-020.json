@@ -3,148 +3,151 @@
   "case": {
     "status": "closed",
     "verdict": "confirmed_fraud",
-    "fraud_probability": 0.9843,
-    "pattern": "card_not_present_fraud_new_device",
+    "fraud_probability": 0.9402,
+    "pattern": "undocumented",
     "evidence": [
       {
+        "evidence_id": "EVD-HHG-020-TRIGGER",
         "type": "CALIBRATED_RISK_SCORE",
         "source": "bank_detection_model",
-        "finding": "Model risk score 0.52",
+        "finding": "Real-time fraud risk score: 0.52",
         "lr": 0.85,
         "log_lr": -0.163,
-        "exculpatory": false
+        "exculpatory": true,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       },
       {
-        "type": "BEHAVIORAL_BASELINE",
-        "source": "customer_profile",
-        "finding": "Customer baseline: 112 historical txns, avg $193.01, primary channel in_person",
-        "lr": 1.0,
-        "log_lr": 0.0,
-        "exculpatory": false
-      },
-      {
-        "type": "SHARED_DEVICE_RING",
-        "source": "device_analysis",
-        "finding": "Device DEV_2355cad97cd1 (Trident/7.0) is shared across 9 distinct cards",
-        "lr": 14.2,
-        "log_lr": 2.653,
-        "exculpatory": false
+        "evidence_id": "EVD-2166A422",
+        "type": "CUSTOMER_DENIAL",
+        "source": "gateway:simulate_customer_reply",
+        "finding": "Cardholder explicitly disputed and denied transaction authorization: 'No, I never made this purchase. My card is still with me.'",
+        "lr": 18.5,
+        "log_lr": 2.918,
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       }
     ],
     "affected_txn_ids": [
       "3509359"
     ],
-    "connected_card_ids": [
-      "C12265-K2",
-      "C08299-K1",
-      "C02923-K1",
-      "C04570-K1",
-      "C03042-K1",
-      "C07987-K2",
-      "C02354-K2",
-      "C09933-K2",
-      "C08623-K2"
-    ],
+    "connected_card_ids": [],
     "exposure_usd": 125.08,
-    "similar_prior_cases": [],
+    "similar_prior_cases": [
+      "CC-2277",
+      "CC-2447",
+      "CC-3035"
+    ],
     "written_to_graph": true,
-    "graph_case_id": "INV-HHG-020"
+    "graph_case_id": "INV-HHG-020",
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "evidence_coverage": 0.4,
+    "applicable_dimensions": [
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY",
+      "BEHAVIORAL_BASELINE",
+      "CUSTOMER_DISPUTE",
+      "MODEL_SCORE"
+    ],
+    "probed_coverage": 0.6,
+    "probed_dimensions": [
+      "CUSTOMER_DISPUTE",
+      "MODEL_SCORE",
+      "TRANSACTION_VELOCITY"
+    ],
+    "informative_families": [
+      "CUSTOMER_DISPUTE",
+      "MODEL_SCORE"
+    ],
+    "corroborated_fraud": true,
+    "missing_information": [],
+    "prior_rationale": "Model risk score 0.52 is below the alert threshold (0.65); UNIFORM prior (P=Fraud 0.50) prevents auto-fraud of thin low-confidence alerts."
   },
   "evidence_requests": [
     {
       "type": "VERIFY_WITH_CUSTOMER",
-      "prompt": "Did you authorize this transaction?",
-      "status": "UNAVAILABLE",
-      "response": "Customer verification challenge timed out; no out-of-band response received via SMS/Email gateway.",
-      "provenance": "external_gateway_timeout"
+      "status": "COMPLETED",
+      "response": "Cardholder explicitly disputed and denied transaction authorization: 'No, I never made this purchase. My card is still with me.'",
+      "provenance": "external_gateway_fixture",
+      "zero_belief_shift": false
     }
   ],
   "next_best_actions": {
     "initial": [
       {
-        "action": "CREATE_CASE",
+        "action": "VERIFY_WITH_CUSTOMER",
         "approval_route": "auto",
-        "reason": "R6: Coordinated fraud ring detected across shared device/region."
+        "reason": "R1: Weak single signal (fraud prob < 0.70); verify before punitive action.",
+        "role": "PRIMARY",
+        "scope": "CUSTOMER"
       },
       {
-        "action": "FILE_REPORT",
-        "approval_route": "L2",
-        "reason": "R6: Suspicious activity report filing for syndicate fraud ring."
-      },
-      {
-        "action": "MONITOR_CONNECTED_CARDS",
+        "action": "MONITOR_CARD",
         "approval_route": "auto",
-        "reason": "R6: Place all connected cards on elevated monitoring."
+        "reason": "R1: Monitor card while awaiting customer verification.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
       }
     ],
     "final": [
       {
+        "action": "BLOCK_CARD",
+        "approval_route": "L1",
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
+      },
+      {
         "action": "CREATE_CASE",
         "approval_route": "auto",
-        "reason": "R6: Coordinated fraud ring detected across shared device/region."
-      },
-      {
-        "action": "FILE_REPORT",
-        "approval_route": "L2",
-        "reason": "R6: Suspicious activity report filing for syndicate fraud ring."
-      },
-      {
-        "action": "MONITOR_CONNECTED_CARDS",
-        "approval_route": "auto",
-        "reason": "R6: Place all connected cards on elevated monitoring."
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
       }
     ],
-    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+    "what_changed": "Primary action shifted from VERIFY_WITH_CUSTOMER to BLOCK_CARD after 2 Evidence Compass step(s) (P(Fraud) 0.4593 -> 0.9402; coverage 0.20 -> 0.40; prior: Model risk score 0.52 is below the alert threshold (0.65); UNIFORM prior (P=Fraud 0.50) prevents auto-fraud of thin low-confidence alerts.)."
   },
   "sar": {
-    "file": true,
-    "narrative": "### SUSPICIOUS ACTIVITY REPORT (SAR) NARRATIVE\n**1. SUMMARY OF SUSPICIOUS ACTIVITY:**\nDuring internal fraud monitoring, anomalous activity exceeding regulatory thresholds was identified. Multiple unauthorized authorizations were flagged and escalated for formal investigation.\n\n**2. IDENTITY & ACCOUNT INFORMATION:**\nThe transaction activity involves cardholder account records identified in case record.\n\n**3. METHOD OF OPERATION:**\nThe observed modus operandi aligns with coordinated card-not-present exploitation and identity manipulation. Technical indicators confirm high-velocity unauthorized access.\n\n**4. LAW ENFORCEMENT ACTIONABLE DETAILS:**\nAssociated device identifiers, IP indicators, and transaction records have been secured in the graph database for regulatory audit and law enforcement referral.\n\n**5. DISPOSITION & MITIGATION:**\nThe compromised card has been permanently blocked, relevant connected entities placed under elevated monitoring, and this suspicious activity filing completed under policy rule R2/R6."
+    "file": false,
+    "narrative": null
   },
-  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "stop_reason": "DECISION_REACHED",
   "tool_calls": [
     {
-      "tool": "customer_profile",
+      "tool": "simulate_customer_reply",
+      "action_id": "VERIFY_WITH_CUSTOMER",
       "params": {
-        "cust_id": "C12265"
-      }
-    },
-    {
-      "tool": "txn_velocity",
-      "params": {
+        "prompt": "Did you authorize this transaction?",
+        "t_id": "3509359",
         "c_id": "C12265-K2",
-        "target_ts": "2016-12-03 06:04:26",
-        "window_hours": 24
-      }
-    },
-    {
-      "tool": "device_analysis",
-      "params": {
-        "t_id": "3509359"
-      }
+        "cust_id": "C12265",
+        "txn_addr1": 264.0,
+        "anchor_ts": "2016-12-03 12:04:26",
+        "target_ts": "2016-12-03 12:04:26"
+      },
+      "status": "COMPLETED",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 0.33
     },
     {
       "tool": "card_sequence",
+      "action_id": "QUERY_CARD_SEQUENCE",
       "params": {
         "c_id": "C12265-K2",
-        "anchor_ts": "2016-12-03 06:04:26",
-        "window_hours": 24
-      }
-    },
-    {
-      "tool": "region_analysis",
-      "params": {
+        "window_hours": 24,
+        "anchor_ts": "2016-12-03 12:04:26",
+        "t_id": "3509359",
         "cust_id": "C12265",
-        "txn_addr1": 264.0
-      }
-    },
-    {
-      "tool": "similar_cases",
-      "params": {
-        "target_pattern": "card_not_present_fraud_new_device",
-        "c_id": "C12265-K2"
-      }
+        "txn_addr1": 264.0,
+        "target_ts": "2016-12-03 12:04:26"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 89.39
     }
   ],
   "tokens": 1210,
-  "latency_s": 6.03
+  "latency_s": 9.79
 }

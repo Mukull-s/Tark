@@ -3,46 +3,150 @@
   "case": {
     "status": "closed",
     "verdict": "confirmed_fraud",
-    "fraud_probability": 0.9934,
+    "fraud_probability": 0.9958,
     "pattern": "card_not_present_fraud",
     "evidence": [
       {
+        "evidence_id": "EVD-HHG-018-TRIGGER",
         "type": "CUSTOMER_DENIAL",
         "source": "customer_report_trigger",
         "finding": "Cardholder initiated report: 'Customer C02354 message: 'I never made this $39.08 purchase. Please check my card.' Refers to 3491361.'",
         "lr": 18.5,
         "log_lr": 2.918,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       },
       {
-        "type": "BEHAVIORAL_BASELINE",
-        "source": "customer_profile",
-        "finding": "Customer baseline: 7091 historical txns, avg $141.15, primary channel in_person",
-        "lr": 1.0,
-        "log_lr": 0.0,
-        "exculpatory": false
-      },
-      {
-        "type": "BEHAVIORAL_BASELINE",
-        "source": "txn_velocity",
-        "finding": "High 24h velocity: 42 transactions totaling $6004.31",
+        "evidence_id": "EVD-CE13091C",
+        "type": "HIGH_VELOCITY",
+        "source": "tigergraph_query:txn_velocity",
+        "finding": "High transaction velocity: 42 transactions totaling $6603.09 within 24h.",
         "lr": 2.5,
         "log_lr": 0.916,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [
+          "3490727",
+          "3490585",
+          "3489157",
+          "3488954",
+          "3490114",
+          "3490511",
+          "3490444",
+          "3489772",
+          "3489721",
+          "3491469",
+          "3491361",
+          "3490069",
+          "3490019",
+          "3489497",
+          "3489383",
+          "3489767",
+          "3491104",
+          "3490411",
+          "3491265",
+          "3489904",
+          "3490305",
+          "3489290",
+          "3488852",
+          "3488866",
+          "3491379",
+          "3489703",
+          "3489691",
+          "3490982",
+          "3489515",
+          "3489428",
+          "3490180",
+          "3490630",
+          "3488986",
+          "3489813",
+          "3490655",
+          "3490961",
+          "3489509",
+          "3488893",
+          "3490239",
+          "3488967",
+          "3489676",
+          "3488922"
+        ],
+        "supporting_entities": []
       }
     ],
     "affected_txn_ids": [
-      "3491361"
+      "3491361",
+      "3490727",
+      "3490585",
+      "3489157",
+      "3488954",
+      "3490114",
+      "3490511",
+      "3490444",
+      "3489772",
+      "3489721",
+      "3491469",
+      "3490069",
+      "3490019",
+      "3489497",
+      "3489383",
+      "3489767",
+      "3491104",
+      "3490411",
+      "3491265",
+      "3489904",
+      "3490305",
+      "3489290",
+      "3488852",
+      "3488866",
+      "3491379",
+      "3489703",
+      "3489691",
+      "3490982",
+      "3489515",
+      "3489428",
+      "3490180",
+      "3490630",
+      "3488986",
+      "3489813",
+      "3490655",
+      "3490961",
+      "3489509",
+      "3488893",
+      "3490239",
+      "3488967",
+      "3489676",
+      "3488922"
     ],
     "connected_card_ids": [],
     "exposure_usd": 39.08,
     "similar_prior_cases": [
-      "CC-2399",
-      "CC-2212",
-      "CC-2286"
+      "CC-0255",
+      "CC-0405",
+      "CC-0454"
     ],
     "written_to_graph": true,
-    "graph_case_id": "INV-HHG-018"
+    "graph_case_id": "INV-HHG-018",
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "evidence_coverage": 0.5,
+    "applicable_dimensions": [
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY",
+      "BEHAVIORAL_BASELINE",
+      "CUSTOMER_DISPUTE"
+    ],
+    "probed_coverage": 0.75,
+    "probed_dimensions": [
+      "CUSTOMER_DISPUTE",
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY"
+    ],
+    "informative_families": [
+      "CUSTOMER_DISPUTE",
+      "TRANSACTION_VELOCITY"
+    ],
+    "corroborated_fraud": true,
+    "missing_information": [],
+    "prior_rationale": "Inbound cardholder dispute is itself alert-conditioned evidence; ALERT_CONDITIONED prior (P=Fraud 0.8383) is statistically valid."
   },
   "evidence_requests": [],
   "next_best_actions": {
@@ -50,77 +154,90 @@
       {
         "action": "BLOCK_CARD",
         "approval_route": "L1",
-        "reason": "R2: Customer reported/denied transaction."
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
         "action": "CREATE_CASE",
         "approval_route": "auto",
-        "reason": "R2: Internal case created for customer dispute/denial."
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
       }
     ],
     "final": [
       {
         "action": "BLOCK_CARD",
         "approval_route": "L1",
-        "reason": "R2: Customer reported/denied transaction."
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
         "action": "CREATE_CASE",
         "approval_route": "auto",
-        "reason": "R2: Internal case created for customer dispute/denial."
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
       }
     ],
-    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+    "what_changed": "No action change: primary 'BLOCK_CARD' remained stable after 3 step(s) (P(Fraud) 0.9897 -> 0.9958; coverage 0.25 -> 0.50; termination: DECISION_REACHED)."
   },
   "sar": {
     "file": false,
     "narrative": null
   },
-  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "stop_reason": "DECISION_REACHED",
   "tool_calls": [
     {
-      "tool": "customer_profile",
-      "params": {
-        "cust_id": "C02354"
-      }
-    },
-    {
-      "tool": "txn_velocity",
-      "params": {
-        "c_id": "C02354-K2",
-        "target_ts": "2016-11-27 13:41:26",
-        "window_hours": 24
-      }
-    },
-    {
       "tool": "device_analysis",
+      "action_id": "QUERY_DEVICE_ANALYSIS",
       "params": {
-        "t_id": "3491361"
-      }
+        "t_id": "3491361",
+        "c_id": "C02354-K2",
+        "cust_id": "C02354",
+        "txn_addr1": 126.0,
+        "anchor_ts": "2016-11-27 14:41:26",
+        "target_ts": "2016-11-27 14:41:26"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 72.47
     },
     {
       "tool": "card_sequence",
+      "action_id": "QUERY_CARD_SEQUENCE",
       "params": {
         "c_id": "C02354-K2",
-        "anchor_ts": "2016-11-27 13:41:26",
-        "window_hours": 24
-      }
-    },
-    {
-      "tool": "region_analysis",
-      "params": {
+        "window_hours": 24,
+        "anchor_ts": "2016-11-27 14:41:26",
+        "t_id": "3491361",
         "cust_id": "C02354",
-        "txn_addr1": 126.0
-      }
+        "txn_addr1": 126.0,
+        "target_ts": "2016-11-27 14:41:26"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 71.87
     },
     {
-      "tool": "similar_cases",
+      "tool": "txn_velocity",
+      "action_id": "QUERY_TXN_VELOCITY",
       "params": {
-        "target_pattern": "card_not_present_fraud",
-        "c_id": "C02354-K2"
-      }
+        "c_id": "C02354-K2",
+        "window_hours": 24,
+        "target_ts": "2016-11-27 14:41:26",
+        "t_id": "3491361",
+        "cust_id": "C02354",
+        "txn_addr1": 126.0,
+        "anchor_ts": "2016-11-27 14:41:26"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 80.08
     }
   ],
-  "tokens": 1210,
-  "latency_s": 1.02
+  "tokens": 1330,
+  "latency_s": 9.86
 }
