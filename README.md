@@ -48,11 +48,11 @@ Tark resolves this tension by decoupling **evidence gathering & deterministic re
           ▼                                                   ▼                                                  ▼
 ┌───────────────────┐                             ┌───────────────────────┐                          ┌───────────────────┐
 │   Decision Gate   │                             │     Policy Engine     │                          │ Grounded Synthesis│
-│  & Flip Analysis  │                             │   (Rules R1-R6 Yaml)  │                          │    & FinCEN SAR   │
+│  & Flip Analysis  │                             │   (Rules R1-R10 Yaml) │                          │    & FinCEN SAR   │
 └─────────┬─────────┘                             └───────────┬───────────┘                          └───────────┬───────┘
           │ Gating checks:                                    │ Statutory thresholds:                            │ LLM strictly cites
           │ - Evidence coverage >= 60%                        │ - Freeze Card (P>=0.85)                          │ Evidence Ledger &
-          │ - Entropy <= 0.40                                 │ - FinCEN SAR Filing                              │ GraphRAG Precedents
+          │ - Entropy <= 0.40                                 │ - FinCEN SAR Filing                              │ Historical Case Precedents
           │ - Stability verified                              │ - Human Approval Routes                          │ No hallucinated facts
           ▼                                                   ▼                                                  ▼
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -81,26 +81,41 @@ Tark models customers, cards, transactions, devices, IP domains, billing regions
 - `similar_cases`: Topological neighborhood similarity across 5,565 historical closed cases.
 
 ### 2. Evidence Compass & Expected Value of Information (EVOI)
-Instead of executing tools haphazardly or relying on an unconstrained LLM agent:
-- The **Evidence Compass** ranks candidate queries by their **Expected Value of Information (EVOI)**:
-  $$\text{EVOI}(Q) = H(\text{Current Belief}) - \mathbb{E}[H(\text{Posterior Belief} \mid Q)] - \text{ExecutionCost}(Q)$$
-- Investigations prioritize queries that have high expected entropy reduction while penalizing redundant or expensive actions.
+Instead of executing tools haphazardly or relying on an unconstrained LLM agent, the **Evidence Compass** ranks candidate evidence actions by a decision-theoretic Expected Value of Information. For each candidate action $a$ it enumerates the possible outcomes, simulates the posterior through the full Belief Engine, and computes:
+
+$$\text{BaselineLoss} = \mathbb{E}[\text{loss} \mid \text{current admissible action}], \quad \text{EDV}(a) = \text{BaselineLoss} - \mathbb{E}[\text{posterior loss} \mid a]$$
+
+$$\text{NetDecisionValue}(a) = \text{EDV}(a) - \text{OperationalCost}(a)$$
+
+Information has decision value **only** when it can flip the next-best-action or unlock the decision gate; otherwise its EDV is zero by construction. Candidates are ranked by Net Decision Value, and the loop stops when no candidate has positive net value (or a hard governance condition is met). The exposed per-candidate metrics are `baseline_loss`, `expected_posterior_loss`, `expected_decision_value`, `net_decision_value`, `gate_unlock_prob`, and `action_flip_prob`.
 
 ### 3. Bayesian Belief Engine
-- Initialized with alert-conditioned base priors calibrated on empirical data ($P_0 \approx 0.838$).
+- Prior probability is **trigger-conditioned** and auditable: inbound customer disputes use the empirical alert-conditioned prior ($P_0 \approx 0.838$), while low-confidence model alerts, analyst referrals, and unknown channels use a maximum-entropy uniform prior ($P_0 = 0.50$).
 - Updates belief state through calibrated **Likelihood Ratios (LR)** for each verified evidence item.
-- Applies **family correlation discounting** to prevent overconfidence from correlated graph signals (e.g., discounting multiple velocity signals from the same card cluster).
+- Applies **family correlation discounting** and family log-LR ceilings to prevent overconfidence from correlated graph signals (e.g., discounting multiple velocity signals from the same card cluster).
+- A **corroboration contract** prevents an automated `confirmed_fraud` determination unless the posterior is supported by $\ge 2$ informative evidence families or a conclusive cardholder dispute.
+
+### 3.1 Vector GraphRAG Grounding + Deterministic Policy Mapper
+The knowledge-grounding layer retrieves authoritative policy rules (R1-R10), fraud typologies, and FinCEN/Regulation-E statutes in two complementary ways:
+- **Vector retrieval (GraphRAG):** `src/knowledge/vector_index.py` embeds every policy/typology/statute chunk and retrieves the most cosine-similar chunks for the active case, exposing an auditable `retrieval_path` (e.g. `VectorIndex -> CosineSimilarity -> KNOW-POLICY-R5`).
+- **Deterministic policy mapping:** `src/knowledge/retriever.py` / `store.py` map observed evidence and graph topology to the governing rules via explicit multi-hop paths.
+
+Every retrieved chunk carries a `retrieval_path`, rendered in SAR §4, so a judge can trace `GSQL finding → KNOW-POLICY-Rx → 31 CFR 1020.320` in under 30 seconds. The vector index is an in-process, deterministic, dependency-free realization of the vector-storage contract; the same embeddings are portable to TigerGraph vector attributes (no claim of live TigerGraph vector search is made unless configured).
 
 ### 4. Decision Gate & Policy Engine
 An investigation cannot recommend terminal action until passing explicit deterministic gates:
-- **Evidence Coverage:** At least 60% of required signal categories explored.
-- **Belief Stability:** Posterior entropy below target decision threshold ($\le 0.40$).
-- **Statutory Policy Rules:** Evaluates codified rules (R1 through R6) determining primary actions, secondary escalations, and whether human analyst approval is legally mandated.
+- **Evidence Coverage:** At least 40% of the **trigger-specific applicable dimensions** observed (denominator = 5 for `risk_score`, 4 for `customer_report`, 3 for `analyst_request`; unless a conclusive cardholder dispute is present). Ruled-out (`NO_MATCH`) dimensions are tracked separately as `probed_dimensions`/`probed_coverage` for explainability and deliberately do **not** inflate coverage or unlock gates.
+- **Belief Stability:** Posterior entropy below target decision threshold.
+- **Corroboration:** $\ge 2$ informative evidence families (or a conclusive dispute) for a positive fraud determination.
+- **Statutory Policy Rules:** Evaluates codified rules (R1 through R10) determining primary actions, secondary escalations, and whether human analyst approval is legally mandated. A shared-device ring spanning $\ge 10$ accounts triggers the **R6-syndicate escalation** (L2 human authorization before SAR filing).
 
 ### 5. Human-in-the-Loop & Controlled Analyst Pivot
 When automated policy triggers a mandatory approval requirement (or when an analyst overrides a preliminary recommendation):
 - Analysts can **Approve**, **Reject**, or execute a **Controlled Evidence Pivot**.
 - A pivot dynamically injects analyst observations into the Evidence Ledger and re-evaluates the Bayesian state and policy rules without corrupting the audit trail.
+
+### 6. Before/After Next-Best-Action and Evidence Requests
+The competition answer format records the NBA and required approval route **before** any additional evidence is requested and **after** evidence is received. The agent surfaces every out-of-band evidence request (`VERIFY_WITH_CUSTOMER`, `STEP_UP_AUTH`) in `evidence_requests` with status (`COMPLETED`/`UNAVAILABLE`/`TIMEOUT`) and provenance; an `UNAVAILABLE` outcome adds a `MissingInfoItem` and a zero log-odds shift, so unresolved cases degrade to monitoring rather than fabricating belief.
 
 ---
 
