@@ -13,6 +13,15 @@ class EvidenceRequestDecision(BaseModel):
     reason: str
 
 class DecisionFlipPlanner:
+    """DEPRECATED compatibility shim.
+
+    Decision-flip planning is subsumed by :class:`src.compass.evoi.EvidenceCompass`,
+    which is the single authoritative information-acquisition planner used by the
+    orchestrator, the API, the benchmark runner, and the evaluation harness. This
+    class is retained only so that existing callers/tests can construct it; it has
+    no authority over the production pipeline.
+    """
+
     def __init__(self, belief_engine: BeliefEngine, policy_engine: PolicyEngine):
         self.belief_engine = belief_engine
         self.policy_engine = policy_engine
