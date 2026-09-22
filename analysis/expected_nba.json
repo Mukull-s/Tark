@@ -1,0 +1,89 @@
+{
+  "metric": "policy-rubric NBA agreement",
+  "provenance": "team-authored",
+  "disclaimer": "This rubric is authored by the Tark team from the bank policy manual and case trigger semantics. It is a detail/self-consistency signal, NOT independent judge ground truth. The headline evaluation metrics are the independent policy-invariant conformance and graded partial credit reported in analysis/evaluation_summary.json.",
+  "methodology": "Independent, human-authored expected primary next-best-action for each benchmark case, derived from the case trigger semantics, the documented fraud typology, and the bank policy manual (Rules R1-R10). These expectations are authored independently of the agent's emitted output and are NOT read from cases/*.json. The evaluation harness compares the agent's actual primary action against this rubric.",
+  "policy_reference": "src/policy/engine.py (R1-R10), src/knowledge/store.py (KNOW-POLICY-R1..R10)",
+  "cases": {
+    "HHG-001": {
+      "expected_primary_action": "MONITOR_CARD",
+      "rationale": "Thin single-signal model alert (risk 0.61, in-region). Posterior is uncorroborated across evidence families and the decision gate is locked; R1/R9-thin mandate a non-punitive monitor/verify posture, not a terminal block or case escalation."
+    },
+    "HHG-002": {
+      "expected_primary_action": "MONITOR_CARD",
+      "rationale": "Elevated model score (0.79) with no corroborating graph dimension. Corroboration contract withholds an automated confirmed_fraud determination; monitor and gather corroborating evidence."
+    },
+    "HHG-003": {
+      "expected_primary_action": "BLOCK_CARD",
+      "rationale": "Inbound cardholder denial (customer report). Rule R2 mandates card block plus internal case creation."
+    },
+    "HHG-004": {
+      "expected_primary_action": "BLOCK_CARD",
+      "rationale": "Inbound cardholder denial (customer report). Rule R2 mandates card block plus internal case creation."
+    },
+    "HHG-005": {
+      "expected_primary_action": "CREATE_CASE",
+      "rationale": "Shared-device multi-card ring observed on a low-confidence alert. Rule R6 mandates case creation, connected-card monitoring, and L2 syndicate reporting."
+    },
+    "HHG-006": {
+      "expected_primary_action": "BLOCK_CARD",
+      "rationale": "Cardholder denial with corroborating shared-device ring. Rule R2 governs (block + case + L2 report + connected-card monitoring)."
+    },
+    "HHG-007": {
+      "expected_primary_action": "CREATE_CASE",
+      "rationale": "High-confidence anomalous velocity on an undocumented typology. Rule R9 mandates case creation, L2 filing, and analyst escalation."
+    },
+    "HHG-008": {
+      "expected_primary_action": "BLOCK_CARD",
+      "rationale": "Cardholder denial with corroborating shared-device ring. Rule R2 governs."
+    },
+    "HHG-009": {
+      "expected_primary_action": "BLOCK_CARD",
+      "rationale": "Cardholder denial with proxy-detected infrastructure. Rule R2 governs."
+    },
+    "HHG-010": {
+      "expected_primary_action": "CREATE_CASE",
+      "rationale": "Shared-device syndicate ring with high exposure. Rule R6 mandates case creation and L2 syndicate reporting."
+    },
+    "HHG-011": {
+      "expected_primary_action": "DECLINE_TRANSACTION",
+      "rationale": "Micro-authorization card-testing sequence detected. Rule R5 governs the transaction-level decline (with consequential card block for exposure over $100)."
+    },
+    "HHG-012": {
+      "expected_primary_action": "VERIFY_WITH_CUSTOMER",
+      "rationale": "Weak single signal in the indeterminate band. Rule R1 mandates customer verification before any punitive action, with card monitoring."
+    },
+    "HHG-013": {
+      "expected_primary_action": "CREATE_CASE",
+      "rationale": "Shared-device multi-card ring. Rule R6 mandates case creation and L2 syndicate reporting."
+    },
+    "HHG-014": {
+      "expected_primary_action": "ESCALATE_TO_ANALYST",
+      "rationale": "Analyst-referred syndicate ring spanning dozens of independent card accounts. The scale (>= 10 accounts) mandates Level-2 human authorization before any SAR filing (R6-syndicate exception); the case is escalated to a fraud analyst rather than auto-filed."
+    },
+    "HHG-015": {
+      "expected_primary_action": "CREATE_CASE",
+      "rationale": "Shared-device multi-card ring. Rule R6 mandates case creation and L2 syndicate reporting."
+    },
+    "HHG-016": {
+      "expected_primary_action": "BLOCK_CARD",
+      "rationale": "Cardholder denial with corroborating shared-device ring. Rule R2 governs."
+    },
+    "HHG-017": {
+      "expected_primary_action": "CREATE_CASE",
+      "rationale": "Shared-device multi-card ring on a moderate model alert. Rule R6 mandates case creation and L2 syndicate reporting."
+    },
+    "HHG-018": {
+      "expected_primary_action": "BLOCK_CARD",
+      "rationale": "Inbound cardholder denial. Rule R2 mandates card block plus internal case creation."
+    },
+    "HHG-019": {
+      "expected_primary_action": "MONITOR_CARD",
+      "rationale": "High model score but no corroborating graph evidence family; the decision gate is locked by the corroboration contract. Monitor and corroborate rather than punish."
+    },
+    "HHG-020": {
+      "expected_primary_action": "BLOCK_CARD",
+      "rationale": "Out-of-band customer verification returned an explicit denial, corroborating the alert. Rule R2 mandates card block."
+    }
+  }
+}
