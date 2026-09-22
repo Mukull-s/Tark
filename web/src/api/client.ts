@@ -8,7 +8,10 @@ import type {
 	InvestigationStatusResponse,
 } from "./types";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
+const rawBase = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+const API_BASE = rawBase
+	? (rawBase.endsWith("/api") ? rawBase : `${rawBase}/api`)
+	: "/api";
 
 export async function fetchHealth(): Promise<HealthStatus> {
 	const res = await fetch(`${API_BASE}/health`);

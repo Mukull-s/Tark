@@ -48,7 +48,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-WORKSPACE_ROOT = r"c:\Users\Mukul\Desktop\Tark"
+WORKSPACE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 CSV_PATH = os.path.join(WORKSPACE_ROOT, "case_pack.csv")
 WEB_DIST_DIR = os.path.join(WORKSPACE_ROOT, "web", "dist")
 
