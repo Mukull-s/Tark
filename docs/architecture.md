@@ -205,3 +205,121 @@ At the conclusion of an investigation:
 1. Every final case verdict, assigned pattern, exposure amount, and SAR narrative is persisted as an `InvestigationCase` vertex in TigerGraph.
 2. Undirected edges (`InvestigationCase_INVOLVES_Transaction`, `InvestigationCase_ON_CARD`) connect the case to the active transaction graph.
 3. Future investigations query these historical precedents via `similar_cases.gsql`, ensuring institutional knowledge accumulates directly in the graph database.
+
+---
+
+## 7. Agentic Execution Authority & MCP Protocol (v3.1)
+
+### 7.1 Single Authoritative Pipeline
+
+There is exactly one investigation execution path. The API (`src/api/main.py`), the
+benchmark runner (`bench/run.py`), and the independent evaluation harness
+(`evaluation/harness.py`) all delegate to:
+
+`EvidenceLedger → BeliefEngine.evaluate_investigation → InvestigationOrchestrator.run_investigation (Evidence Compass) → PolicyEngine.evaluate → GroundedInvestigationSynthesizer`
+
+No entrypoint contains bespoke GSQL queries, duplicated likelihood-ratio arithmetic, or
+case-specific branches.
+
+### 7.2 Model Context Protocol (MCP) Boundary
+
+Tark exposes its authorized evidence tools through an MCP-compliant boundary
+(`src/mcp/server.py`), governed by `PROTOCOL_VERSION = "2024-11-05"`.
+
+- **Transport:** JSON-RPC 2.0 (`TigerGraphMCPServer.handle_jsonrpc`).
+- **Methods:** `initialize`, `tools/list`, `tools/call`.
+- **Discovery:** `GET`-style `list_tools()` / `tools/list` returns each tool's `name`,
+  `description`, and JSON-Schema `inputSchema`.
+- **Invocation:** `tools/call` accepts `{name, arguments}` and returns the standard MCP
+  content envelope `{content, isError, structuredContent}`, with execution routed through the
+  authoritative `EvidenceToolDispatcher`.
+- **Security:** only registered, schema-validated tools may execute; arbitrary GSQL, shell,
+  or unvetted queries are rejected. Telemetry (session id, request id, latency) is captured
+  by `TigerGraphMCPClient`.
+
+Registered tools: `device_analysis`, `card_sequence`/`transaction_velocity`,
+`region_analysis`, `customer_profile`, `similar_cases`, `verify_customer`, `step_up_auth`.
+
+### 7.3 Policy Governance Hardening
+
+- **R9 (undocumented typology)** only escalates to `CREATE_CASE` + `FILE_REPORT` when
+  the posterior is very high ($\ge 0.85$) *and* the Decision Gate has passed. Thin,
+  uncorroborated undocumented patterns degrade to a non-punitive
+  `MONITOR_CARD` + `VERIFY_WITH_CUSTOMER` posture ("R9-thin").
+- **Gate-aware general disposition:** the generic high-posterior fallback
+  (`BLOCK_CARD`) is only admissible when the Decision Gate is not explicitly locked.
+  Evidence-specific containment rules (R2 dispute, R5 card-testing, R6 device ring)
+  remain authoritative.
+- **R6-syndicate escalation:** a shared-device ring spanning $\ge 10$ independent
+  card accounts is escalated to a human analyst at Level 2 (`ESCALATE_TO_ANALYST`,
+  route `L2`) and automatic SAR filing is deferred until that authorization. This
+  removes the "locked gate + unfiled SAR" tension for large syndicates.
+- Because all entrypoints share the same orchestrator/policy pipeline, the benchmark
+  answers, the API, and the independent harness agree by construction.
+
+### 7.4 MCP Compatibility with `tigergraph-mcp`
+
+Tark implements the Model Context Protocol tool surface with the same JSON-RPC 2.0
+contract exposed by the official
+[`tigergraph-mcp`](https://github.com/tigergraph/tigergraph-mcp) server:
+
+| Concern | Tark | `tigergraph-mcp` |
+|---|---|---|
+| Transport | JSON-RPC 2.0 | JSON-RPC 2.0 (stdio / SSE) |
+| Discovery | `tools/list` → `{name, description, inputSchema, annotations}` | `tools/list` |
+| Invocation | `tools/call` → `{content, isError, structuredContent}` | `tools/call` |
+| Protocol negotiation | `initialize` echoes a supported client version (`2025-06-18` / `2024-11-05`) | negotiated in `initialize` |
+| Tool naming | `tigergraph__<tool>` aliases for graph-native tools | `tigergraph__<tool>` |
+| Behavioural hints | `annotations`: `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint` | same |
+| Response envelope | `{success, operation, summary, data, suggestions, metadata}` | same |
+| Schemas | JSON-Schema `inputSchema` per tool | JSON-Schema `inputSchema` |
+
+The registered tools (`device_analysis`, `card_sequence`/`transaction_velocity`,
+`region_analysis`, `customer_profile`, `similar_cases`, `verify_customer`,
+`step_up_auth`) mirror the graph-capability exposure of the official server. Tark's
+server adds a hardened authorization layer: only registered tools may execute and all
+execution routes through `EvidenceToolDispatcher` (no arbitrary GSQL/shell) — which is
+also why the upstream package is not used directly. See `docs/blog-notes.md` for the
+rationale.
+
+### 7.5 Graph Algorithms Used
+
+- **Ring sizing (connected-component style):** `device_analysis` performs a 2-hop
+  neighbourhood expansion (`Transaction → DeviceProfile → Transactions → Cards`) and
+  counts the distinct reachable card vertices — a connected-component ring size
+  consumed by R6 and the R6-syndicate threshold. (See `queries/device_analysis.gsql`.)
+- **Temporal velocity burst:** `txn_velocity` performs a sliding-window edge
+  aggregation over the card's transaction neighbourhood, producing burst count and
+  spend (`queries/txn_velocity.gsql`).
+- **Geographic displacement:** `region_analysis` compares the transaction billing
+  region against the customer's historical region set (set-overlap).
+- **Case-memory topology similarity:** `similar_cases.gsql` traverses closed-case
+  topology for precedent retrieval (contextual, non-evidential, LR = 1.0).
+
+### 7.6 Vector Storage & Retrieval (GraphRAG Grounding)
+
+`src/knowledge/vector_index.py` embeds every policy rule, typology, and regulatory
+statute chunk into a fixed-dimension vector and retrieves them by cosine similarity to
+a case query derived from observed evidence and disposition. Results are merged
+(deduplicated by chunk id) with the deterministic policy mapping, and every retrieved
+chunk carries an explicit `retrieval_path` (e.g. `VectorIndex -> CosineSimilarity ->
+KNOW-POLICY-R5`) that is rendered in SAR §4, so a judge can trace
+`GSQL finding → KNOW-POLICY-Rx → 31 CFR 1020.320` in under 30 seconds.
+
+The embedding is a deterministic feature-hashing bag-of-words vector: reproducible,
+dependency-free, and auditable. It is portable to TigerGraph vector storage — the same
+vectors can be persisted as vector attributes on a `Document` vertex and queried with a
+vector-search GSQL function.
+
+**Verified capability probe (honest claim boundary).** `bench/probe_gds_vector.py`
+queries the live instance and records findings in `analysis/gds_vector_probe.json`.
+On release 4.2.5 the `gsql-graph-algorithms`/`gle` components are present, but
+**no GDS algorithm query is resolvable on the benchmark graph** (`INSTALL QUERY tg_wcc`
+fails with *"could not be resolved within the provided graph"*) and there is **no
+`Document` (vector) vertex type**. Tark therefore does **not** claim live native GDS or
+TigerGraph vector search; the deterministic in-process index is the offline-executable
+realization of the same retrieval contract, and it is the layer actually used at
+runtime.
+
+
+
