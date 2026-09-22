@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://YOUR_BACKEND_URL/api/:path*"
+      "destination": "https://tark-7iqe.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
