@@ -7,43 +7,70 @@
     "pattern": "card_not_present_fraud_new_device",
     "evidence": [
       {
+        "evidence_id": "EVD-HHG-016-TRIGGER",
         "type": "CUSTOMER_DENIAL",
         "source": "customer_report_trigger",
         "finding": "Cardholder initiated report: 'Customer C09988 message: 'I never made this $59.67 purchase. Please check my card.' Refers to 3534820.'",
         "lr": 18.5,
         "log_lr": 2.918,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": []
       },
       {
-        "type": "BEHAVIORAL_BASELINE",
-        "source": "customer_profile",
-        "finding": "Customer baseline: 61 historical txns, avg $41.81, primary channel online",
-        "lr": 1.0,
-        "log_lr": 0.0,
-        "exculpatory": false
-      },
-      {
+        "evidence_id": "EVD-2F37D25A",
         "type": "SHARED_DEVICE_RING",
-        "source": "device_analysis",
-        "finding": "Device DEV_db08695bc376 (Windows) is shared across 4 distinct cards",
+        "source": "tigergraph_query:device_analysis",
+        "finding": "Device DEV_db08695bc376 is shared across 4 distinct cards in graph ring (proxy=False).",
         "lr": 14.2,
         "log_lr": 2.653,
-        "exculpatory": false
+        "exculpatory": false,
+        "supporting_transaction_ids": [],
+        "supporting_entities": [
+          "C13171-K2",
+          "C08106-K1",
+          "C09988-K1",
+          "C11923-K2"
+        ]
       }
     ],
     "affected_txn_ids": [
       "3534820"
     ],
     "connected_card_ids": [
-      "C09988-K1",
-      "C11923-K2",
       "C13171-K2",
-      "C08106-K1"
+      "C08106-K1",
+      "C11923-K2"
     ],
     "exposure_usd": 59.67,
-    "similar_prior_cases": [],
+    "similar_prior_cases": [
+      "CC-2971",
+      "CC-2649",
+      "CC-2985"
+    ],
     "written_to_graph": true,
-    "graph_case_id": "INV-HHG-016"
+    "graph_case_id": "INV-HHG-016",
+    "decision_gate_passed": true,
+    "decision_state": "DECIDED",
+    "evidence_coverage": 0.5,
+    "applicable_dimensions": [
+      "DEVICE_INFRASTRUCTURE",
+      "TRANSACTION_VELOCITY",
+      "BEHAVIORAL_BASELINE",
+      "CUSTOMER_DISPUTE"
+    ],
+    "probed_coverage": 0.5,
+    "probed_dimensions": [
+      "CUSTOMER_DISPUTE",
+      "DEVICE_INFRASTRUCTURE"
+    ],
+    "informative_families": [
+      "CUSTOMER_DISPUTE",
+      "DEVICE_INFRASTRUCTURE"
+    ],
+    "corroborated_fraud": true,
+    "missing_information": [],
+    "prior_rationale": "Inbound cardholder dispute is itself alert-conditioned evidence; ALERT_CONDITIONED prior (P=Fraud 0.8383) is statistically valid."
   },
   "evidence_requests": [],
   "next_best_actions": {
@@ -51,97 +78,71 @@
       {
         "action": "BLOCK_CARD",
         "approval_route": "L1",
-        "reason": "R2: Customer reported/denied transaction."
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
         "action": "CREATE_CASE",
         "approval_route": "auto",
-        "reason": "R2: Internal case created for customer dispute/denial."
-      },
-      {
-        "action": "FILE_REPORT",
-        "approval_route": "L2",
-        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring)."
-      },
-      {
-        "action": "MONITOR_CONNECTED_CARDS",
-        "approval_route": "auto",
-        "reason": "R6: Shared device or infrastructure links to other cards."
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
       }
     ],
     "final": [
       {
         "action": "BLOCK_CARD",
         "approval_route": "L1",
-        "reason": "R2: Customer reported/denied transaction."
+        "reason": "R2: Customer reported/denied transaction.",
+        "role": "PRIMARY",
+        "scope": "CARD_ACCOUNT"
       },
       {
         "action": "CREATE_CASE",
         "approval_route": "auto",
-        "reason": "R2: Internal case created for customer dispute/denial."
+        "reason": "R2: Internal case created for customer dispute/denial.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
       },
       {
         "action": "FILE_REPORT",
         "approval_route": "L2",
-        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring)."
+        "reason": "R2: Regulatory SAR filing required (exposure > $1,000 or shared ring).",
+        "role": "CONSEQUENTIAL",
+        "scope": "CASE_MANAGEMENT"
       },
       {
         "action": "MONITOR_CONNECTED_CARDS",
         "approval_route": "auto",
-        "reason": "R6: Shared device or infrastructure links to other cards."
+        "reason": "R6: Shared device or infrastructure links to other cards.",
+        "role": "CONSEQUENTIAL",
+        "scope": "CARD_ACCOUNT"
       }
     ],
-    "what_changed": "No change: initial graph evidence was decisive under policy rules."
+    "what_changed": "No action change: primary 'BLOCK_CARD' remained stable after 1 step(s) (P(Fraud) 0.9897 -> 0.9993; coverage 0.25 -> 0.50; termination: DECISION_REACHED)."
   },
   "sar": {
     "file": true,
-    "narrative": "### SUSPICIOUS ACTIVITY REPORT (SAR) NARRATIVE\n**1. SUMMARY OF SUSPICIOUS ACTIVITY:**\nDuring internal fraud monitoring, anomalous activity exceeding regulatory thresholds was identified. Multiple unauthorized authorizations were flagged and escalated for formal investigation.\n\n**2. IDENTITY & ACCOUNT INFORMATION:**\nThe transaction activity involves cardholder account records identified in case record.\n\n**3. METHOD OF OPERATION:**\nThe observed modus operandi aligns with coordinated card-not-present exploitation and identity manipulation. Technical indicators confirm high-velocity unauthorized access.\n\n**4. LAW ENFORCEMENT ACTIONABLE DETAILS:**\nAssociated device identifiers, IP indicators, and transaction records have been secured in the graph database for regulatory audit and law enforcement referral.\n\n**5. DISPOSITION & MITIGATION:**\nThe compromised card has been permanently blocked, relevant connected entities placed under elevated monitoring, and this suspicious activity filing completed under policy rule R2/R6."
+    "narrative": "### 1. Executive Summary\n- **Investigation Identifier:** `HHG-016`\n- **Target Entities:** Card `C09988-K1` | Customer `C09988` | Flagged Txn `3534820`\n- **Financial Exposure:** $59.67\n- **Belief Shift:** P(Fraud) shifted from 0.8383 to 0.9993.\n- **Decision Gate Status:** PASSED (DECIDED).\n- **Evidence Coverage:** 50% of core investigative dimensions observed.\n- **Primary Disposition:** BLOCK_CARD, CREATE_CASE, FILE_REPORT, MONITOR_CONNECTED_CARDS\n\n### 2. Graph Evidence Analysis\nEmpirical evidence observed via deterministic GSQL query executions on the TigerGraph cluster:\n- **[EVD-HHG-016-TRIGGER]** `CUSTOMER_DENIAL` (LR: 18.50, SUPPORTS): Cardholder initiated report: 'Customer C09988 message: 'I never made this $59.67 purchase. Please check my card.' Refers to 3534820.' (Provenance: `Graph GSQL Execution`).\n- **[EVD-2F37D25A]** `SHARED_DEVICE_RING` (LR: 14.20, SUPPORTS): Device DEV_db08695bc376 is shared across 4 distinct cards in graph ring (proxy=False). (Provenance: `TigerGraph GSQL device_analysis`).\n\n### 3. Historical Precedent Analysis\nContextual memory precedents retrieved from historical closed investigations (non-evidential, LR=1.0):\n- **[CC-2971]** Outcome: `CONFIRMED_FRAUD` (Similarity: 0.38) | Typology: `undocumented` | Actions: `CREATE_CASE, BLOCK_CARD, FILE_REPORT`. Precedent Case CC-2971 (CONFIRMED_FRAUD): Shares [Matching fraud typology pattern ('undocumented'); Comparable dollar exposure ($108.36 vs $59.67, proximity 55%); Shared device infrastructure / multi-card ring topology]. Historical disposition resulted in [CREATE_CASE, BLOCK_CARD, FILE_REPORT]. Role: Contextual precedent only (LR=1.0, non-evidential).\n- **[CC-2649]** Outcome: `CONFIRMED_FRAUD` (Similarity: 0.30) | Typology: `undocumented` | Actions: `CREATE_CASE, BLOCK_CARD, FILE_REPORT`. Precedent Case CC-2649 (CONFIRMED_FRAUD): Shares [Matching fraud typology pattern ('undocumented'); Shared device infrastructure / multi-card ring topology]. Historical disposition resulted in [CREATE_CASE, BLOCK_CARD, FILE_REPORT]. Role: Contextual precedent only (LR=1.0, non-evidential).\n- **[CC-2985]** Outcome: `CONFIRMED_FRAUD` (Similarity: 0.30) | Typology: `undocumented` | Actions: `CREATE_CASE, BLOCK_CARD, FILE_REPORT`. Precedent Case CC-2985 (CONFIRMED_FRAUD): Shares [Matching fraud typology pattern ('undocumented'); Shared device infrastructure / multi-card ring topology]. Historical disposition resulted in [CREATE_CASE, BLOCK_CARD, FILE_REPORT]. Role: Contextual precedent only (LR=1.0, non-evidential).\n\n### 4. Policy & Regulatory Compliance\nAuthoritative bank policies and statutory regulations governing this disposition:\n- **[KNOW-POLICY-R6]** `Rule R6: Shared Origin and Syndicate Device Rings` (Policy Manual \u00a7 4.6 (Rule R6), Bank Risk Governance): \"When graph traversal reveals shared device infrastructure (SHARED_DEVICE_RING) or IP/proxy masking linking multiple unrelated card accounts, CREATE_CASE is required, all connected cards must be placed under MONITOR_CONNECTED_CARDS, and a syndicate fraud report (FILE_REPORT) must be routed to Level 2 (L2) AML/Fraud compliance. R6-syndicate exception: when the ring spans 10 or more independent card accounts, the scale of the multi-account graph corroboration mandates Level-2 human authorization (ESCALATE_TO_ANALYST) BEFORE any SAR filing; automatic FILE_REPORT is deferred until that authorization is granted.\" (Application Rationale: Shared device ring requires case creation, connected card monitoring, and L2 syndicate reporting.) _(Retrieval Path: `GraphEvidence -> SHARED_DEVICE_RING -> Policy:Rule R6 | VectorIndex -> CosineSimilarity -> KNOW-POLICY-R6 (0.439)`)_\n- **[KNOW-POLICY-R2]** `Rule R2: Customer Direct Dispute / Transaction Denial` (Policy Manual \u00a7 4.2 (Rule R2), Bank Risk Governance & FinCEN): \"If a cardholder reports or formally denies a transaction (CUSTOMER_DENIAL), the card must be blocked (BLOCK_CARD) and an internal fraud case opened (CREATE_CASE). If total exposure exceeds $1,000 or the card is linked to a shared device ring, a formal Suspicious Activity Report (FILE_REPORT) must be routed to Level 2 (L2) compliance for filing under 31 CFR 1020.320. Approval route: L1 if exposure <= $2,500; L2 if exposure > $2,500.\" (Application Rationale: Direct cardholder denial mandates card block and investigation under Regulation E.) _(Retrieval Path: `GraphEvidence -> CUSTOMER_DENIAL -> Policy:Rule R2 | VectorIndex -> CosineSimilarity -> KNOW-POLICY-R2 (0.460)`)_\n- **[KNOW-REG-FINCEN-SAR]** `Regulatory Statute: FinCEN Suspicious Activity Report (SAR) Requirements` (31 CFR \u00a7 1020.320, Financial Crimes Enforcement Network (FinCEN)): \"Under 31 CFR \u00a7 1020.320(a)(2), covered financial institutions must file a Suspicious Activity Report (SAR) within 30 calendar days of initial detection for any transaction involving $5,000 or more where a suspect is identified ($25,000 or more for unidentified suspects, or any amount for insider abuse) if the bank knows, suspects, or has reason to suspect illicit funds, regulatory evasion, or lack of lawful purpose. In accordance with Bank Risk Governance, Tark enforces a heightened internal compliance threshold requiring Level 2 (L2) SAR filing review (FILE_REPORT) at exposure >= $1,000 or upon detection of multi-card syndicate infrastructure (Rules R2, R6, R10).\" (Application Rationale: Exposure ($59.67) or syndicate ring flags mandatory FinCEN SAR filing within 30 days under 31 CFR 1020.320.) _(Retrieval Path: `PolicyAction / ExposureThreshold -> Regulation:31 CFR \u00a7 1020.320`)_\n- **[KNOW-TYPO-SHARED-DEVICE]** `Fraud Typology: Shared Device & Syndicate Mule Rings` (Typology Catalog \u00a7 2.4, FinCEN / Interpol Cybercrime): \"Organized fraud syndicates utilize shared device infrastructure (emulators, rooted mobile devices, proxy services) to operate dozens of compromised or synthetic cardholder accounts from a single hardware footprint. Key graph indicators: device vertex connected to > 5 distinct card accounts, anonymous proxy flags, and cross-account velocity.\" (Application Rationale: Observed SHARED_DEVICE_RING or PROXY_DETECTED indicates multi-card hardware sharing syndicate.) _(Retrieval Path: `GraphEvidence -> SHARED_DEVICE_RING -> Typology:DeviceSyndicate | VectorIndex -> CosineSimilarity -> KNOW-TYPO-SHARED-DEVICE (0.238)`)_\n- **[KNOW-REG-REGE]** `Regulatory Statute: Regulation E Electronic Fund Transfer Consumer Protection` (12 CFR \u00a7\u00a7 1005.6, 1005.11, Consumer Financial Protection Bureau (CFPB)): \"Under 12 CFR Part 1005 (Regulation E, implementing the Electronic Fund Transfer Act), financial institutions must comply with strict error resolution procedures and consumer liability caps. Under 12 CFR \u00a7 1005.11(c)(1), the general statutory timeline mandates investigating and resolving an alleged error within 10 business days of notice. Under 12 CFR \u00a7 1005.11(c)(2), the institution may extend the investigation period up to 45 calendar days only on the condition that it provisionally credits the consumer's account (with full access to funds) within 10 business days of notice while the investigation continues; provisional credit is not an automatic unconditional grant but a statutory prerequisite for utilizing the extended 45-day resolution window. Under \u00a7 1005.11(c)(3), the investigation window is extendable up to 90 calendar days for point-of-sale (POS) debit card transactions, foreign transactions, or new accounts within 30 days of opening. Under 12 CFR \u00a7 1005.6, consumer liability for unauthorized transfers is strictly tiered based on notification timing ($50 if reported within 2 business days; $500 if reported within 60 calendar days of periodic statement), and zero consumer liability attaches to any transactions occurring after the consumer notifies the institution (CUSTOMER_DENIAL).\" (Application Rationale: Customer reported unauthorized debit triggering Regulation E error resolution statutory protections.) _(Retrieval Path: `CustomerReport / Denial -> Regulation:12 CFR \u00a7\u00a7 1005.6, 1005.11`)_\n- **[KNOW-POLICY-R10]** `Rule R10: General Disposition Thresholds and Governance` (Policy Manual \u00a7 4.10 (Rule R10), Bank Risk Governance): \"Final automated dispositions are governed strictly by calibrated posteriors: P(Fraud) >= 0.70 requires BLOCK_CARD and CREATE_CASE (with FILE_REPORT if exposure >= $1,000); P(Fraud) <= 0.30 warrants ALLOW_TRANSACTION and CLOSE_NO_FRAUD; intermediate values require MONITOR_CARD and VERIFY_WITH_CUSTOMER.\" (Application Rationale: General bank disposition thresholds and calibrated belief gating governance.) _(Retrieval Path: `BeliefState -> CalibratedGate -> Policy:Rule R10 | VectorIndex -> CosineSimilarity -> KNOW-POLICY-R10 (0.362)`)_\n- **[KNOW-POLICY-R9]** `Rule R9: Undocumented Pattern with Clear Evidence of Abuse` (Policy Manual \u00a7 4.9 (Rule R9), Bank Risk Governance): \"If activity exhibits high assessed fraud probability (P(Fraud) >= 0.70) but does not fit standard defined typologies, CREATE_CASE is mandated, the card is blocked (BLOCK_CARD), and a special investigation report (FILE_REPORT) is routed to L2 for pattern classification. Approval route: L2.\" (Application Rationale: Vector-similarity retrieval: chunk embedding is cosine-similar (0.263) to the active investigation query [CUSTOMER_DENIAL SHARED_DEVICE_RING BLOCK_CARD CREATE_CASE FILE_REPORT MONITOR_CONNECTED_CARDS undocumented customer_report].) _(Retrieval Path: `VectorIndex -> CosineSimilarity -> KNOW-POLICY-R9`)_\n- **[KNOW-POLICY-R4]** `Rule R4: Out-of-Region Card-Present Activity Without Travel Notice` (Policy Manual \u00a7 4.4 (Rule R4), Bank Risk Governance): \"When a card-present transaction occurs in a billing region with zero prior customer transaction history and no active travel notification on file, DECLINE_TRANSACTION must be executed. The system initiates VERIFY_WITH_CUSTOMER via registered mobile channel and monitors the account for further geographic anomalies. Approval route: auto.\" (Application Rationale: Vector-similarity retrieval: chunk embedding is cosine-similar (0.261) to the active investigation query [CUSTOMER_DENIAL SHARED_DEVICE_RING BLOCK_CARD CREATE_CASE FILE_REPORT MONITOR_CONNECTED_CARDS undocumented customer_report].) _(Retrieval Path: `VectorIndex -> CosineSimilarity -> KNOW-POLICY-R4`)_\n\n### 5. Uncertainty & Conflict Assessment\n- **Epistemic Uncertainty:** 0.50 (Satisfied).\n- **Aleatoric Conflict:** 0.00 (Coherent evidence).\n- **Coverage Gate:** UNLOCKED (Coverage >= 40%).\n\n### 6. Investigation Trajectory & EVOI Rationale\nThe autonomous investigation proceeded under pure Evidence Compass authority. Evidence acquisition ceased because terminal conditions were met: decision gate unlocked with positive net decision value exhausted.\n\n### 7. Final Operational Disposition & Remediation\nMandated operational actions approved by the Policy Engine under banking risk governance:\n- **`BLOCK_CARD`** (Approval Route: `L1`): R2: Customer reported/denied transaction.\n- **`CREATE_CASE`** (Approval Route: `auto`): R2: Internal case created for customer dispute/denial.\n- **`FILE_REPORT`** (Approval Route: `L2`): R2: Regulatory SAR filing required (exposure > $1,000 or shared ring).\n- **`MONITOR_CONNECTED_CARDS`** (Approval Route: `auto`): R6: Shared device or infrastructure links to other cards."
   },
-  "stop_reason": "CONFIDENT_POLICY_DECISION_REACHED",
+  "stop_reason": "DECISION_REACHED",
   "tool_calls": [
     {
-      "tool": "customer_profile",
-      "params": {
-        "cust_id": "C09988"
-      }
-    },
-    {
-      "tool": "txn_velocity",
-      "params": {
-        "c_id": "C09988-K1",
-        "target_ts": "2016-12-11 22:39:08",
-        "window_hours": 24
-      }
-    },
-    {
       "tool": "device_analysis",
+      "action_id": "QUERY_DEVICE_ANALYSIS",
       "params": {
-        "t_id": "3534820"
-      }
-    },
-    {
-      "tool": "card_sequence",
-      "params": {
+        "t_id": "3534820",
         "c_id": "C09988-K1",
-        "anchor_ts": "2016-12-11 22:39:08",
-        "window_hours": 24
-      }
-    },
-    {
-      "tool": "region_analysis",
-      "params": {
         "cust_id": "C09988",
-        "txn_addr1": 0.0
-      }
-    },
-    {
-      "tool": "similar_cases",
-      "params": {
-        "target_pattern": "card_not_present_fraud_new_device",
-        "c_id": "C09988-K1"
-      }
+        "anchor_ts": "2016-12-12 01:39:08",
+        "target_ts": "2016-12-12 01:39:08"
+      },
+      "status": "DATA_AVAILABLE",
+      "scope_status": "DATA_AVAILABLE",
+      "duration_ms": 85.11
     }
   ],
-  "tokens": 1210,
-  "latency_s": 5.75
+  "tokens": 1090,
+  "latency_s": 9.29
 }
