@@ -91,3 +91,104 @@ This ensures that redundant signals from the same infrastructure or sequence can
    - `NO_MATCH`: Confirms absence of pattern within observed scope.
 2. **Contradictions**:
    - Tracked separately ($L^+$ vs $L^-$). When both are strong ($\ge 1.5$), generates `ContradictionItem` and escalates to `DecisionState.REQUIRES_HUMAN_APPROVAL`.
+
+---
+
+## 7. Trigger-Conditioned Prior Resolution (v3.1)
+
+The `ALERT_CONDITIONED` prior is only statistically valid for cases that arrived through an
+inbound cardholder dispute. Applying $P(\text{Fraud})=0.8383$ indiscriminately to thin,
+low-confidence model alerts caused systematic over-classification (auto-fraud of
+uninformative cases). `src/belief/calibration.py::resolve_trigger_prior` therefore resolves
+the prior explicitly from the trigger channel:
+
+| Trigger channel | Prior profile | Rationale |
+|---|---|---|
+| `customer_report` | `ALERT_CONDITIONED` (0.8383) | Inbound dispute is itself alert-conditioned evidence. |
+| `analyst_request` | `UNIFORM` (0.50) | Human referral carries no calibrated statistical prior. |
+| `risk_score < 0.65` | `UNIFORM` (0.50) | Below-threshold model alert; maximum-entropy baseline. |
+| `risk_score >= 0.65` | `ALERT_CONDITIONED` (0.8383) | Confirmed high-risk alert. |
+| unknown | `UNIFORM` (0.50) | Defensive maximum-entropy default. |
+
+The resolved profile, with its audit rationale, is threaded through
+`BeliefEngine.evaluate_investigation`, `bench/run.py`, and `evaluation/harness.py`.
+
+## 8. Corroboration Contract for Positive Fraud Determinations (v3.1)
+
+A high posterior ($P \ge 0.70$) is **not** sufficient by itself for an automated
+`confirmed_fraud` gate pass. The Decision Gate additionally requires corroboration:
+
+$$\text{corroborated} \;=\; \text{conclusive dispute} \;\lor\; \#\{\text{informative families}\} \ge 2$$
+
+where an *informative family* is a semantic evidence family contributing a non-zero
+effective log-LR after family discounting and ceilings. This prevents the prior from
+auto-frauding cases whose posterior rests on a single uncorroborated dimension
+(e.g. the model risk score alone). Non-corroborated high-posterior cases remain in
+`INSUFFICIENT_EVIDENCE` and receive a monitoring / verification posture rather than a
+terminal fraud disposition.
+
+`CUSTOMER_COMMUNICATION_UNAVAILABLE` (LR = 1.0) contributes zero log-odds, emits an
+explicit `MissingInfoItem`, and never unlocks the gate on its own.
+
+## 9. Likelihood-Ratio Recalibration Audit (Honest Non-Identifiability Note)
+
+The closed-case population (`closed_cases_history.csv`, 4,665 confirmed fraud / 900
+cleared) supports exactly one empirical quantity: the **alert-conditioned prior**
+$4665/5565 = 0.8383$. It does **not** identify evidence-conditioned likelihood ratios,
+because every historically `cleared` case carries the sentinel typology `none` (no
+observed fraud pattern), so $P(E_{\text{typology}} \mid \text{cleared}) = 0$ for all
+fraud typologies and every candidate LR is degenerate (infinite/undefined).
+
+The `PROVISIONAL` classifications in the LR registry are therefore intentionally
+**retained** rather than promoted to `EMPIRICAL`; promoting them would misrepresent the
+identifiability of the data. Evidence-conditioned ratios remain anchored on operational
+IEEE-CIS statistics with explicit governance tiers, and the specificity benchmark
+(`bench/eval_specificity.py`) provides the empirical false-positive evidence that the
+cleared population can actually support.
+
+## 10. Probed Dimensions & Per-Trigger Coverage Denominator (v3.2)
+
+**Coverage denominator is trigger-specific.** Evidence coverage is no longer a fixed
+$1/5$ ratio. The denominator is the set of dimensions that are resolvable and
+decision-relevant for the trigger channel (`BeliefEngine.resolve_applicable_families`):
+
+| Trigger channel | Applicable checklist | Denominator |
+|---|---|---|
+| `risk_score` | device, velocity, behavioral, dispute, model score | 5 |
+| `customer_report` | device, velocity, behavioral, dispute | 4 |
+| `analyst_request` | device, velocity, behavioral | 3 |
+| unknown | canonical superset | 5 |
+
+$$\text{evidence\_coverage} = \frac{|\text{observed} \cap \text{applicable}|}{|\text{applicable}|}$$
+
+This is why the benchmark shows genuine coverage variance (0.20 / 0.40 / 0.50 / 0.67)
+rather than a single value, and why `applicable_dimensions` is emitted per case.
+
+A graph query that executes and returns `NO_MATCH` is recorded as a **probed** dimension
+(`UncertaintyState.probed_dimensions` / `probed_coverage`). Probed dimensions are
+reported for explainability but deliberately do **not** count toward `evidence_coverage`
+and do **not** reduce the epistemic gate: absence of an observed pattern is not proof,
+and letting ruled-out dimensions unlock a gate would contradict the `NO_MATCH` neutrality
+contract (Required Change 4). This keeps coverage a measure of *informative* dimensions
+while still crediting the investigation for work performed.
+
+## 11. R6-Syndicate Exception (v3.2)
+
+A shared-device ring spanning $\ge 10$ independent card accounts (`SYNDICATE_CARD_THRESHOLD`)
+is a large-scale syndicate. When the Decision Gate is locked, the policy engine routes
+the case to `ESCALATE_TO_ANALYST` at approval route `L2` and **defers** automatic
+`FILE_REPORT` until a human authorizes the filing. This removes the
+"locked gate + auto-filed SAR" tension: the multi-account graph corroboration justifies
+escalation, and the SAR is not filed by an unresolved automated gate.
+
+## 12. Independent NBA Evaluation (v3.2)
+
+`evaluation/harness.py` no longer derives expected actions from `cases/*.json` (which
+would be circular). Expectations come only from the case pack column
+(`expected_primary_action`, if present) or the human-authored, policy-grounded rubric
+`analysis/expected_nba.json`. The harness additionally computes an independent
+**policy-invariant conformance** rate by re-checking emitted results against policy
+invariants (locked gate must not punish; cardholder reports must be contained; a
+`legitimate` disposition must not be punitive).
+
+
