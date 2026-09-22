@@ -75,7 +75,29 @@ class GroundedInvestigationSynthesizer:
             if llm_response and len(llm_response.strip()) > 100:
                 # Validate LLM response for citation reference integrity
                 validated_text = self._validate_and_sanitize_citations(llm_response.strip(), context)
-                return validated_text
+
+                # Grounding contract: a filing-ready narrative must reference at least one
+                # *registered* observed evidence ID, and — when policy/regulatory knowledge
+                # was retrieved — at least one *registered* knowledge chunk ID. If the model
+                # produced ungrounded or placeholder citations, discard the response and fall
+                # back to the authoritative deterministic narrative.
+                valid_ev_ids: Set[str] = {ev["evidence_id"] for ev in context.observed_evidence_summary}
+                valid_know_ids: Set[str] = {k.chunk.chunk_id for k in context.retrieved_knowledge}
+                found_ev = set(re.findall(r"\bEVD-[A-Za-z0-9_-]+\b", validated_text))
+                found_know = set(re.findall(r"\bKNOW-[A-Za-z0-9_-]+\b", validated_text))
+
+                has_valid_evidence = bool(found_ev & valid_ev_ids)
+                has_valid_knowledge = (not valid_know_ids) or bool(found_know & valid_know_ids)
+
+                if has_valid_evidence and has_valid_knowledge:
+                    return validated_text
+
+                logger.warning(
+                    "LLM synthesis failed the citation grounding contract "
+                    "(valid_evidence=%s, valid_knowledge=%s); reverting to deterministic grounded narrative.",
+                    has_valid_evidence,
+                    has_valid_knowledge,
+                )
 
         except Exception as e:
             logger.warning(f"LLM synthesis encountered exception ({e}); reverting to deterministic synthesis.")
@@ -142,9 +164,11 @@ class GroundedInvestigationSynthesizer:
         else:
             for k in knowledge:
                 c = k.chunk
+                path = getattr(k, "retrieval_path", "") or "PolicyMapper"
                 sec4.append(
                     f"- **[{c.chunk_id}]** `{c.title}` ({c.section_reference}, {c.governing_body}): "
-                    f"\"{c.text}\" (Application Rationale: {k.match_rationale})"
+                    f"\"{c.text}\" (Application Rationale: {k.match_rationale}) "
+                    f"_(Retrieval Path: `{path}`)_"
                 )
 
         # Section 5: Uncertainty & Conflict Assessment

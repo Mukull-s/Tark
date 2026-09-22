@@ -107,7 +107,8 @@ class InvestigationContext(BaseModel):
                     f"- [{c.chunk_id}] {c.title} ({c.section_reference})\n"
                     f"  Authority: {c.governing_body} | Version: {c.version}\n"
                     f"  Grounded Rule Text: \"{c.text}\"\n"
-                    f"  GraphRAG Match Rationale: {k.match_rationale}"
+                    f"  GraphRAG Match Rationale: {k.match_rationale}\n"
+                    f"  Retrieval Path: {getattr(k, 'retrieval_path', '') or 'PolicyMapper'}"
                 )
         sections.append("")
 
