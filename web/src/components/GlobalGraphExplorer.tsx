@@ -1,5 +1,6 @@
 import type React from "react";
 import { useState, useEffect } from "react";
+import { fetchGraphSchemaOverview } from "../api/client";
 
 interface SchemaOverviewData {
 	graph_name: string;
@@ -13,11 +14,20 @@ interface SchemaOverviewData {
 		is_directed: boolean;
 	}>;
 	timestamp: string;
+	data_source?: string;
+	is_cached?: boolean;
+	notice?: string;
 }
 
+// Illustrative fallback shown only when the schema endpoint is unreachable.
+// It is explicitly labelled as cached in the UI (never presented as live data).
 const DEFAULT_DATA: SchemaOverviewData = {
 	graph_name: "FraudInvestigation",
-	status: "connected",
+	status: "cached",
+	data_source: "CACHED_FALLBACK",
+	is_cached: true,
+	notice:
+		"Live TigerGraph schema topology unavailable; showing last-known cached figures.",
 	total_vertices: 38187,
 	vertex_counts: {
 		Transaction: 26754,
@@ -49,11 +59,7 @@ export const GlobalGraphExplorer: React.FC = () => {
 	useEffect(() => {
 		let isMounted = true;
 		setLoading(true);
-		fetch("/api/graph/schema-overview")
-			.then((res) => {
-				if (!res.ok) throw new Error("Network error");
-				return res.json();
-			})
+		fetchGraphSchemaOverview()
 			.then((json) => {
 				if (isMounted && json && json.vertex_counts) {
 					setData(json);
@@ -140,21 +146,38 @@ export const GlobalGraphExplorer: React.FC = () => {
 						gap: "2px",
 					}}
 				>
-					<span
-						style={{
-							fontSize: "11px",
-							fontWeight: 700,
-							color: "#15803d",
-							backgroundColor: "#f0fdf4",
-							padding: "3px 8px",
-							borderRadius: "4px",
-							border: "1px solid #bbf7d0",
-						}}
-					>
-						● TIGERGRAPH CLOUD CONNECTED
-					</span>
+					{data.is_cached ? (
+						<span
+							style={{
+								fontSize: "11px",
+								fontWeight: 700,
+								color: "#b45309",
+								backgroundColor: "#fffbeb",
+								padding: "3px 8px",
+								borderRadius: "4px",
+								border: "1px solid #fde68a",
+							}}
+							title={data.notice}
+						>
+							● CACHED FIGURES (LIVE GRAPH UNAVAILABLE)
+						</span>
+					) : (
+						<span
+							style={{
+								fontSize: "11px",
+								fontWeight: 700,
+								color: "#15803d",
+								backgroundColor: "#f0fdf4",
+								padding: "3px 8px",
+								borderRadius: "4px",
+								border: "1px solid #bbf7d0",
+							}}
+						>
+							● TIGERGRAPH CLOUD CONNECTED
+						</span>
+					)}
 					<span style={{ fontSize: "11px", color: "#94a3b8" }}>
-						{data.total_vertices.toLocaleString()} Total Vertices Indexed
+						{data.total_vertices.toLocaleString()} Total Vertices {data.is_cached ? "Cached" : "Indexed"}
 					</span>
 				</div>
 			</div>
