@@ -1,5 +1,76 @@
-# Fraud Policy Rules Configuration (IEEE-CIS HHGOA Edition v1.0)
+# Fraud Policy Rules Configuration (IEEE-CIS HHGOA Edition v2.0)
+#
+# This file is the declarative mirror of the authoritative operational logic in
+# src/policy/engine.py (PolicyEngine.evaluate) and the knowledge base
+# (src/knowledge/store.py, KNOW-POLICY-R1..R10). Rules R1-R10 are listed below in
+# evaluation order. Dynamic routing thresholds (e.g. BLOCK_CARD approval tier)
+# are applied by src/policy/engine.py::PolicyEngine.determine_block_card_route.
 
+rules:
+  R1:
+    name: "Verification Before Action on Weak Single Signal"
+    condition: "single informative signal AND 0.30 < P(Fraud) < 0.70"
+    primary: VERIFY_WITH_CUSTOMER
+    secondary: [MONITOR_CARD]
+    route: auto
+  R2:
+    name: "Customer Direct Dispute / Transaction Denial"
+    condition: "CUSTOMER_DENIAL observed or inbound customer report"
+    primary: BLOCK_CARD
+    secondary: [CREATE_CASE]
+    conditional: ["FILE_REPORT if exposure >= $1,000 or shared ring", "MONITOR_CONNECTED_CARDS if shared ring"]
+    route: "L1 if exposure <= 2500; L2 if exposure > 2500"
+  R3:
+    name: "Cardholder Legitimate Transaction Confirmation"
+    condition: "CUSTOMER_CONFIRMATION observed (exculpatory)"
+    primary: CLOSE_NO_FRAUD
+    route: auto
+  R4:
+    name: "Out-of-Region Card-Present Activity Without Travel Notice"
+    condition: "OUT_OF_REGION observed"
+    primary: DECLINE_TRANSACTION
+    secondary: [VERIFY_WITH_CUSTOMER]
+    route: auto
+  R5:
+    name: "Card Testing and Micro-Authorization Sequences"
+    condition: "CARD_TESTING_SEQUENCE observed"
+    primary: DECLINE_TRANSACTION
+    secondary: ["BLOCK_CARD if exposure > $100 else STEP_UP_AUTH"]
+    route: L1
+  R6:
+    name: "Shared Origin and Syndicate Device Rings"
+    condition: "SHARED_DEVICE_RING / PROXY_DETECTED observed"
+    primary: CREATE_CASE
+    secondary: [FILE_REPORT, MONITOR_CONNECTED_CARDS]
+    route: L2
+  R7:
+    name: "Disputed Charge Matching Recurring Billing Profile"
+    condition: "RECURRING_CHARGE_MATCH AND CUSTOMER_DENIAL"
+    primary: CREATE_CASE
+    secondary: [VERIFY_WITH_CUSTOMER, WARN_CUSTOMER]
+    route: auto
+  R8:
+    name: "Uncertain Verdict with High Financial Exposure"
+    condition: "verdict uncertain AND exposure > $500"
+    primary: ESCALATE_TO_ANALYST
+    secondary: [MONITOR_CARD]
+    route: auto
+  R9:
+    name: "Undocumented Pattern with Clear Evidence of Abuse"
+    condition: "undocumented typology AND P(Fraud) >= 0.70"
+    primary: CREATE_CASE
+    secondary: [FILE_REPORT, ESCALATE_TO_ANALYST]
+    route: L2
+  R10:
+    name: "General Disposition Thresholds and Governance"
+    condition: "calibrated posterior disposition"
+    primary: "P>=0.70 -> BLOCK_CARD; P<=0.30 -> ALLOW_TRANSACTION; else MONITOR_CARD"
+    secondary: ["CREATE_CASE / FILE_REPORT (exposure >= $1,000) at P>=0.70", "CLOSE_NO_FRAUD at P<=0.30"]
+    route: auto
+
+# ---------------------------------------------------------------------------
+# Action registry (declared impact tiers)
+# ---------------------------------------------------------------------------
 actions:
   ALLOW_TRANSACTION: { route: "auto", impact: "None" }
   MONITOR_CARD: { route: "auto", impact: "None" }
@@ -15,7 +86,11 @@ actions:
   FILE_REPORT: { route: "L2", impact: "None" }
   BLOCK_ALL_CARDS: { route: "L2", impact: "Very high" }
 
-# Dynamic route rules:
+# Dynamic routing thresholds:
 # BLOCK_CARD:
-#   if exposure <= 2500 -> L1
-#   if exposure > 2500 -> L2
+#   if exposure <= 2500 -> L1 (automated Level-1 authorization review)
+#   if exposure >  2500 -> L2 (Level-2 compliance authorization)
+block_card_routing:
+  l1_max_exposure_usd: 2500
+  l2_above_exposure_usd: 2500
+  sar_review_threshold_usd: 1000
