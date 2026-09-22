@@ -1,5 +1,12 @@
 // Query 2: txn_velocity
-// Analyzes transaction velocity within a time window for a card
+// Analyzes transaction velocity within a time window for a card.
+//
+// Graph algorithm: temporal sliding-window edge aggregation over the
+// Card -[Card_MADE_Transaction]-> Transaction neighbourhood. All edges incident
+// to the card vertex are filtered by the time delta to the anchor transaction
+// and aggregated into a burst count and spend volume. This burst signal feeds
+// the TRANSACTION_VELOCITY evidence family and the card-testing / high-velocity
+// typologies.
 USE GRAPH FraudInvestigation
 
 CREATE OR REPLACE QUERY txn_velocity(STRING c_id, DATETIME target_ts, INT window_hours) FOR GRAPH FraudInvestigation {
